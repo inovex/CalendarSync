@@ -37,7 +37,7 @@ type SourceAdapter struct {
 	typ        Type
 }
 
-func NewSourceAdapterFromConfig(ctx context.Context, config ConfigReader, storage auth.Storage) (*SourceAdapter, error) {
+func NewSourceAdapterFromConfig(ctx context.Context, bindPort uint, config ConfigReader, storage auth.Storage) (*SourceAdapter, error) {
 	var client sync.Source
 	client, err := SourceClientFactory(Type(config.Adapter().Type))
 	if err != nil {
@@ -66,7 +66,9 @@ func NewSourceAdapterFromConfig(ctx context.Context, config ConfigReader, storag
 				},
 				CalendarId: config.Adapter().Calendar,
 			},
-			storage); err != nil {
+			storage,
+			bindPort,
+			); err != nil {
 			return nil, err
 		}
 	}

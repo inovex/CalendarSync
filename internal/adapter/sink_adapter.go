@@ -33,7 +33,7 @@ func SinkClientFactory(typ Type) (sync.Sink, error) {
 	}
 }
 
-func NewSinkAdapterFromConfig(ctx context.Context, config ConfigReader, storage auth.Storage) (*SinkAdapter, error) {
+func NewSinkAdapterFromConfig(ctx context.Context, bindPort uint, config ConfigReader, storage auth.Storage) (*SinkAdapter, error) {
 	client, err := SinkClientFactory(Type(config.Adapter().Type))
 	if err != nil {
 		return nil, err
@@ -62,6 +62,7 @@ func NewSinkAdapterFromConfig(ctx context.Context, config ConfigReader, storage 
 				CalendarId: config.Adapter().Calendar,
 			},
 			storage,
+			bindPort,
 		); err != nil {
 			return nil, err
 		}

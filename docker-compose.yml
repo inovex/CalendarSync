@@ -1,0 +1,11 @@
+version: '3.4'
+
+services:
+  calendarsync:
+    build:
+      context: .
+    ports:
+      - "8085:8085"
+      - "8086:8086"
+    volumes:
+      - "./local.sync.yaml:/etc/calendarsync/sync.yaml:ro"

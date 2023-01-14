@@ -8,6 +8,9 @@ import (
 	"strings"
 
 	"golang.org/x/oauth2"
+
+	log "github.com/sirupsen/logrus"
+	"golang.org/x/oauth2"
 )
 
 const successHtml = `<!DOCTYPE html>
@@ -27,22 +30,24 @@ type OAuthHandler struct {
 	listener net.Listener
 	config   oauth2.Config
 	token    *oauth2.Token
+	logger   *log.Entry
 }
 
-func NewOAuthHandler(config oauth2.Config) (OAuthHandler, error) {
-	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
+func NewOAuthHandler(config oauth2.Config, bindPort uint, logger *log.Entry) (*OAuthHandler, error) {
+	addr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("0.0.0.0:%v", bindPort))
 	if err != nil {
-		return OAuthHandler{}, err
+		return nil, err
 	}
 
 	listener, err := net.ListenTCP("tcp", addr)
 	if err != nil {
-		return OAuthHandler{}, err
+		return nil, err
 	}
 
-	return OAuthHandler{
+	return &OAuthHandler{
 		config:   config,
 		listener: listener,
+		logger:   logger,
 	}, nil
 }
 
@@ -70,6 +75,7 @@ func (l *OAuthHandler) createAuthorizationExchange(ctx context.Context) func(htt
 		// exchange authorization token for access and refresh token
 		l.token, err = l.Configuration().Exchange(context.WithValue(ctx, oauth2.HTTPClient, http.DefaultClient), authorizationCode)
 		if err != nil {
+			l.logger.Error(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}

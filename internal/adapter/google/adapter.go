@@ -40,12 +40,12 @@ type CalendarAPI struct {
 	authenticated bool
 	oAuthUrl      string
 	oAuthToken    *oauth2.Token
-	oAuthHandler  auth.OAuthHandler
+	oAuthHandler  *auth.OAuthHandler
 
 	storage auth.Storage
 }
 
-func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Storage) error {
+func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Storage, bindPort uint) error {
 	// Google Adapter does not need the tenantId
 	switch {
 	case credentials.Client.Id == "":
@@ -61,7 +61,7 @@ func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Sto
 		ClientSecret: credentials.Client.Secret,
 		Endpoint:     google.Endpoint,
 		Scopes:       []string{calendar.CalendarReadonlyScope, calendar.CalendarEventsScope},
-	})
+	}, bindPort, c.logger)
 	if err != nil {
 		return err
 	}

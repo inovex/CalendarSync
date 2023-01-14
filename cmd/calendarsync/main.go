@@ -21,6 +21,7 @@ const (
 	flagStorageEncryptionKey = "storage-encryption-key"
 	flagClean                = "clean"
 	flagDryRun               = "dry-run"
+	flagPort                 = "port"
 )
 
 var (
@@ -61,6 +62,12 @@ func main() {
 				Usage: "This flag helps you see which events would get created, updated or deleted without actually doing these operations",
 				Value: false,
 			},
+			&cli.UintFlag{
+				Name:   flagPort,
+				Usage:  "set manual free port for the authentication process",
+				Hidden: true,
+				Value:  0,
+			},
 		},
 		Before: func(c *cli.Context) error {
 			// setup global logger
@@ -99,6 +106,12 @@ func Run(c *cli.Context) error {
 	log.WithField("start", startTime).Debug("configured start time for sync")
 	log.WithField("end", endTime).Debug("configured end time for sync")
 
+	var sourceBindAuthPort, sinkBindAuthPort uint
+	if c.IsSet("port") {
+		sourceBindAuthPort = c.Uint("port")
+		sinkBindAuthPort = c.Uint("port") + 1
+	}
+
 	storage, err := auth.NewStorageAdapterFromConfig(c.Context, cfg.Auth, c.String(flagStorageEncryptionKey))
 	if err != nil {
 		log.Fatalln("error during storage adapter load:", err)
@@ -106,6 +119,7 @@ func Run(c *cli.Context) error {
 
 	sourceAdapter, err := adapter.NewSourceAdapterFromConfig(
 		c.Context,
+		sourceBindAuthPort,
 		config.NewAdapterConfig(cfg.Source.Adapter),
 		storage,
 	)
@@ -119,6 +133,7 @@ func Run(c *cli.Context) error {
 
 	sinkAdapter, err := adapter.NewSinkAdapterFromConfig(
 		c.Context,
+		sinkBindAuthPort,
 		config.NewAdapterConfig(cfg.Sink.Adapter),
 		storage,
 	)
