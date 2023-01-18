@@ -130,9 +130,6 @@ func (zep *CalendarAPI) ListEvents(from, to time.Time) ([]Event, error) {
 			eventCalendar = calendar
 		}
 	}
-	if eventCalendar == (caldav.Calendar{}) {
-		return nil, fmt.Errorf("no %s calendar found in %s", zep.calendarID, zep.homeSet)
-	}
 
 	// query all events inside the given time range (inclusive)
 	ret, err := zep.client.QueryCalendar(eventCalendar.Path, &caldav.CalendarQuery{
