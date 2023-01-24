@@ -5,7 +5,7 @@ ADD . /build
 WORKDIR /build
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o calendarsync -mod=vendor ./cmd/calendarsync
+RUN CGO_ENABLED=0 go build -o calendarsync -mod=vendor ./cmd/calendarsync
 
 FROM scratch
 
@@ -14,4 +14,4 @@ COPY --from=Build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=Build /build/calendarsync /app/
 WORKDIR /app
 
-CMD ["./calendarsync", "--config", "/etc/calendarsync/sync.yaml", "--port", "8085"]
+ENTRYPOINT ["./calendarsync", "--config", "/etc/calendarsync/sync.yaml", "--port", "8085"]

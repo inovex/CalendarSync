@@ -59,7 +59,7 @@ createTag:
 release:
   stage: release
   image:
-    name: goreleaser/goreleaser
+    name: goreleaser/goreleaser:v1.14.1
     entrypoint: ['']
   dependencies: []
   only:
@@ -68,5 +68,8 @@ release:
     # Disable shallow cloning so that goreleaser can diff between tags to
     # generate a changelog.
     GIT_DEPTH: 0
+    DOCKER_REGISTRY: $CI_REGISTRY
+    # DOCKER_USERNAME: $CI_REGISTRY_USER
+    # DOCKER_PASSWORD: $CI_REGISTRY_PASSWORD
   script:
     - goreleaser release --rm-dist
