@@ -22,6 +22,10 @@ builds:
     goarch:
       - amd64
       - arm64
+      - arm
+    goarm:
+      - '6'
+      - '7'
     ignore:
       - goos: windows
         goarch: arm64
@@ -45,9 +49,9 @@ changelog:
       - '^test:'
 
 dockers:
-  - image_templates: 
-    - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-amd64'
-    dockerfile: goreleaser.dockerfile
+  - image_templates:
+      - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-amd64'
+    dockerfile: .goreleaser.dockerfile
     goarch: amd64
     use: buildx
     build_flag_templates:
@@ -58,13 +62,41 @@ dockers:
       - --label=org.opencontainers.image.revision={{ .FullCommit }}
       - --label=org.opencontainers.image.licenses=MIT
 
-  - image_templates: 
-    - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-arm64v8'
-    dockerfile: goreleaser.dockerfile
+  - image_templates:
+      - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-arm64v8'
+    dockerfile: .goreleaser.dockerfile
     goarch: arm64
     use: buildx
     build_flag_templates:
       - --platform=linux/arm64/v8
+      - --label=org.opencontainers.image.title={{ .ProjectName }}
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.licenses=MIT
+
+  - image_templates:
+      - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-armv6'
+    dockerfile: .goreleaser.dockerfile
+    goarch: arm
+    goarm: "6"
+    use: buildx
+    build_flag_templates:
+      - --platform=linux/arm/v6
+      - --label=org.opencontainers.image.title={{ .ProjectName }}
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.licenses=MIT
+
+  - image_templates:
+      - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-armv7'
+    dockerfile: .goreleaser.dockerfile
+    goarch: arm
+    goarm: "7"
+    use: buildx
+    build_flag_templates:
+      - --platform=linux/arm/v7
       - --label=org.opencontainers.image.title={{ .ProjectName }}
       - --label=org.opencontainers.image.version={{ .Version }}
       - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
@@ -76,7 +108,11 @@ docker_manifests:
     image_templates:
       - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-amd64'
       - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-arm64v8'
+      - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-armv7'
+      - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-armv6'
   - name_template: "inovex-calendarsync/{{ .ProjectName }}:latest"
     image_templates:
       - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-amd64'
       - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-arm64v8'
+      - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-armv7'
+      - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-armv6'
