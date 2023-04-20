@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"strings"
 
-	"golang.org/x/oauth2"
-
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )
