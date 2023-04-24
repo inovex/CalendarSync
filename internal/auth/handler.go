@@ -2,9 +2,10 @@ package auth
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -32,7 +33,8 @@ type OAuthHandler struct {
 }
 
 func NewOAuthHandler(config oauth2.Config, bindPort uint, logger *log.Entry) (*OAuthHandler, error) {
-	addr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("0.0.0.0:%v", bindPort))
+	address := net.JoinHostPort("localhost", strconv.Itoa(int(bindPort)))
+	addr, err := net.ResolveTCPAddr("tcp", address)
 	if err != nil {
 		return nil, err
 	}
@@ -50,11 +52,17 @@ func NewOAuthHandler(config oauth2.Config, bindPort uint, logger *log.Entry) (*O
 }
 
 func (l *OAuthHandler) Configuration() *oauth2.Config {
+	redirectURL := url.URL{
+		Scheme: "http",
+		Host:   net.JoinHostPort("localhost", strconv.Itoa(l.listener.Addr().(*net.TCPAddr).Port)),
+		Path:   "/redirect",
+	}
+
 	return &oauth2.Config{
 		ClientID:     l.config.ClientID,
 		ClientSecret: l.config.ClientSecret,
 		Endpoint:     l.config.Endpoint,
-		RedirectURL:  fmt.Sprintf("http://localhost:%d/redirect", l.listener.Addr().(*net.TCPAddr).Port),
+		RedirectURL:  redirectURL.String(),
 		Scopes:       l.config.Scopes,
 	}
 }

@@ -6,6 +6,7 @@ example.yaml
 
 # local auth credentials
 auth-storage.yaml
+.auth.yaml
 
 # IDEs
 .idea
