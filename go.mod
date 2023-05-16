@@ -10,7 +10,7 @@ require (
 	github.com/emersion/go-webdav v0.3.1
 	github.com/microcosm-cc/bluemonday v1.0.23
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
-	github.com/sirupsen/logrus v1.8.1
+	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.7.1
 	github.com/thlib/go-timezone-local v0.0.0-20210907160436-ef149e42d28e
 	github.com/urfave/cli/v2 v2.3.0
