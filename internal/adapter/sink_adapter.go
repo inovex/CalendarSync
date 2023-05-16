@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"time"
 
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/auth"
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/models"
+	"github.com/inovex/CalendarSync/internal/auth"
+	"github.com/inovex/CalendarSync/internal/models"
 
 	log "github.com/sirupsen/logrus"
 
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/adapter/google"
-	outlook "gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/adapter/outlook_http"
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/sync"
+	"github.com/inovex/CalendarSync/internal/adapter/google"
+	outlook "github.com/inovex/CalendarSync/internal/adapter/outlook_http"
+	"github.com/inovex/CalendarSync/internal/sync"
 )
 
 type SinkAdapter struct {

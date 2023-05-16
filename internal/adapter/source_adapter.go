@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"time"
 
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/auth"
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/models"
+	"github.com/inovex/CalendarSync/internal/auth"
+	"github.com/inovex/CalendarSync/internal/models"
 
-	outlook "gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/adapter/outlook_http"
+	outlook "github.com/inovex/CalendarSync/internal/adapter/outlook_http"
 
 	log "github.com/sirupsen/logrus"
 
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/adapter/google"
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/adapter/zep"
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/sync"
+	"github.com/inovex/CalendarSync/internal/adapter/google"
+	"github.com/inovex/CalendarSync/internal/adapter/zep"
+	"github.com/inovex/CalendarSync/internal/sync"
 )
 
 // SourceClientFactory is a convenience factory. It is needed to retrieve new - default - client implementations.

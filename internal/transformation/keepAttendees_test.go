@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/models"
+	"github.com/inovex/CalendarSync/internal/models"
 )
 
 // verify keep attendees

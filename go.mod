@@ -1,4 +1,4 @@
-module gitlab.inovex.de/inovex-calendarsync/calendarsync
+module github.com/inovex/CalendarSync
 
 go 1.20
 

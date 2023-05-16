@@ -1,7 +1,7 @@
 package transformation
 
 import (
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/models"
+	"github.com/inovex/CalendarSync/internal/models"
 )
 
 // KeepTitle allows to keep the title of an event.

@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/models"
+	"github.com/inovex/CalendarSync/internal/models"
 
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/ratelimit"

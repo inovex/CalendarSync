@@ -1,7 +1,7 @@
 package outlook_http
 
 import (
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/models"
+	"github.com/inovex/CalendarSync/internal/models"
 )
 
 // https://learn.microsoft.com/en-us/graph/api/resources/event?view=graph-rest-1.0

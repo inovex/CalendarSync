@@ -11,8 +11,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/auth"
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/models"
+	"github.com/inovex/CalendarSync/internal/auth"
+	"github.com/inovex/CalendarSync/internal/models"
 )
 
 const (

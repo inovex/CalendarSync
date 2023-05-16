@@ -6,9 +6,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/config"
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/sync"
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/transformation"
+	"github.com/inovex/CalendarSync/internal/config"
+	"github.com/inovex/CalendarSync/internal/sync"
+	"github.com/inovex/CalendarSync/internal/transformation"
 )
 
 type ConfigTestSuite struct {

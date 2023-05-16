@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"os"
 
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/auth"
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/models"
+	"github.com/inovex/CalendarSync/internal/auth"
+	"github.com/inovex/CalendarSync/internal/models"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
 
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/adapter"
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/config"
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/sync"
+	"github.com/inovex/CalendarSync/internal/adapter"
+	"github.com/inovex/CalendarSync/internal/config"
+	"github.com/inovex/CalendarSync/internal/sync"
 )
 
 const (

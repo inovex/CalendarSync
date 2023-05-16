@@ -30,7 +30,7 @@ data to a third party.
 # How to use
 
 Download the newest
-[release](https://gitlab.inovex.de/inovex-calendarsync/calendarsync/-/releases)
+[release](https://github.com/inovex/CalendarSync/releases)
 for your platform, create a modified `sync.yaml` file based on the content of
   the `./example.sync.yaml` file. Finally, start the app using `./calendarsync
   --config sync.yaml --storage-encryption-key <YourSecretPassword>` and follow
