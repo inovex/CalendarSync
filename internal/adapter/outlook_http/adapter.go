@@ -37,12 +37,12 @@ type CalendarAPI struct {
 	authenticated bool
 	oAuthUrl      string
 	oAuthToken    *oauth2.Token
-	oAuthHandler  auth.OAuthHandler
+	oAuthHandler  *auth.OAuthHandler
 
 	storage auth.Storage
 }
 
-func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Storage) error {
+func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Storage, bindPort uint) error {
 	// Outlook Adapter does not need the clientKey
 	switch {
 	case credentials.Client.Id == "":
@@ -65,7 +65,7 @@ func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Sto
 		ClientID: credentials.Client.Id,
 		Endpoint: endpoint,
 		Scopes:   []string{"Calendars.ReadWrite", "offline_access"}, // You need to request offline_access in order to retrieve a refresh token
-	})
+	}, bindPort, c.logger)
 	if err != nil {
 		return err
 	}
