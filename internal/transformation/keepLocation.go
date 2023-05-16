@@ -1,7 +1,7 @@
 package transformation
 
 import (
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/models"
+	"github.com/inovex/CalendarSync/internal/models"
 )
 
 // KeepLocation allows to keep the location of an event.

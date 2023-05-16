@@ -5,9 +5,9 @@ import (
 	"reflect"
 	"strings"
 
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/config"
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/models"
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/transformation"
+	"github.com/inovex/CalendarSync/internal/config"
+	"github.com/inovex/CalendarSync/internal/models"
+	"github.com/inovex/CalendarSync/internal/transformation"
 )
 
 // Transformer applies a well-defined transformation to an event. Multiple transformers may be concatenated.

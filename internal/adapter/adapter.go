@@ -4,9 +4,9 @@ import (
 	"context"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/auth"
+	"github.com/inovex/CalendarSync/internal/auth"
 
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/config"
+	"github.com/inovex/CalendarSync/internal/config"
 )
 
 type Type string

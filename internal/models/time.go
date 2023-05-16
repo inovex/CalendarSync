@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/config"
+	"github.com/inovex/CalendarSync/internal/config"
 )
 
 // TODO: @ljarosch: This might just be a quick-fix. I'm not yet sure if this is an ideal solution

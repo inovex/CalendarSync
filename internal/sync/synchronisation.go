@@ -2,7 +2,7 @@ package sync
 
 import (
 	"context"
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/models"
+	"github.com/inovex/CalendarSync/internal/models"
 	"time"
 )
 

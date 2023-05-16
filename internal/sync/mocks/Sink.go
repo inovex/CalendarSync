@@ -6,7 +6,7 @@ import (
 	context "context"
 
 	mock "github.com/stretchr/testify/mock"
-	models "gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/models"
+	models "github.com/inovex/CalendarSync/internal/models"
 
 	time "time"
 )

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/mail"
 
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/models"
+	"github.com/inovex/CalendarSync/internal/models"
 )
 
 // KeepAttendes allows to keep the attendees of an event.

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/config"
+	"github.com/inovex/CalendarSync/internal/config"
 )
 
 type Storage interface {

@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/config"
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/models"
+	"github.com/inovex/CalendarSync/internal/config"
+	"github.com/inovex/CalendarSync/internal/models"
 
 	log "github.com/sirupsen/logrus"
 
@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/sync/mocks"
+	"github.com/inovex/CalendarSync/internal/sync/mocks"
 )
 
 type ControllerTestSuite struct {

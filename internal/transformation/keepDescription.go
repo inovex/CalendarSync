@@ -1,10 +1,11 @@
 package transformation
 
 import (
+	"strings"
+
 	"github.com/aquilax/truncate"
 	"github.com/microcosm-cc/bluemonday"
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/models"
-	"strings"
+	"github.com/inovex/CalendarSync/internal/models"
 )
 
 // KeepDescription allows to keep the description of an event.
@@ -15,7 +16,7 @@ func (t *KeepDescription) Name() string {
 }
 
 func (t *KeepDescription) Transform(source models.Event, sink models.Event) (models.Event, error) {
-	// need to remove microsoft html overhead. read more here: https://gitlab.inovex.de/inovex-calendarsync/calendarsync/-/merge_requests/37#note_569909
+	// need to remove microsoft html overhead
 	p := bluemonday.StrictPolicy()
 	description := strings.ReplaceAll(source.Description, "\r\n", "")
 	sanitizedDescription := p.Sanitize(description)

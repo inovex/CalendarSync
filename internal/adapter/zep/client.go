@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/models"
+	"github.com/inovex/CalendarSync/internal/models"
 
 	"github.com/emersion/go-ical"
 	"github.com/emersion/go-webdav"

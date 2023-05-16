@@ -2,7 +2,7 @@ package transformation
 
 import (
 	"fmt"
-	"gitlab.inovex.de/inovex-calendarsync/calendarsync/internal/models"
+	"github.com/inovex/CalendarSync/internal/models"
 )
 
 // KeepMeetingLink allows to keep the meeting link of an event.
