@@ -1,0 +1,29 @@
+# local sync config for testing:
+*.local.sync.yaml
+local.sync.yaml
+
+example.yaml
+
+# local auth credentials
+auth-storage.yaml
+
+# IDEs
+.idea
+.vscode
+
+# Secrets
+credentials.json
+token.json
+sync.yaml
+.env
+.envrc
+
+# docs
+docs/public
+
+# assets
+bin/
+dist/
+
+# Mac Files
+.DS_Store

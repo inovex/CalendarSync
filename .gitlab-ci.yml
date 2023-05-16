@@ -1,0 +1,72 @@
+---
+image: golang:1.20.1
+
+stages:
+  - prepare
+  - test
+  - build
+  - release
+
+default:
+  tags:
+    - shared
+
+# Calls 'go vet' on the entire project to catch subtle errors
+vet:
+  stage: prepare
+  tags:
+    - shared
+  script:
+    - go vet $(go list ./... | grep -v /vendor/)
+
+# Lint job is responsible for calling 'golangci-lint'.
+lint:
+  stage: prepare
+  image: golangci/golangci-lint:v1.51.2
+  script:
+    - golangci-lint --timeout 10m run --go "1.20"
+
+# Execute all tests in the project
+test:
+  stage: test
+  script:
+    - go test -race $(go list ./... | grep -v /vendor/)
+
+# Build the calendarsync binary, injecting current git version information
+build:
+  stage: build
+  script:
+    - go mod download
+    - go build -race -ldflags "-X 'main.Version=$(git describe --exact-match --tags 2> /dev/null || git rev-parse --short HEAD)' -X 'main.BuildTime=$(date)'" -o calendarsync cmd/calendarsync/main.go
+  artifacts:
+    paths:
+      - calendarsync
+
+createTag:
+  stage: release
+  image: registry.gitlab.com/juhani/go-semrel-gitlab:v0.21.1
+  variables:
+    GSG_PATCH_COMMIT_TYPES: chore,fix,refactor,perf,docs,style,test,renovate
+    GSG_INITIAL_DEVELOPMENT: "true"
+  tags:
+    - shared
+  when: manual
+  only:
+    - main
+  script:
+    - release tag --list-other-changes
+
+release:
+  stage: release
+  image:
+    name: goreleaser/goreleaser
+    entrypoint: ['']
+  dependencies: []
+  only:
+    - tags
+  variables:
+    # Disable shallow cloning so that goreleaser can diff between tags to
+    # generate a changelog.
+    GIT_DEPTH: 0
+  script:
+    - goreleaser release --rm-dist

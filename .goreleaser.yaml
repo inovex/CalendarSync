@@ -1,0 +1,49 @@
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - go mod tidy
+    - go mod vendor
+
+gitlab_urls:
+  api: https://gitlab.inovex.de/api/v4/
+  download: https://gitlab.inovex.de
+  # set to true if you use a self-signed certificate
+  skip_tls_verify: false
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    dir: ./cmd/calendarsync
+    goos:
+      - linux
+      - windows
+      - darwin
+      - freebsd
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+      - goos: freebsd
+        goarch: arm64
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      amd64: x86_64
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+source:
+  enabled: true
+  files:
+  - vendor
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'

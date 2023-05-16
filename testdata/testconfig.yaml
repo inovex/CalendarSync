@@ -1,0 +1,46 @@
+sync:
+  start:
+    identifier: MonthStart # 1st of the current month
+    offset: -1 # MonthStart -1 month (beginning of last month)
+  end:
+    identifier: MonthEnd # last day of the current month
+    offset: +1 # MonthEnd +1 month (end of next month)
+
+
+auth:
+  storage_mode: yaml
+  config:
+    path: "./auth-storage.yaml"
+
+# Unfortunately, at this point, we only support one source adapter.
+# This is something which we're going to add soon.
+
+# Outlook source adapter
+source:
+  adapter:
+    type: "outlook_http"
+    calendar: "[base64-format string here]"
+    oAuth:
+      clientId: "[UUID-format string here]"
+      tenantId: "[UUID-format string here]"
+
+sink:
+  adapter:
+    type: google
+    calendar: "target-calendar@group.calendar.google.com"
+    oAuth:
+      clientId: "[google-oAuth-client-id]"
+      clientKey: "[google-oAuth-client-key]"
+
+transformations:
+  - name: KeepDescription
+  - name: ReplaceTitle
+    config:
+      NewTitle: "[Synchronisierter Termin]"
+  - name: KeepAttendees
+    config:
+      UseEmailAsDisplayName: true
+  - name: KeepTitle
+  - name: PrefixTitle
+    config:
+      Prefix: "foobar"

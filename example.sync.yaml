@@ -1,0 +1,59 @@
+---
+sync:
+  start:
+    identifier: MonthStart # 1st of the current month
+    offset: -1 # MonthStart -1 month (beginning of last month)
+  end:
+    identifier: MonthEnd # last day of the current month
+    offset: +1 # MonthEnd +1 month (end of next month)
+
+auth:
+  storage_mode: yaml
+  config:
+    path: "./auth-storage.yaml"
+
+# Unfortunately, at this point, we only support one source adapter.
+# This is something which we're going to add soon.
+
+# Outlook source adapter
+source:
+  adapter:
+    type: "outlook_http"
+    calendar: "[base64-format string here]"
+    oAuth:
+      clientId: "[UUID-format string here]"
+      tenantId: "[UUID-format string here]"
+
+# ZEP source adapter
+#source:      
+#  adapter:
+#    type: "zep"
+#    calendar: "absences"
+#    config:
+#      username: "testymctestface@inovex.de"
+#      password: "[password here]"
+
+sink:
+  adapter:
+    type: google
+    calendar: "target-calendar@group.calendar.google.com"
+    oAuth:
+      clientId: "[google-oAuth-client-id]"
+      clientKey: "[google-oAuth-client-key]"
+
+transformations:
+  - name: KeepDescription
+  - name: KeepLocation
+  - name: KeepReminders
+  - name: ReplaceTitle
+    config:
+      NewTitle: "[Synchronisierter Termin]"
+  - name: KeepMeetingLink
+  # Do not use KeepAttendees when the Outlook Adapter is used as a sink. There is no way to suppress mail invitations
+  - name: KeepAttendees
+    config:
+      UseEmailAsDisplayName: true
+
+# Perform multiple calendar updates concurrently
+# Defaults to 1 if not set
+updateConcurrency: 3
