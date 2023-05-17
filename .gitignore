@@ -28,3 +28,5 @@ dist/
 
 # Mac Files
 .DS_Store
+
+vendor/
