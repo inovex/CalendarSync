@@ -1,6 +1,6 @@
 <div align="center">
     <p>
-        <img src="./docs/static/logo_color_128.png"/>
+        <img src="./docs/static/logo.png"/>
         <h1 align="center">CalendarSync</h1>
         <b>Stateless CLI tool to sync calendars across different calendaring systems.</b>
     </p>
