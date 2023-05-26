@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000">
+  <defs>
+    <style>
+      .m {
+        opacity: .1;
+      }
+
+      .n {
+        fill: #f4f7ff;
+      }
+
+      .o {
+        fill: #ff8f80;
+      }
+
+      .p {
+        fill: #9f73e5;
+      }
+
+      .q {
+        fill: #74e8b6;
+      }
+
+      .r {
+        filter: url(#b);
+      }
+
+      .r, .s, .t, .u {
+        fill: #fff;
+      }
+
+      .s {
+        filter: url(#f);
+      }
+
+      .t {
+        filter: url(#d);
+      }
+
+      .u {
+        filter: url(#i);
+      }
+
+      .v {
+        fill: #c7e9db;
+      }
+
+      .v, .w, .x {
+        opacity: .5;
+      }
+
+      .w {
+        fill: #d4c6e6;
+      }
+
+      .x {
+        fill: #ffd7d0;
+      }
+    </style>
+    <filter id="b" data-name="drop-shadow-1" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="0"/>
+      <feGaussianBlur result="c" stdDeviation="23.706093797009199"/>
+      <feFlood flood-color="#000" flood-opacity=".1"/>
+      <feComposite in2="c" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <filter id="d" data-name="drop-shadow-2" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="0"/>
+      <feGaussianBlur result="e" stdDeviation="23.706093797009199"/>
+      <feFlood flood-color="#000" flood-opacity=".1"/>
+      <feComposite in2="e" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <filter id="f" data-name="drop-shadow-3" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="0"/>
+      <feGaussianBlur result="g" stdDeviation="23.706093797009199"/>
+      <feFlood flood-color="#000" flood-opacity=".1"/>
+      <feComposite in2="g" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+    <filter id="i" data-name="drop-shadow-5" filterUnits="userSpaceOnUse">
+      <feOffset dx="0" dy="0"/>
+      <feGaussianBlur result="j" stdDeviation="23.706093797009199"/>
+      <feFlood flood-color="#000" flood-opacity=".23"/>
+      <feComposite in2="j" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g id="a" data-name="Ebene 3">
+    <g>
+      <rect class="r" x="287.624477274097444" y="221.021305135380317" width="556" height="490.58823529412075" rx="22.999999999999996" ry="22.999999999999996"/>
+      <path class="x" d="m310.624477274097444,221.021305135380317h510c12.69404556336201,0,23,10.30595443663799,23,23v86.267379679140504H287.624477274097444v-86.267379679140504c0-12.69404556336201,10.30595443663799-23,23-23Z"/>
+    </g>
+    <g>
+      <rect class="t" x="266.624477274097444" y="246.021305135380317" width="556" height="490.58823529412075" rx="23" ry="23"/>
+      <path class="v" d="m289.624477274097444,246.021305135380317h510c12.69404556336201,0,23,10.30595443663799,23,23v86.267379679140504H266.624477274097444v-86.267379679140504c0-12.69404556336201,10.30595443663799-23,23-23Z"/>
+    </g>
+    <g>
+      <rect class="s" x="241.124477274097444" y="266.521305135380317" width="556" height="490.58823529412075" rx="22.999999999999996" ry="22.999999999999996"/>
+      <path class="w" d="m264.124477274097444,266.521305135380317h510c12.69404556336201,0,23,10.30595443663799,23,23v86.267379679140504H241.124477274097444v-86.267379679140504c0-12.69404556336201,10.30595443663799-23,23-23Z"/>
+    </g>
+  </g>
+  <g id="h" data-name="Ebene 1">
+    <rect class="u" x="222" y="292.705882352940534" width="556" height="490.588235294118931" rx="23" ry="23"/>
+    <path class="n" d="m245.000000000000909,292.705882352940534h509.999999999999091c12.69404556336201,0,23,10.30595443663799,23,23v86.267379679149599H222.000000000000909v-86.267379679149599c0-12.69404556336201,10.30595443663799-23,23-23Z"/>
+  </g>
+  <g id="k" data-name="Ebene 2">
+    <rect class="n" x="249.123108430993852" y="435.422459893050473" width="103.700420980771014" height="90.684491978609003"/>
+    <rect class="n" x="513.743429286609171" y="435.422459893050473" width="103.700420980771014" height="90.684491978609003"/>
+    <rect class="p" x="249.123108430993852" y="547.66310160428111" width="103.700420980771014" height="90.684491978609003"/>
+    <rect class="p" x="191" y="547.66310160428111" width="58" height="90.684491978609003"/>
+    <rect class="q" x="646.053589714418194" y="547.66310160428111" width="131.946410285581806" height="90.684491978609003"/>
+    <rect class="n" x="646.053589714418194" y="659.903743315509928" width="103.700420980769195" height="90.684491978609003"/>
+    <rect class="n" x="381.433268858801966" y="547.66310160428111" width="103.700420980770105" height="90.684491978609003"/>
+    <rect class="n" x="381.433268858801966" y="659.903743315509928" width="103.700420980770105" height="90.684491978609003"/>
+    <rect class="o" x="513.743429286609171" y="659.903743315509928" width="103.700420980771014" height="138.096256684490072"/>
+    <polygon class="p" points="191 638.347593582890113 222 657 222 638.347593582890113 191 638.347593582890113"/>
+    <polygon class="m" points="191 638.347593582890113 222 657 222 638.347593582890113 191 638.347593582890113"/>
+    <rect class="q" x="750.000000000418368" y="547.6631016042802" width="58" height="90.684491978609913"/>
+    <polygon class="q" points="807.999999998382918 638.347593584188871 776.999999997546183 656.999999999909051 776.999999998382918 638.347593582799163 807.999999998382918 638.347593584188871"/>
+    <polygon class="m" points="807.999999998382918 638.347593584188871 776.999999997546183 656.999999999909051 776.999999998382918 638.347593582799163 807.999999998382918 638.347593584188871"/>
+    <polygon class="o" points="617.443850267380185 798 634.561492534930949 783.294117647059466 617.443850267380185 783.294117647059466 617.443850267380185 798"/>
+    <polyline class="m" points="617.443850267380185 783.294117647059466 617.443850267380185 798 634.561492534930949 783.294117647059466"/>
+  </g>
+</svg>
