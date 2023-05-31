@@ -10,8 +10,6 @@ import (
 
 	outlook "github.com/inovex/CalendarSync/internal/adapter/outlook_http"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/inovex/CalendarSync/internal/adapter/google"
 	"github.com/inovex/CalendarSync/internal/adapter/zep"
 	"github.com/inovex/CalendarSync/internal/sync"
@@ -44,16 +42,6 @@ func NewSourceAdapterFromConfig(ctx context.Context, bindPort uint, config Confi
 		return nil, err
 	}
 
-	logger := log.WithFields(log.Fields{
-		"client":       config.Adapter().Type,
-		"adapter_type": "source",
-		"calendar":     config.Adapter().Calendar,
-	})
-
-	if c, ok := client.(LogSetter); ok {
-		c.SetLogger(logger)
-	}
-
 	if c, ok := client.(OAuth2Adapter); ok {
 		if err := c.SetupOauth2(
 			auth.Credentials{
@@ -68,7 +56,7 @@ func NewSourceAdapterFromConfig(ctx context.Context, bindPort uint, config Confi
 			},
 			storage,
 			bindPort,
-			); err != nil {
+		); err != nil {
 			return nil, err
 		}
 	}

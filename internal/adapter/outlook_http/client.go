@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"time"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/charmbracelet/log"
 	"github.com/thlib/go-timezone-local/tzlocal"
 
 	"github.com/inovex/CalendarSync/internal/models"

@@ -8,12 +8,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/browser"
 	"github.com/inovex/CalendarSync/internal/models"
+	"github.com/pkg/browser"
 
 	"golang.org/x/oauth2/google"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/charmbracelet/log"
 	"github.com/inovex/CalendarSync/internal/auth"
 	"golang.org/x/oauth2"
 	"google.golang.org/api/calendar/v3"
@@ -33,7 +33,6 @@ type GoogleCalendarClient interface {
 // CalendarAPI is our Google Calendar client wrapper which adapts the base api to the needs of CalendarSync.
 type CalendarAPI struct {
 	gcalClient     GoogleCalendarClient
-	logger         *log.Entry
 	pageMaxResults int64
 	calendarID     string
 
@@ -61,7 +60,7 @@ func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Sto
 		ClientSecret: credentials.Client.Secret,
 		Endpoint:     google.Endpoint,
 		Scopes:       []string{calendar.CalendarReadonlyScope, calendar.CalendarEventsScope},
-	}, bindPort, c.logger)
+	}, bindPort)
 	if err != nil {
 		return err
 	}
@@ -89,7 +88,7 @@ func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Sto
 		}
 
 		c.authenticated = true
-		c.logger.Infof("using stored credentials")
+		log.Info("using stored credentials")
 	}
 
 	return nil
@@ -102,10 +101,10 @@ func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Sto
 func (c *CalendarAPI) Initialize(ctx context.Context, config map[string]interface{}) error {
 	if !c.authenticated {
 		c.oAuthUrl = c.oAuthHandler.Configuration().AuthCodeURL("state", oauth2.AccessTypeOffline)
-		c.logger.WithFields(log.Fields{}).Infof("opening browser window for authentication of %s\n", c.Name())
+		log.Infof("opening browser window for authentication of %s\n", c.Name())
 		err := browser.OpenURL(c.oAuthUrl)
 		if err != nil {
-			c.logger.WithFields(log.Fields{}).Infof("browser did not open, please authenticate adapter %s:\n\n %s\n\n\n", c.Name(), c.oAuthUrl)
+			log.Infof("browser did not open, please authenticate adapter %s:\n\n %s\n\n\n", c.Name(), c.oAuthUrl)
 		}
 
 		if err := c.oAuthHandler.Listen(ctx); err != nil {
@@ -127,7 +126,7 @@ func (c *CalendarAPI) Initialize(ctx context.Context, config map[string]interfac
 		}
 
 	} else {
-		c.logger.Debugln("adapter is already authenticated, loading access token")
+		log.Debug("adapter is already authenticated, loading access token")
 	}
 
 	c.pageMaxResults = defaultPageMaxResults
@@ -146,7 +145,7 @@ func (c *CalendarAPI) Initialize(ctx context.Context, config map[string]interfac
 	_, err = c.gcalClient.ListEvents(ctx, time.Now().Add(-3*time.Hour), time.Now().Add(3*time.Hour))
 	if err != nil {
 		if strings.Contains(err.Error(), "Token has been expired") {
-			c.logger.Infof("the refresh token expired, initiating reauthentication...")
+			log.Info("the refresh token expired, initiating reauthentication...")
 			err := c.storage.RemoveCalendarAuth(c.calendarID)
 			if err != nil {
 				return fmt.Errorf("failed to remove authentication for calendar %s: %w", c.calendarID, err)
@@ -170,9 +169,7 @@ func (c *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, en
 		return nil, err
 	}
 
-	log.WithFields(log.Fields{
-		"adapter": c.Name(),
-	}).Printf("loaded %d events between %s and %s.", len(events), start.Format(time.RFC1123), end.Format(time.RFC1123))
+	log.Infof("loaded %d events between %s and %s.", len(events), start.Format(time.RFC1123), end.Format(time.RFC1123))
 
 	return events, nil
 }
@@ -184,9 +181,7 @@ func (c *CalendarAPI) CreateEvent(ctx context.Context, e models.Event) error {
 		return err
 	}
 
-	log.WithFields(log.Fields{
-		"adapter": c.Name(),
-	}).Printf("Event %s at %s created", e.ShortTitle(), e.StartTime.String())
+	log.Info("Event created", "title", e.ShortTitle(), "time", e.StartTime.String(), "adapter", c.Name())
 
 	return nil
 }
@@ -200,9 +195,7 @@ func (c *CalendarAPI) UpdateEvent(ctx context.Context, e models.Event) error {
 		return err
 	}
 
-	log.WithFields(log.Fields{
-		"adapter": c.Name(),
-	}).Printf("Event %s at %s updated", e.ShortTitle(), e.StartTime.String())
+	log.Info("Event updated", "title", e.ShortTitle(), "time", e.StartTime.String(), "adapter", c.Name())
 
 	return nil
 }
@@ -214,16 +207,9 @@ func (c *CalendarAPI) DeleteEvent(ctx context.Context, e models.Event) error {
 		return err
 	}
 
-	log.WithFields(log.Fields{
-		"adapter": c.Name(),
-	}).Printf("Event %s at %s deleted", e.ShortTitle(), e.StartTime.String())
+	log.Info("Event deleted", "title", e.ShortTitle(), "time", e.StartTime.String(), "adapter", c.Name())
 
 	return nil
-}
-
-// SetLogger implements the LogSetter interface and allows injection of a custom logrus.Entry into the client.
-func (c *CalendarAPI) SetLogger(logger *log.Entry) {
-	c.logger = logger
 }
 
 // Name implements the NamedComponent interface and provides a very fancy name.

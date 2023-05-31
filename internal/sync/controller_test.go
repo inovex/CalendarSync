@@ -9,7 +9,7 @@ import (
 	"github.com/inovex/CalendarSync/internal/config"
 	"github.com/inovex/CalendarSync/internal/models"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/charmbracelet/log"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

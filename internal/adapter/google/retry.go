@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
-	log "github.com/sirupsen/logrus"
+	"github.com/charmbracelet/log"
 	"google.golang.org/api/googleapi"
 )
 
@@ -22,7 +22,7 @@ func retry[T any](ctx context.Context, call func() (T, error)) (T, error) {
 		}
 		return result, backoff.Permanent(err)
 	}, b, func(err error, d time.Duration) {
-		log.WithError(err).WithField("delay", d).Debugf("will retry error")
+		log.Debug("will retry error", "delay", d, "error", err)
 	})
 }
 

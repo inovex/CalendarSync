@@ -8,8 +8,6 @@ import (
 	"github.com/inovex/CalendarSync/internal/auth"
 	"github.com/inovex/CalendarSync/internal/models"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/inovex/CalendarSync/internal/adapter/google"
 	outlook "github.com/inovex/CalendarSync/internal/adapter/outlook_http"
 	"github.com/inovex/CalendarSync/internal/sync"
@@ -37,16 +35,6 @@ func NewSinkAdapterFromConfig(ctx context.Context, bindPort uint, config ConfigR
 	client, err := SinkClientFactory(Type(config.Adapter().Type))
 	if err != nil {
 		return nil, err
-	}
-
-	logger := log.WithFields(log.Fields{
-		"client":       config.Adapter().Type,
-		"adapter_type": "sink",
-		"calendar":     config.Adapter().Calendar,
-	})
-
-	if c, ok := client.(LogSetter); ok {
-		c.SetLogger(logger)
 	}
 
 	if c, ok := client.(OAuth2Adapter); ok {

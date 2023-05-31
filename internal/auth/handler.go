@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/charmbracelet/log"
 	"golang.org/x/oauth2"
 )
 
@@ -29,10 +29,9 @@ type OAuthHandler struct {
 	listener net.Listener
 	config   oauth2.Config
 	token    *oauth2.Token
-	logger   *log.Entry
 }
 
-func NewOAuthHandler(config oauth2.Config, bindPort uint, logger *log.Entry) (*OAuthHandler, error) {
+func NewOAuthHandler(config oauth2.Config, bindPort uint) (*OAuthHandler, error) {
 	address := net.JoinHostPort("localhost", strconv.Itoa(int(bindPort)))
 	addr, err := net.ResolveTCPAddr("tcp", address)
 	if err != nil {
@@ -47,7 +46,6 @@ func NewOAuthHandler(config oauth2.Config, bindPort uint, logger *log.Entry) (*O
 	return &OAuthHandler{
 		config:   config,
 		listener: listener,
-		logger:   logger,
 	}, nil
 }
 
@@ -81,7 +79,7 @@ func (l *OAuthHandler) createAuthorizationExchange(ctx context.Context) func(htt
 		// exchange authorization token for access and refresh token
 		l.token, err = l.Configuration().Exchange(context.WithValue(ctx, oauth2.HTTPClient, http.DefaultClient), authorizationCode)
 		if err != nil {
-			l.logger.Error(err)
+			log.Error(err, "method", "createAuthorizationExchange")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}

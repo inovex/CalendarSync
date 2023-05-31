@@ -11,7 +11,7 @@ import (
 
 	"github.com/inovex/CalendarSync/internal/models"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/charmbracelet/log"
 	"go.uber.org/ratelimit"
 	"google.golang.org/api/calendar/v3"
 	"google.golang.org/api/googleapi"
@@ -187,9 +187,7 @@ func (g *GCalClient) DeleteEvent(ctx context.Context, event models.Event) error 
 		return nil, err
 	})
 	if isNotFound(err) {
-		log.WithFields(log.Fields{
-			"title": event.ShortTitle(),
-		}).Debugln("Event is already deleted.")
+		log.Debug("Event is already deleted.", "method", "DeleteEvent", "client", "google")
 		return nil
 	} else if err != nil {
 		return err

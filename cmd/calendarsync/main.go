@@ -3,11 +3,12 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/inovex/CalendarSync/internal/auth"
 	"github.com/inovex/CalendarSync/internal/models"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/charmbracelet/log"
 	"github.com/urfave/cli/v2"
 
 	"github.com/inovex/CalendarSync/internal/adapter"
@@ -71,19 +72,19 @@ func main() {
 		},
 		Before: func(c *cli.Context) error {
 			// setup global logger
-			level, err := log.ParseLevel(c.String(flagLogLevel))
-			if err != nil {
-				return err
-			}
+			level := log.ParseLevel(c.String(flagLogLevel))
 			log.SetLevel(level)
-
+			log.SetTimeFormat(time.Kitchen)
+			if level == log.DebugLevel {
+				log.SetReportCaller(true)
+			}
 			return nil
 		},
 		Action: Run,
 	}
 
 	if err := app.Run(os.Args); err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
 }
 
@@ -92,7 +93,7 @@ func Run(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	log.WithField("path", cfg.Path).Infoln("loaded config file")
+	log.Info("loaded config file", "path", cfg.Path)
 
 	startTime, err := models.TimeFromConfig(cfg.Sync.StartTime)
 	if err != nil {
@@ -103,8 +104,7 @@ func Run(c *cli.Context) error {
 		return err
 	}
 
-	log.WithField("start", startTime).Debug("configured start time for sync")
-	log.WithField("end", endTime).Debug("configured end time for sync")
+	log.Debug("configured start and end time for sync", "start", startTime, "end", endTime)
 
 	var sourceBindAuthPort, sinkBindAuthPort uint
 	if c.IsSet("port") {
@@ -114,7 +114,7 @@ func Run(c *cli.Context) error {
 
 	storage, err := auth.NewStorageAdapterFromConfig(c.Context, cfg.Auth, c.String(flagStorageEncryptionKey))
 	if err != nil {
-		log.Fatalln("error during storage adapter load:", err)
+		log.Fatal("error during storage adapter load:", err)
 	}
 
 	sourceAdapter, err := adapter.NewSourceAdapterFromConfig(
@@ -126,10 +126,7 @@ func Run(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	log.WithFields(log.Fields{
-		"adapter":  cfg.Source.Adapter.Type,
-		"calendar": cfg.Source.Adapter.Calendar,
-	}).Info("loaded source adapter")
+	log.Info("loaded source adapter", "adapter", cfg.Source.Adapter.Type, "calendar", cfg.Source.Adapter.Calendar)
 
 	sinkAdapter, err := adapter.NewSinkAdapterFromConfig(
 		c.Context,
@@ -140,17 +137,11 @@ func Run(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	log.WithFields(log.Fields{
-		"adapter":  cfg.Sink.Adapter.Type,
-		"calendar": cfg.Sink.Adapter.Calendar,
-	}).Info("loaded sink adapter")
+	log.Info("loaded sink adapter", "adapter", cfg.Sink.Adapter.Type, "calendar", cfg.Sink.Adapter.Calendar)
 
 	if log.GetLevel() == log.DebugLevel {
 		for _, transformation := range cfg.Transformations {
-			log.WithFields(log.Fields{
-				"name":   transformation.Name,
-				"config": transformation.Config,
-			}).Debug("configured transformer")
+			log.Debug("configured transformer", "name", transformation.Name, "config", transformation.Config)
 		}
 	}
 
