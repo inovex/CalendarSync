@@ -8,7 +8,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.2.1
 	github.com/emersion/go-ical v0.0.0-20211103111159-f16f27911f39
 	github.com/emersion/go-webdav v0.3.1
-	github.com/microcosm-cc/bluemonday v1.0.23
+	github.com/microcosm-cc/bluemonday v1.0.24
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.1
