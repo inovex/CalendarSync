@@ -3,6 +3,7 @@ package adapter
 import (
 	"context"
 
+	"github.com/charmbracelet/log"
 	"github.com/inovex/CalendarSync/internal/auth"
 
 	"github.com/inovex/CalendarSync/internal/config"
@@ -21,6 +22,10 @@ const (
 // to a struct which implements this interface. Clients should be configurable.
 type Configurable interface {
 	Initialize(ctx context.Context, config map[string]interface{}) error
+}
+
+type LogSetter interface {
+	SetLogger(logger *log.Logger)
 }
 
 type OAuth2Adapter interface {

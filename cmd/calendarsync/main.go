@@ -117,22 +117,28 @@ func Run(c *cli.Context) error {
 		log.Fatal("error during storage adapter load:", err)
 	}
 
+	sourceLogger := log.With("adapter", cfg.Source.Adapter.Type, "type", "source")
+
 	sourceAdapter, err := adapter.NewSourceAdapterFromConfig(
 		c.Context,
 		sourceBindAuthPort,
 		config.NewAdapterConfig(cfg.Source.Adapter),
 		storage,
+		sourceLogger,
 	)
 	if err != nil {
 		return err
 	}
 	log.Info("loaded source adapter", "adapter", cfg.Source.Adapter.Type, "calendar", cfg.Source.Adapter.Calendar)
 
+	sinkLogger := log.With("adapter", cfg.Sink.Adapter.Type, "type", "sink")
+
 	sinkAdapter, err := adapter.NewSinkAdapterFromConfig(
 		c.Context,
 		sinkBindAuthPort,
 		config.NewAdapterConfig(cfg.Sink.Adapter),
 		storage,
+		sinkLogger,
 	)
 	if err != nil {
 		return err
@@ -145,7 +151,7 @@ func Run(c *cli.Context) error {
 		}
 	}
 
-	controller := sync.NewController(sourceAdapter, sinkAdapter, sync.TransformerFactory(cfg.Transformations)...)
+	controller := sync.NewController(log.Default(), sourceAdapter, sinkAdapter, sync.TransformerFactory(cfg.Transformations)...)
 	if cfg.UpdateConcurrency != 0 {
 		controller.SetConcurrency(cfg.UpdateConcurrency)
 	}

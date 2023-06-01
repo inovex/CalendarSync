@@ -29,15 +29,17 @@ type GCalClient struct {
 	RateLimiter ratelimit.Limiter
 	CalendarId  string
 	oauthClient *http.Client
+	logger      *log.Logger
 }
 
-func (g *GCalClient) InitGoogleCalendarClient(CalendarId string) error {
+func (g *GCalClient) InitGoogleCalendarClient(CalendarId string, logger *log.Logger) error {
 	apiClient, err := calendar.NewService(context.Background(), option.WithHTTPClient(g.oauthClient))
 	if err != nil {
 		return fmt.Errorf("unable to retrieve Calendar client: %w", err)
 	}
 	g.Client = apiClient
 	g.CalendarId = CalendarId
+	g.logger = logger
 	g.InitRateLimiter()
 	return nil
 }
@@ -125,7 +127,7 @@ func (g *GCalClient) CreateEvent(ctx context.Context, event models.Event) error 
 	if err != nil {
 		return fmt.Errorf("failed to marshal insert call: %w", err)
 	}
-	log.Debugf("Insert Call:\n%v", string(by))
+	g.logger.Debugf("Insert Call:\n%v", string(by))
 	return nil
 }
 
@@ -187,7 +189,7 @@ func (g *GCalClient) DeleteEvent(ctx context.Context, event models.Event) error 
 		return nil, err
 	})
 	if isNotFound(err) {
-		log.Debug("Event is already deleted.", "method", "DeleteEvent", "client", "google")
+		g.logger.Debug("Event is already deleted.", "method", "DeleteEvent", "title", event.ShortTitle(), "time", event.StartTime.String())
 		return nil
 	} else if err != nil {
 		return err

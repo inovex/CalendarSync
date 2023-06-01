@@ -2,7 +2,6 @@ package sync
 
 import (
 	"context"
-	"io"
 	"testing"
 	"time"
 
@@ -28,8 +27,6 @@ type ControllerTestSuite struct {
 func (suite *ControllerTestSuite) SetupTest() {
 	suite.sink = &mocks.Sink{}
 	suite.source = &mocks.Source{}
-	suite.controller = NewController(suite.source, suite.sink)
-	log.SetOutput(io.Discard)
 	// Preconfigured Transformers for the tests
 	transformers := TransformerFactory([]config.Transformer{
 		{Name: "KeepLocation"},
@@ -37,8 +34,7 @@ func (suite *ControllerTestSuite) SetupTest() {
 		{Name: "KeepTitle"},
 		{Name: "KeepReminders"},
 	})
-	suite.controller = NewController(suite.source, suite.sink, transformers...)
-	log.SetOutput(io.Discard)
+	suite.controller = NewController(log.Default(), suite.source, suite.sink, transformers...)
 }
 
 // TestDryRun tests that no acutal adapter func is called
@@ -664,6 +660,7 @@ func TestController_diffEvents(t *testing.T) {
 
 			var controller = Controller{
 				source: &source,
+				logger: log.Default(),
 			}
 
 			creates, updates, deletes := controller.diffEvents(tc.source, tc.sink)

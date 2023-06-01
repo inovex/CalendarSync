@@ -163,7 +163,7 @@ func (zep *CalendarAPI) ListEvents(from, to time.Time) ([]Event, error) {
 				event, err := eventFromCalDavEvent(calDavEvent, object.ETag)
 				if err != nil {
 					// todo: handle properly
-					log.Error("err")
+					log.Error(err)
 					continue
 				}
 				events = append(events, event)

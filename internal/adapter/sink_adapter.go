@@ -8,6 +8,8 @@ import (
 	"github.com/inovex/CalendarSync/internal/auth"
 	"github.com/inovex/CalendarSync/internal/models"
 
+	"github.com/charmbracelet/log"
+
 	"github.com/inovex/CalendarSync/internal/adapter/google"
 	outlook "github.com/inovex/CalendarSync/internal/adapter/outlook_http"
 	"github.com/inovex/CalendarSync/internal/sync"
@@ -17,6 +19,7 @@ type SinkAdapter struct {
 	client     sync.Sink
 	calendarID string
 	typ        Type
+	logger     *log.Logger
 }
 
 // SinkClientFactory is a convenience factory. It is needed to retrieve new - default - client implementations.
@@ -31,10 +34,14 @@ func SinkClientFactory(typ Type) (sync.Sink, error) {
 	}
 }
 
-func NewSinkAdapterFromConfig(ctx context.Context, bindPort uint, config ConfigReader, storage auth.Storage) (*SinkAdapter, error) {
+func NewSinkAdapterFromConfig(ctx context.Context, bindPort uint, config ConfigReader, storage auth.Storage, logger *log.Logger) (*SinkAdapter, error) {
 	client, err := SinkClientFactory(Type(config.Adapter().Type))
 	if err != nil {
 		return nil, err
+	}
+
+	if c, ok := client.(LogSetter); ok {
+		c.SetLogger(logger)
 	}
 
 	if c, ok := client.(OAuth2Adapter); ok {
@@ -67,6 +74,7 @@ func NewSinkAdapterFromConfig(ctx context.Context, bindPort uint, config ConfigR
 		client:     client,
 		calendarID: config.Adapter().Calendar,
 		typ:        Type(config.Adapter().Type),
+		logger:     logger,
 	}, nil
 }
 

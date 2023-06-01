@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/charmbracelet/log"
 	"github.com/inovex/CalendarSync/internal/auth"
 	"github.com/inovex/CalendarSync/internal/models"
 
@@ -33,13 +34,18 @@ type SourceAdapter struct {
 	client     sync.Source
 	calendarID string
 	typ        Type
+	logger     *log.Logger
 }
 
-func NewSourceAdapterFromConfig(ctx context.Context, bindPort uint, config ConfigReader, storage auth.Storage) (*SourceAdapter, error) {
+func NewSourceAdapterFromConfig(ctx context.Context, bindPort uint, config ConfigReader, storage auth.Storage, logger *log.Logger) (*SourceAdapter, error) {
 	var client sync.Source
 	client, err := SourceClientFactory(Type(config.Adapter().Type))
 	if err != nil {
 		return nil, err
+	}
+
+	if c, ok := client.(LogSetter); ok {
+		c.SetLogger(logger)
 	}
 
 	if c, ok := client.(OAuth2Adapter); ok {
@@ -72,6 +78,7 @@ func NewSourceAdapterFromConfig(ctx context.Context, bindPort uint, config Confi
 		client:     client,
 		calendarID: config.Adapter().Calendar,
 		typ:        Type(config.Adapter().Type),
+		logger:     logger,
 	}, nil
 
 }

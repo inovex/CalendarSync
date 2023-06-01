@@ -38,6 +38,8 @@ type CalendarAPI struct {
 	oAuthToken    *oauth2.Token
 	oAuthHandler  *auth.OAuthHandler
 
+	logger *log.Logger
+
 	storage auth.Storage
 }
 
@@ -88,7 +90,7 @@ func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Sto
 		// TODO: in the oauth2 package. I'm not aware of the culprit yet.
 		now := time.Now()
 		if now.After(expiry) {
-			log.Info("saved credentials expired, we need to reauthenticate..")
+			c.logger.Info("saved credentials expired, we need to reauthenticate..")
 			c.authenticated = false
 			err := c.storage.RemoveCalendarAuth(c.calendarID)
 			if err != nil {
@@ -105,7 +107,7 @@ func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Sto
 		}
 
 		c.authenticated = true
-		log.Info("using stored credentials")
+		c.logger.Info("using stored credentials")
 	}
 
 	return nil
@@ -114,10 +116,10 @@ func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Sto
 func (c *CalendarAPI) Initialize(ctx context.Context, config map[string]interface{}) error {
 	if !c.authenticated {
 		c.oAuthUrl = c.oAuthHandler.Configuration().AuthCodeURL("state", oauth2.AccessTypeOffline)
-		log.Infof("opening browser window for authentication of %s\n", c.Name())
+		c.logger.Infof("opening browser window for authentication of %s\n", c.Name())
 		err := browser.OpenURL(c.oAuthUrl)
 		if err != nil {
-			log.Infof("browser did not open, please authenticate adapter %s:\n\n %s\n\n\n", c.Name(), c.oAuthUrl)
+			c.logger.Infof("browser did not open, please authenticate adapter %s:\n\n %s\n\n\n", c.Name(), c.oAuthUrl)
 		}
 		if err := c.oAuthHandler.Listen(ctx); err != nil {
 			return err
@@ -137,7 +139,7 @@ func (c *CalendarAPI) Initialize(ctx context.Context, config map[string]interfac
 			return err
 		}
 	} else {
-		log.Debug("adapter is already authenticated, loading access token")
+		c.logger.Debug("adapter is already authenticated, loading access token")
 	}
 
 	client := c.oAuthConfig.Client(ctx, c.oAuthToken)
@@ -145,7 +147,7 @@ func (c *CalendarAPI) Initialize(ctx context.Context, config map[string]interfac
 	resp, err := client.Get(baseUrl + "/me/calendars/" + c.calendarID)
 	if err != nil {
 		if strings.Contains(err.Error(), "token_expired") {
-			log.Info("the refresh token expired, initiating reauthentication...")
+			c.logger.Info("the refresh token expired, initiating reauthentication...")
 			err := c.storage.RemoveCalendarAuth(c.calendarID)
 			if err != nil {
 				return fmt.Errorf("failed to remove authentication for calendar %s: %w", c.calendarID, err)
@@ -172,7 +174,7 @@ func (c *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, en
 		return nil, err
 	}
 
-	log.Infof("loaded %d events between %s and %s.", len(events), start.Format(time.RFC1123), end.Format(time.RFC1123))
+	c.logger.Infof("loaded %d events between %s and %s.", len(events), start.Format(time.RFC1123), end.Format(time.RFC1123))
 
 	return events, nil
 }
@@ -183,7 +185,7 @@ func (c *CalendarAPI) CreateEvent(ctx context.Context, e models.Event) error {
 		return err
 	}
 
-	log.Info("Event created", "title", e.ShortTitle(), "time", e.StartTime.String(), "adapter", c.Name())
+	c.logger.Info("Event created", "title", e.ShortTitle(), "time", e.StartTime.String(), "adapter", c.Name())
 
 	return nil
 }
@@ -194,7 +196,7 @@ func (c *CalendarAPI) UpdateEvent(ctx context.Context, e models.Event) error {
 		return err
 	}
 
-	log.Info("Event updated", "title", e.ShortTitle(), "time", e.StartTime.String(), "adapter", c.Name())
+	c.logger.Info("Event updated", "title", e.ShortTitle(), "time", e.StartTime.String(), "adapter", c.Name())
 
 	return nil
 }
@@ -205,7 +207,7 @@ func (c *CalendarAPI) DeleteEvent(ctx context.Context, e models.Event) error {
 		return err
 	}
 
-	log.Info("Event deleted", "title", e.ShortTitle(), "time", e.StartTime.String(), "adapter", c.Name())
+	c.logger.Info("Event deleted", "title", e.ShortTitle(), "time", e.StartTime.String(), "adapter", c.Name())
 
 	return nil
 }
@@ -216,4 +218,8 @@ func (c *CalendarAPI) GetSourceID() string {
 
 func (c *CalendarAPI) Name() string {
 	return "Outlook"
+}
+
+func (c *CalendarAPI) SetLogger(logger *log.Logger) {
+	c.logger = logger
 }
