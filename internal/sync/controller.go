@@ -11,10 +11,8 @@ import (
 )
 
 var (
-	logFields = func(event models.Event) []interface{} {
-		result := make([]interface{}, 0)
-		result = append(result, "title", event.ShortTitle(), "time", event.StartTime.String())
-		return result
+	logFields = func(event models.Event) []any {
+		return []any{"title", event.ShortTitle(), "time", event.StartTime.String()}
 	}
 )
 

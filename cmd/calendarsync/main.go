@@ -114,7 +114,7 @@ func Run(c *cli.Context) error {
 
 	storage, err := auth.NewStorageAdapterFromConfig(c.Context, cfg.Auth, c.String(flagStorageEncryptionKey))
 	if err != nil {
-		log.Fatal("error during storage adapter load:", err)
+		log.Fatal("error during storage adapter load", "error", err)
 	}
 
 	sourceLogger := log.With("adapter", cfg.Source.Adapter.Type, "type", "source")

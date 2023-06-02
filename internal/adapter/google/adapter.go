@@ -183,7 +183,7 @@ func (c *CalendarAPI) CreateEvent(ctx context.Context, e models.Event) error {
 		return err
 	}
 
-	c.logger.Info("Event created", "title", e.ShortTitle(), "time", e.StartTime.String(), "adapter", c.Name())
+	c.logger.Info("Event created", "title", e.ShortTitle(), "time", e.StartTime.String())
 
 	return nil
 }
@@ -197,7 +197,7 @@ func (c *CalendarAPI) UpdateEvent(ctx context.Context, e models.Event) error {
 		return err
 	}
 
-	c.logger.Info("Event updated", "title", e.ShortTitle(), "time", e.StartTime.String(), "adapter", c.Name())
+	c.logger.Info("Event updated", "title", e.ShortTitle(), "time", e.StartTime.String())
 
 	return nil
 }
@@ -209,7 +209,7 @@ func (c *CalendarAPI) DeleteEvent(ctx context.Context, e models.Event) error {
 		return err
 	}
 
-	c.logger.Info("Event deleted", "title", e.ShortTitle(), "time", e.StartTime.String(), "adapter", c.Name())
+	c.logger.Info("Event deleted", "title", e.ShortTitle(), "time", e.StartTime.String())
 
 	return nil
 }
