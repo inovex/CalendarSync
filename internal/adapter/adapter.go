@@ -3,7 +3,7 @@ package adapter
 import (
 	"context"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/charmbracelet/log"
 	"github.com/inovex/CalendarSync/internal/auth"
 
 	"github.com/inovex/CalendarSync/internal/config"
@@ -18,9 +18,9 @@ const (
 	OutlookHttpCalendarType Type = "outlook_http"
 )
 
-// LogSetter is a struct which implements this interface and thus allows injection of a logrus *log.Entry
+// LogSetter can be implemented by a struct to allows injection of a logger instance
 type LogSetter interface {
-	SetLogger(logger *log.Entry)
+	SetLogger(logger *log.Logger)
 }
 
 // Configurable is an interface which defines how arbitrary configuration data can be passed

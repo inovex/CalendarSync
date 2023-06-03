@@ -4,7 +4,7 @@ import (
 	"sort"
 	"time"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/charmbracelet/log"
 )
 
 // Event describes a calendar event which can be processed in a Controller via Transformer funcs.

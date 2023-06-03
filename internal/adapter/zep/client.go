@@ -11,10 +11,10 @@ import (
 
 	"github.com/inovex/CalendarSync/internal/models"
 
+	"github.com/charmbracelet/log"
 	"github.com/emersion/go-ical"
 	"github.com/emersion/go-webdav"
 	"github.com/emersion/go-webdav/caldav"
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -29,7 +29,6 @@ type CalendarAPI struct {
 	endpoint string
 
 	client *caldav.Client
-	logger *log.Entry
 
 	calendarID string
 
@@ -49,9 +48,6 @@ func (zep *CalendarAPI) generateSourceID() string {
 	id = append(id, sum[:]...)
 	return base64.URLEncoding.EncodeToString(id)
 
-}
-func (zep *CalendarAPI) SetLogger(logger *log.Entry) {
-	zep.logger = logger
 }
 
 func (zep *CalendarAPI) Name() string {
@@ -90,8 +86,6 @@ func (zep *CalendarAPI) Initialize(ctx context.Context, calendarID string, confi
 	if err != nil {
 		return fmt.Errorf("unable to find calendar homeSet: %w", err)
 	}
-	zep.logger = log.New().WithField("client", "zep")
-	zep.calendarID = calendarID
 	return nil
 }
 
@@ -169,7 +163,7 @@ func (zep *CalendarAPI) ListEvents(from, to time.Time) ([]Event, error) {
 				event, err := eventFromCalDavEvent(calDavEvent, object.ETag)
 				if err != nil {
 					// todo: handle properly
-					log.Errorln(err)
+					log.Error(err)
 					continue
 				}
 				events = append(events, event)

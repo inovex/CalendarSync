@@ -7,15 +7,12 @@ import (
 
 	"github.com/inovex/CalendarSync/internal/models"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/charmbracelet/log"
 )
 
 var (
-	logEventFields = func(event models.Event) log.Fields {
-		return log.Fields{
-			"title":      event.Title,
-			"start_time": event.StartTime.String(),
-		}
+	logFields = func(event models.Event) []any {
+		return []any{"title", event.ShortTitle(), "time", event.StartTime.String()}
 	}
 )
 
@@ -26,15 +23,17 @@ type Controller struct {
 	transformers []Transformer
 	sink         Sink
 	concurrency  int
+	logger       *log.Logger
 }
 
 // NewController constructs a new Controller.
-func NewController(source Source, sink Sink, transformer ...Transformer) Controller {
+func NewController(logger *log.Logger, source Source, sink Sink, transformer ...Transformer) Controller {
 	return Controller{
 		concurrency:  1,
 		source:       source,
 		transformers: transformer,
 		sink:         sink,
+		logger:       logger,
 	}
 }
 
@@ -49,9 +48,9 @@ func (p Controller) loadEvents(ctx context.Context, start, end time.Time) (sourc
 		return nil, nil, fmt.Errorf("failed to get events in timeframe from source %s: %v", p.source.Name(), err)
 	}
 
-	if log.GetLevel() == log.DebugLevel {
+	if p.logger.GetLevel() == log.DebugLevel {
 		for _, event := range source {
-			log.WithFields(logEventFields(event)).Debugln("source event loaded")
+			p.logger.Debug("source event loaded", logFields(event)...)
 		}
 	}
 
@@ -60,9 +59,9 @@ func (p Controller) loadEvents(ctx context.Context, start, end time.Time) (sourc
 		return nil, nil, fmt.Errorf("failed to get events in timeframe from sink %s: %v", p.sink.Name(), err)
 	}
 
-	if log.GetLevel() == log.DebugLevel {
+	if p.logger.GetLevel() == log.DebugLevel {
 		for _, event := range sink {
-			log.WithFields(logEventFields(event)).Debugln("sink event loaded")
+			p.logger.Debug("sink event loaded", logFields(event)...)
 		}
 	}
 
@@ -81,7 +80,7 @@ func (p Controller) SynchroniseTimeframe(ctx context.Context, start time.Time, e
 
 	// Output which transformers were loaded
 	for _, trans := range p.transformers {
-		log.Infoln("Using transformer:", trans.Name())
+		p.logger.Info("loaded transformer", "name", trans.Name())
 	}
 
 	for _, event := range eventsInSource {
@@ -90,7 +89,7 @@ func (p Controller) SynchroniseTimeframe(ctx context.Context, start time.Time, e
 
 	toCreate, toUpdate, toDelete := p.diffEvents(transformedEventsInSource, eventsInSink)
 	if dryRun {
-		log.Warnln("we're running in dry run mode, no changes will be executed")
+		p.logger.Warn("we're running in dry run mode, no changes will be executed")
 		return nil
 	}
 
@@ -178,19 +177,19 @@ func (p Controller) diffEvents(sourceEvents []models.Event, sinkEvents []models.
 
 		switch {
 		case !exists:
-			log.WithFields(logEventFields(event)).Infoln("new event, needs sync")
+			p.logger.Info("new event, needs sync", logFields(event)...)
 			createEvents = append(createEvents, event)
 
 		case sinkEvent.Metadata.SourceID != p.source.GetSourceID():
-			log.WithFields(logEventFields(sinkEvent)).Infoln("event was not synced by this source adapter, skipping")
+			p.logger.Info("event was not synced by this source adapter, skipping", logFields(event)...)
 
 			// Only update the event if the event differs AND we synced it prior and set the correct metadata
 		case !models.IsSameEvent(event, sinkEvent) && sinkEvent.Metadata.SourceID == p.source.GetSourceID():
-			log.WithFields(logEventFields(event)).Infoln("event content changed, needs sync")
+			p.logger.Info("event content changed, needs sync", logFields(event)...)
 			updateEvents = append(updateEvents, sinkEvent.Overwrite(event))
 
 		default:
-			log.WithFields(logEventFields(sinkEvent)).Infoln("event in sync")
+			p.logger.Info("event in sync", logFields(event)...)
 		}
 	}
 
@@ -205,17 +204,17 @@ func (p Controller) diffEvents(sourceEvents []models.Event, sinkEvents []models.
 		case event.Metadata.SourceID == "":
 			// An event which has not been synced correctly or has been synced prior to the SourceID implementation
 			// should rather be removed. If the event still exists in the sourceEvents, it will eventually be re-synced.
-			log.WithFields(logEventFields(event)).Warnln("event metadata corrupted (SourceID empty), deleting")
+			p.logger.Info("event metadata corrupted (SourceID empty), deleting", logFields(event)...)
 			deleteEvents = append(deleteEvents, event)
 
 		case event.Metadata.SourceID == p.source.GetSourceID():
-			log.WithFields(logEventFields(event)).Infoln("sinkEvent is not (anymore) in sourceEvents, marked for removal")
+			p.logger.Info("sinkEvent is not (anymore) in sourceEvents, marked for removal", logFields(event)...)
 			deleteEvents = append(deleteEvents, event)
 
 		default:
 			// Do not delete events which were not loaded by the current sourceEvents-adapter.
 			// This enables the synchronization of multiple sources without them interfering.
-			log.WithFields(logEventFields(event)).Infoln("event is not in sourceEvents but was not synced with this source adapter, skipping")
+			p.logger.Info("event is not in sourceEvents but was not synced with this source adapter, skipping", logFields(event)...)
 		}
 	}
 

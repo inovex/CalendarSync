@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/charmbracelet/log"
 	"github.com/inovex/CalendarSync/internal/auth"
 	"github.com/inovex/CalendarSync/internal/models"
 
 	outlook "github.com/inovex/CalendarSync/internal/adapter/outlook_http"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/inovex/CalendarSync/internal/adapter/google"
 	"github.com/inovex/CalendarSync/internal/adapter/zep"
@@ -35,20 +34,15 @@ type SourceAdapter struct {
 	client     sync.Source
 	calendarID string
 	typ        Type
+	logger     *log.Logger
 }
 
-func NewSourceAdapterFromConfig(ctx context.Context, bindPort uint, config ConfigReader, storage auth.Storage) (*SourceAdapter, error) {
+func NewSourceAdapterFromConfig(ctx context.Context, bindPort uint, config ConfigReader, storage auth.Storage, logger *log.Logger) (*SourceAdapter, error) {
 	var client sync.Source
 	client, err := SourceClientFactory(Type(config.Adapter().Type))
 	if err != nil {
 		return nil, err
 	}
-
-	logger := log.WithFields(log.Fields{
-		"client":       config.Adapter().Type,
-		"adapter_type": "source",
-		"calendar":     config.Adapter().Calendar,
-	})
 
 	if c, ok := client.(LogSetter); ok {
 		c.SetLogger(logger)
@@ -68,7 +62,7 @@ func NewSourceAdapterFromConfig(ctx context.Context, bindPort uint, config Confi
 			},
 			storage,
 			bindPort,
-			); err != nil {
+		); err != nil {
 			return nil, err
 		}
 	}
@@ -84,6 +78,7 @@ func NewSourceAdapterFromConfig(ctx context.Context, bindPort uint, config Confi
 		client:     client,
 		calendarID: config.Adapter().Calendar,
 		typ:        Type(config.Adapter().Type),
+		logger:     logger,
 	}, nil
 
 }

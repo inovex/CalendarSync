@@ -2,8 +2,9 @@ package sync
 
 import (
 	"context"
-	"github.com/inovex/CalendarSync/internal/models"
 	"time"
+
+	"github.com/inovex/CalendarSync/internal/models"
 )
 
 // RecurrencePattern is an RFC5545 conform recurrence pattern

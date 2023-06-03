@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/charmbracelet/log"
 	"github.com/pkg/browser"
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 
 	"github.com/inovex/CalendarSync/internal/auth"
@@ -29,7 +29,6 @@ type OutlookCalendarClient interface {
 }
 
 type CalendarAPI struct {
-	logger        *log.Entry
 	outlookClient OutlookCalendarClient
 	calendarID    string
 
@@ -38,6 +37,8 @@ type CalendarAPI struct {
 	oAuthUrl      string
 	oAuthToken    *oauth2.Token
 	oAuthHandler  *auth.OAuthHandler
+
+	logger *log.Logger
 
 	storage auth.Storage
 }
@@ -65,7 +66,7 @@ func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Sto
 		ClientID: credentials.Client.Id,
 		Endpoint: endpoint,
 		Scopes:   []string{"Calendars.ReadWrite", "offline_access"}, // You need to request offline_access in order to retrieve a refresh token
-	}, bindPort, c.logger)
+	}, bindPort)
 	if err != nil {
 		return err
 	}
@@ -89,7 +90,7 @@ func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Sto
 		// TODO: in the oauth2 package. I'm not aware of the culprit yet.
 		now := time.Now()
 		if now.After(expiry) {
-			c.logger.Infof("saved credentials expired, we need to reauthenticate..")
+			c.logger.Info("saved credentials expired, we need to reauthenticate..")
 			c.authenticated = false
 			err := c.storage.RemoveCalendarAuth(c.calendarID)
 			if err != nil {
@@ -106,7 +107,7 @@ func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Sto
 		}
 
 		c.authenticated = true
-		c.logger.Infof("using stored credentials")
+		c.logger.Info("using stored credentials")
 	}
 
 	return nil
@@ -115,10 +116,10 @@ func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Sto
 func (c *CalendarAPI) Initialize(ctx context.Context, config map[string]interface{}) error {
 	if !c.authenticated {
 		c.oAuthUrl = c.oAuthHandler.Configuration().AuthCodeURL("state", oauth2.AccessTypeOffline)
-		c.logger.WithFields(log.Fields{}).Infof("opening browser window for authentication of %s\n", c.Name())
+		c.logger.Infof("opening browser window for authentication of %s\n", c.Name())
 		err := browser.OpenURL(c.oAuthUrl)
 		if err != nil {
-			c.logger.WithFields(log.Fields{}).Infof("browser did not open, please authenticate adapter %s:\n\n %s\n\n\n", c.Name(), c.oAuthUrl)
+			c.logger.Infof("browser did not open, please authenticate adapter %s:\n\n %s\n\n\n", c.Name(), c.oAuthUrl)
 		}
 		if err := c.oAuthHandler.Listen(ctx); err != nil {
 			return err
@@ -138,7 +139,7 @@ func (c *CalendarAPI) Initialize(ctx context.Context, config map[string]interfac
 			return err
 		}
 	} else {
-		c.logger.Debugln("adapter is already authenticated, loading access token")
+		c.logger.Debug("adapter is already authenticated, loading access token")
 	}
 
 	client := c.oAuthConfig.Client(ctx, c.oAuthToken)
@@ -146,7 +147,7 @@ func (c *CalendarAPI) Initialize(ctx context.Context, config map[string]interfac
 	resp, err := client.Get(baseUrl + "/me/calendars/" + c.calendarID)
 	if err != nil {
 		if strings.Contains(err.Error(), "token_expired") {
-			c.logger.Infof("the refresh token expired, initiating reauthentication...")
+			c.logger.Info("the refresh token expired, initiating reauthentication...")
 			err := c.storage.RemoveCalendarAuth(c.calendarID)
 			if err != nil {
 				return fmt.Errorf("failed to remove authentication for calendar %s: %w", c.calendarID, err)
@@ -173,9 +174,7 @@ func (c *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, en
 		return nil, err
 	}
 
-	log.WithFields(log.Fields{
-		"adapter": c.Name(),
-	}).Printf("loaded %d events between %s and %s.", len(events), start.Format(time.RFC1123), end.Format(time.RFC1123))
+	c.logger.Infof("loaded %d events between %s and %s.", len(events), start.Format(time.RFC1123), end.Format(time.RFC1123))
 
 	return events, nil
 }
@@ -186,9 +185,7 @@ func (c *CalendarAPI) CreateEvent(ctx context.Context, e models.Event) error {
 		return err
 	}
 
-	log.WithFields(log.Fields{
-		"adapter": c.Name(),
-	}).Printf("Event %s at %s created", e.ShortTitle(), e.StartTime.String())
+	c.logger.Info("Event created", "title", e.ShortTitle(), "time", e.StartTime.String())
 
 	return nil
 }
@@ -199,9 +196,7 @@ func (c *CalendarAPI) UpdateEvent(ctx context.Context, e models.Event) error {
 		return err
 	}
 
-	log.WithFields(log.Fields{
-		"adapter": c.Name(),
-	}).Printf("Event %s at %s updated", e.ShortTitle(), e.StartTime.String())
+	c.logger.Info("Event updated", "title", e.ShortTitle(), "time", e.StartTime.String())
 
 	return nil
 }
@@ -212,9 +207,7 @@ func (c *CalendarAPI) DeleteEvent(ctx context.Context, e models.Event) error {
 		return err
 	}
 
-	log.WithFields(log.Fields{
-		"adapter": c.Name(),
-	}).Printf("Event %s at %s deleted", e.ShortTitle(), e.StartTime.String())
+	c.logger.Info("Event deleted", "title", e.ShortTitle(), "time", e.StartTime.String())
 
 	return nil
 }
@@ -223,10 +216,10 @@ func (c *CalendarAPI) GetSourceID() string {
 	return c.outlookClient.GetSourceID()
 }
 
-func (c *CalendarAPI) SetLogger(logger *log.Entry) {
-	c.logger = logger
-}
-
 func (c *CalendarAPI) Name() string {
 	return "Outlook"
+}
+
+func (c *CalendarAPI) SetLogger(logger *log.Logger) {
+	c.logger = logger
 }
