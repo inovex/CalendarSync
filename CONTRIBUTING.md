@@ -1,20 +1,24 @@
 # Contributing
 
-Thanks for you interest in improving Calendarsync.
+Thanks for your interest in improving Calendarsync.
+
+We'd love some feedback or some input from the Open Source Community. Feel free
+to open up a PR. This project is maintained by inovex employees mostly in their
+freetime, so have mercy if a response to your PRs or issues may take a while -
+we're doing our best :)
 
 ## Getting started
 
 Clone repo, then:
 
 ```bash
-go mod init
-go build -o calendarsync cmd/calendarsync/main.go
+make build
 ```
 
 ## To run without a build
 
 ```bash
-go run cmd/calendarsync/main.go --config <yourConfigFile>
+go run cmd/calendarsync/main.go --config <yourConfigFile> --storage-encryption-key <yourPasswordForTheLocalAuthFile>
 ```
 
 ## Git commit messages
@@ -23,3 +27,4 @@ For proper semantic versioning, we use
 [go-semrel-gitlab](https://juhani.gitlab.io/go-semrel-gitlab). Please use the
 [documented format](https://juhani.gitlab.io/go-semrel-gitlab/commit-message/) to
 write the commmit messages.
+
