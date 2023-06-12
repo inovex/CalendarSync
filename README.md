@@ -83,6 +83,12 @@ source:
 Configures the Source Adapter, for the adapter configuration, check the
 documentation [here](./docs/adapters.md).
 
+### Available Source Adapters
+
+- Google
+- Outlook
+- [ZEP](https://www.zep.de/en/)
+
 ## Sink
 
 Example:
@@ -99,6 +105,11 @@ sink:
 
 Configures the Sink Adapter, for the adapter configuration, check the
 documentation [here](./docs/adapters.md).
+
+### Available Sink Adapters
+
+- Google
+- Outlook
 
 ## Transformers
 
