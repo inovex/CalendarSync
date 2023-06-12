@@ -136,13 +136,6 @@ from your calendar?
 Use the `--clean` flag to get rid of all the unwanted events. (We leave your
 events which were't synced with CalendarSync alone! :) )
 
-# Contributing
-
-We'd love some feedback or some input from the Open Source Community. Feel free
-to open up a PR. This project is maintained by inovex employees mostly in their
-freetime, so have mercy if a response to your PRs or issues may take a while -
-we're doing our best :)
-
 # Trademarks
 
 GOOGLE is a trademark of GOOGLE INC. OUTLOOK is a trademark of Microsoft
