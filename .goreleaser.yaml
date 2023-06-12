@@ -104,12 +104,12 @@ docker_manifests:
   - name_template: "ghcr.io/inovex/calendarsync:{{ .Version }}"
     image_templates:
       - 'ghcr.io/inovex/calendarsync:{{ .Version }}-amd64'
-      - 'ghcr.io/inovex/calendarsync:{{ .Version }}-arm64v8'
+      - 'ghcr.io/inovex/calendarsync:{{ .Version }}-arm64'
       - 'ghcr.io/inovex/calendarsync:{{ .Version }}-armv7'
       - 'ghcr.io/inovex/calendarsync:{{ .Version }}-armv6'
   - name_template: "ghcr.io/inovex/calendarsync:latest"
     image_templates:
       - 'ghcr.io/inovex/calendarsync:{{ .Version }}-amd64'
-      - 'ghcr.io/inovex/calendarsync:{{ .Version }}-arm64v8'
+      - 'ghcr.io/inovex/calendarsync:{{ .Version }}-arm64'
       - 'ghcr.io/inovex/calendarsync:{{ .Version }}-armv7'
       - 'ghcr.io/inovex/calendarsync:{{ .Version }}-armv6'
