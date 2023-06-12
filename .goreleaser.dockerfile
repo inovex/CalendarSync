@@ -1,5 +1,5 @@
 FROM scratch
 
-COPY calendarsync /calendarsync
+COPY CalendarSync /calendarsync
 
 ENTRYPOINT ["/calendarsync", "--config", "/etc/calendarsync/sync.yaml", "--port", "8080"]
