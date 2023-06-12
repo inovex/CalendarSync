@@ -1,14 +1,7 @@
 before:
   hooks:
-    # You may remove this if you don't use go modules.
     - go mod tidy
     - go mod vendor
-
-gitlab_urls:
-  api: https://gitlab.inovex.de/api/v4/
-  download: https://gitlab.inovex.de
-  # set to true if you use a self-signed certificate
-  skip_tls_verify: false
 
 builds:
   - env:
@@ -50,7 +43,7 @@ changelog:
 
 dockers:
   - image_templates:
-      - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-amd64'
+      - "ghcr.io/inovex/calendarsync:{{ .Version }}-amd64"
     dockerfile: .goreleaser.dockerfile
     goarch: amd64
     use: buildx
@@ -63,7 +56,7 @@ dockers:
       - --label=org.opencontainers.image.licenses=MIT
 
   - image_templates:
-      - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-arm64v8'
+      - "ghcr.io/inovex/calendarsync:{{ .Version }}-arm64"
     dockerfile: .goreleaser.dockerfile
     goarch: arm64
     use: buildx
@@ -76,7 +69,7 @@ dockers:
       - --label=org.opencontainers.image.licenses=MIT
 
   - image_templates:
-      - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-armv6'
+      - "ghcr.io/inovex/calendarsync:{{ .Version }}-armv6"
     dockerfile: .goreleaser.dockerfile
     goarch: arm
     goarm: "6"
@@ -90,7 +83,7 @@ dockers:
       - --label=org.opencontainers.image.licenses=MIT
 
   - image_templates:
-      - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-armv7'
+      - "ghcr.io/inovex/calendarsync:{{ .Version }}-armv7"
     dockerfile: .goreleaser.dockerfile
     goarch: arm
     goarm: "7"
@@ -104,15 +97,15 @@ dockers:
       - --label=org.opencontainers.image.licenses=MIT
 
 docker_manifests:
-  - name_template: "inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}"
+  - name_template: "ghcr.io/inovex/calendarsync:{{ .Version }}"
     image_templates:
-      - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-amd64'
-      - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-arm64v8'
-      - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-armv7'
-      - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-armv6'
-  - name_template: "inovex-calendarsync/{{ .ProjectName }}:latest"
+      - 'ghcr.io/inovex/calendarsync:{{ .Version }}-amd64'
+      - 'ghcr.io/inovex/calendarsync:{{ .Version }}-arm64v8'
+      - 'ghcr.io/inovex/calendarsync:{{ .Version }}-armv7'
+      - 'ghcr.io/inovex/calendarsync:{{ .Version }}-armv6'
+  - name_template: "ghcr.io/inovex/calendarsync::latest"
     image_templates:
-      - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-amd64'
-      - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-arm64v8'
-      - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-armv7'
-      - 'inovex-calendarsync/{{ .ProjectName }}:{{ .Version }}-armv6'
+      - 'ghcr.io/inovex/calendarsync:{{ .Version }}-amd64'
+      - 'ghcr.io/inovex/calendarsync:{{ .Version }}-arm64v8'
+      - 'ghcr.io/inovex/calendarsync:{{ .Version }}-armv7'
+      - 'ghcr.io/inovex/calendarsync:{{ .Version }}-armv6'
