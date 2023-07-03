@@ -201,11 +201,7 @@ func (p Controller) diffEvents(sourceEvents []models.Event, sinkEvents []models.
 
 		switch {
 		case exists:
-		case event.Metadata.SourceID == "":
-			// An event which has not been synced correctly or has been synced prior to the SourceID implementation
-			// should rather be removed. If the event still exists in the sourceEvents, it will eventually be re-synced.
-			p.logger.Info("event metadata corrupted (SourceID empty), deleting", logFields(event)...)
-			deleteEvents = append(deleteEvents, event)
+			// Nothing to do
 
 		case event.Metadata.SourceID == p.source.GetSourceID():
 			p.logger.Info("sinkEvent is not (anymore) in sourceEvents, marked for removal", logFields(event)...)
