@@ -56,7 +56,11 @@ func calendarEventToEvent(e *calendar.Event, adapterSourceID string) models.Even
 func ensureMetadata(event *calendar.Event, adapterSourceID string) *models.Metadata {
 	var metadata *models.Metadata
 	if event.ExtendedProperties != nil && len(event.ExtendedProperties.Private) > 0 {
-		metadata = eventMetadataFromMap(event.ExtendedProperties.Private)
+		metadata = eventMetadataFromMap(event.ExtendedProperties.Private, ExtensionName)
+		if metadata == nil {
+			// fallback to unprefixed keys if necessary
+			metadata = eventMetadataFromMap(event.ExtendedProperties.Private, "")
+		}
 	}
 	if metadata == nil {
 		metadata = models.NewEventMetadata(event.Id, event.HtmlLink, adapterSourceID)
@@ -117,28 +121,30 @@ func eventDateTimeToTime(t *calendar.EventDateTime) time.Time {
 	return time.Now()
 }
 
+// Total key length must be at most 44 characters
 const (
 	keyEventID          = "EventID"
 	keyOriginalEventUri = "OriginalEventUri"
 	keySourceID         = "SourceID"
+	ExtensionName       = "inovex.calendarsync."
 )
 
 // EventMetadataFromMap creates the Metadata object from a map of strings
 // this func validates if the map contains the expected keys. If the keys are not the way we expect,
 // no metadata is returned.
-func eventMetadataFromMap(md map[string]string) *models.Metadata {
+func eventMetadataFromMap(md map[string]string, prefix string) *models.Metadata {
 	var metadata models.Metadata
 
 	var ok bool
-	if metadata.SyncID, ok = md[keyEventID]; !ok {
+	if metadata.SyncID, ok = md[prefix+keyEventID]; !ok {
 		return nil
 	}
 
-	if metadata.OriginalEventUri, ok = md[keyOriginalEventUri]; !ok {
+	if metadata.OriginalEventUri, ok = md[prefix+keyOriginalEventUri]; !ok {
 		return nil
 	}
 
-	if metadata.SourceID, ok = md[keySourceID]; !ok {
+	if metadata.SourceID, ok = md[prefix+keySourceID]; !ok {
 		return nil
 	}
 	metadata.SourceID = strings.Trim(metadata.SourceID, "\"\\")
@@ -149,8 +155,8 @@ func eventMetadataFromMap(md map[string]string) *models.Metadata {
 // eventMetadataToEventProperties returns a map[string]string of the metadata.
 func eventMetadataToEventProperties(m *models.Metadata) map[string]string {
 	return map[string]string{
-		keyEventID:          m.SyncID,
-		keyOriginalEventUri: m.OriginalEventUri,
-		keySourceID:         m.SourceID,
+		ExtensionName + keyEventID:          m.SyncID,
+		ExtensionName + keyOriginalEventUri: m.OriginalEventUri,
+		ExtensionName + keySourceID:         m.SourceID,
 	}
 }
