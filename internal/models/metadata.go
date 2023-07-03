@@ -1,14 +1,8 @@
 package models
 
 import (
-	"errors"
 	"fmt"
 	"hash/fnv"
-)
-
-// Errors raised by package models
-var (
-	ErrMetadataNotFound = errors.New("could not find metadata")
 )
 
 // Metadata describes the metadata which is added to events read from the source.

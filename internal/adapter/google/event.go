@@ -1,8 +1,6 @@
 package google
 
 import (
-	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -57,13 +55,10 @@ func calendarEventToEvent(e *calendar.Event, adapterSourceID string) models.Even
 // Otherwise, new metadata will be derived from the given event.
 func ensureMetadata(event *calendar.Event, adapterSourceID string) *models.Metadata {
 	var metadata *models.Metadata
-	var err error
 	if event.ExtendedProperties != nil && len(event.ExtendedProperties.Private) > 0 {
-		metadata, err = eventMetadataFromMap(event.ExtendedProperties.Private)
-		if errors.Is(err, models.ErrMetadataNotFound) {
-			metadata = models.NewEventMetadata(event.Id, event.HtmlLink, adapterSourceID)
-		}
-	} else {
+		metadata = eventMetadataFromMap(event.ExtendedProperties.Private)
+	}
+	if metadata == nil {
 		metadata = models.NewEventMetadata(event.Id, event.HtmlLink, adapterSourceID)
 	}
 
@@ -130,25 +125,25 @@ const (
 
 // EventMetadataFromMap creates the Metadata object from a map of strings
 // this func validates if the map contains the expected keys. If the keys are not the way we expect,
-// we're returing an error of type ErrMetadataNotFound
-func eventMetadataFromMap(md map[string]string) (*models.Metadata, error) {
+// no metadata is returned.
+func eventMetadataFromMap(md map[string]string) *models.Metadata {
 	var metadata models.Metadata
 
 	var ok bool
 	if metadata.SyncID, ok = md[keyEventID]; !ok {
-		return nil, fmt.Errorf("%w: key not exists %s", models.ErrMetadataNotFound, keyEventID)
+		return nil
 	}
 
 	if metadata.OriginalEventUri, ok = md[keyOriginalEventUri]; !ok {
-		return nil, fmt.Errorf("%w: key not exists %s", models.ErrMetadataNotFound, keyOriginalEventUri)
+		return nil
 	}
 
 	if metadata.SourceID, ok = md[keySourceID]; !ok {
-		return nil, fmt.Errorf("%w: key not exists %s", models.ErrMetadataNotFound, keySourceID)
+		return nil
 	}
 	metadata.SourceID = strings.Trim(metadata.SourceID, "\"\\")
 
-	return &metadata, nil
+	return &metadata
 }
 
 // eventMetadataToEventProperties returns a map[string]string of the metadata.
