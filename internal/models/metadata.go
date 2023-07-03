@@ -29,9 +29,9 @@ func Hash(s string) uint64 {
 }
 
 func NewEventID(seed string) string {
-  // We hash the event id, as we need some common denominator for the event IDs
-  // We can't use the original event id as the event id in the sink, because the allowed formats differ
-  // between the adapters.
+	// We hash the event id, as we need some common denominator for the event IDs
+	// We can't use the original event id as the event id in the sink, because the allowed formats differ
+	// between the adapters.
 	return fmt.Sprint(Hash(seed))
 }
 
