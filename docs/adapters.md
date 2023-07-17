@@ -70,7 +70,6 @@ To get your calendar ID, use the [Microsoft Graph Explorer](https://developer.mi
 
 ![client-id-popup](../assets/gcloud-oauth-client.png)
 
-
 ```yaml
 sink:
   adapter:
@@ -84,3 +83,5 @@ sink:
 Important: When retrieving the credentials from google, you'll get a `clientId`
 and a `clientSecret`. Make sure to add the `clientSecret` to the `clientKey`
 setting in your CalendarSync configuration.
+
+If you want to use the created OAuth Application also with accounts outside of your Google Workspace, make sure to set the Usertype to `external` in the `OAuth Consent Screen` Menu.
