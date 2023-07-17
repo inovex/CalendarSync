@@ -2,8 +2,8 @@
 
 To run CalendarSync periodically / automatically on specific times using systemd, two files are necessary.
 
-- A [service unit](https://www.freedesktop.org/software/systemd/man/systemd.service.html) file, which we will call: `CalendarSync.service`
-- A [timer unit](https://www.freedesktop.org/software/systemd/man/systemd.timer.html) file, which we will call: `CalendarSync.timer`
+- A [service unit](https://www.freedesktop.org/software/systemd/man/systemd.service.html) file: `CalendarSync.service`
+- A [timer unit](https://www.freedesktop.org/software/systemd/man/systemd.timer.html) file: `CalendarSync.timer`
 
 The following content should be placed under: `.config/systemd/user/CalendarSync.service`:
 
@@ -15,7 +15,7 @@ Description=Run CalendarSync
 ExecStart=/path/to/binary/calendarsync --config path/to/your/sync.yaml --storage-encryption-key $key
 ```
 
-The following content should be placed under: `.config/systemd/user/CalendarSync.timer`:
+The following content should be placed under: `.config/systemd/user/CalendarSync.timer`
 
 ```systemd
 [Unit]
