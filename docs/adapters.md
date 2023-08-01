@@ -48,6 +48,7 @@ To get your calendar ID, use the [Microsoft Graph Explorer](https://developer.mi
 
 
 ### Google Adapter Setup
+
 + Open the [Google Cloud Console](https://console.cloud.google.com/home/dashboard) and login.
 + Now you can either select *New Project* at the top left of the screen or just [click here](https://console.cloud.google.com/projectcreate)
 + Create a new project, name it as you like but make sure that the Billing Account is set correctly.
@@ -67,3 +68,19 @@ To get your calendar ID, use the [Microsoft Graph Explorer](https://developer.mi
     + You'll see a popup open. Here you can simply **Download JSON**. This will download the `credentials.json` file required.
 
 ![client-id-popup](../assets/gcloud-oauth-client.png)
+
+```yaml
+sink:
+  adapter:
+    type: google
+    calendar: "jerrymccoopface@example.com"
+    oAuth:
+      clientId: "<clientID>"
+      clientKey: "<clientSecret>"
+```
+
+Important: When retrieving the credentials from Google, you'll get a `clientId`
+and a `clientSecret`. Make sure to add the `clientSecret` to the `clientKey`
+setting in your CalendarSync configuration.
+
+If you want to use the created OAuth Application also with accounts outside of your Google Workspace, make sure to set the Usertype to `external` in the `OAuth Consent Screen` Menu.
