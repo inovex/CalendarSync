@@ -85,7 +85,7 @@ func (g *GCalClient) ListEvents(ctx context.Context, starttime time.Time, endtim
 
 func (g *GCalClient) CreateEvent(ctx context.Context, event models.Event) error {
 	extProperties := &calendar.EventExtendedProperties{
-		Private: event.Metadata.Map(),
+		Private: eventMetadataToEventProperties(event.Metadata),
 	}
 
 	var calendarAttendees []*calendar.EventAttendee
@@ -138,7 +138,7 @@ func isNotFound(err error) bool {
 
 func (g *GCalClient) UpdateEvent(ctx context.Context, event models.Event) error {
 	extProperties := &calendar.EventExtendedProperties{
-		Private: event.Metadata.Map(),
+		Private: eventMetadataToEventProperties(event.Metadata),
 	}
 
 	var calendarAttendees []*calendar.EventAttendee

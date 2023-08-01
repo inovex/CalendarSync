@@ -1,7 +1,7 @@
 package google
 
 import (
-	"errors"
+	"strings"
 	"time"
 
 	"github.com/inovex/CalendarSync/internal/models"
@@ -55,13 +55,14 @@ func calendarEventToEvent(e *calendar.Event, adapterSourceID string) models.Even
 // Otherwise, new metadata will be derived from the given event.
 func ensureMetadata(event *calendar.Event, adapterSourceID string) *models.Metadata {
 	var metadata *models.Metadata
-	var err error
 	if event.ExtendedProperties != nil && len(event.ExtendedProperties.Private) > 0 {
-		metadata, err = models.EventMetadataFromMap(event.ExtendedProperties.Private)
-		if errors.Is(err, models.ErrMetadataNotFound) {
-			metadata = models.NewEventMetadata(event.Id, event.HtmlLink, adapterSourceID)
+		metadata = eventMetadataFromMap(event.ExtendedProperties.Private, ExtensionName)
+		if metadata == nil {
+			// fallback to unprefixed keys if necessary
+			metadata = eventMetadataFromMap(event.ExtendedProperties.Private, "")
 		}
-	} else {
+	}
+	if metadata == nil {
 		metadata = models.NewEventMetadata(event.Id, event.HtmlLink, adapterSourceID)
 	}
 
@@ -118,4 +119,44 @@ func eventDateTimeToTime(t *calendar.EventDateTime) time.Time {
 
 	// at this point the event is most likely malformed, but we add a time anyway to remedy the need to fail here
 	return time.Now()
+}
+
+// Total key length must be at most 44 characters
+const (
+	keyEventID          = "EventID"
+	keyOriginalEventUri = "OriginalEventUri"
+	keySourceID         = "SourceID"
+	ExtensionName       = "inovex.calendarsync."
+)
+
+// EventMetadataFromMap creates the Metadata object from a map of strings
+// this func validates if the map contains the expected keys. If the keys are not the way we expect,
+// no metadata is returned.
+func eventMetadataFromMap(md map[string]string, prefix string) *models.Metadata {
+	var metadata models.Metadata
+
+	var ok bool
+	if metadata.SyncID, ok = md[prefix+keyEventID]; !ok {
+		return nil
+	}
+
+	if metadata.OriginalEventUri, ok = md[prefix+keyOriginalEventUri]; !ok {
+		return nil
+	}
+
+	if metadata.SourceID, ok = md[prefix+keySourceID]; !ok {
+		return nil
+	}
+	metadata.SourceID = strings.Trim(metadata.SourceID, "\"\\")
+
+	return &metadata
+}
+
+// eventMetadataToEventProperties returns a map[string]string of the metadata.
+func eventMetadataToEventProperties(m *models.Metadata) map[string]string {
+	return map[string]string{
+		ExtensionName + keyEventID:          m.SyncID,
+		ExtensionName + keyOriginalEventUri: m.OriginalEventUri,
+		ExtensionName + keySourceID:         m.SourceID,
+	}
 }
