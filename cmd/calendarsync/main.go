@@ -49,9 +49,8 @@ func main() {
 				Value: "sync.yaml",
 			},
 			&cli.StringFlag{
-				Name:     flagStorageEncryptionKey,
-				Usage:    "encryption string",
-				Required: true,
+				Name:  flagStorageEncryptionKey,
+				Usage: "encryption string",
 			},
 			&cli.BoolFlag{
 				Name:  flagClean,
@@ -81,11 +80,23 @@ func main() {
 			return nil
 		},
 		Action: Run,
+		Commands: []*cli.Command{
+			{
+				Name:    "version",
+				Aliases: []string{"v"},
+				Usage:   "shows the version of CalendarSync",
+				Action: func(cCtx *cli.Context) error {
+					fmt.Println("Version:", Version)
+					return nil
+				},
+			},
+		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
+
 }
 
 func Run(c *cli.Context) error {
@@ -94,6 +105,10 @@ func Run(c *cli.Context) error {
 		return err
 	}
 	log.Info("loaded config file", "path", cfg.Path)
+
+	if len(c.String(flagStorageEncryptionKey)) == 0 {
+		return fmt.Errorf("flag --storage-encryption-key needs to be set")
+	}
 
 	startTime, err := models.TimeFromConfig(cfg.Sync.StartTime)
 	if err != nil {
