@@ -124,7 +124,7 @@ transformations:
   - name: KeepLocation
   - name: KeepReminders
   - name: KeepTitle
-  - name: Prefixtitle 
+  - name: PrefixTitle 
     config: 
       Prefix: "[Sync] "
   - name: ReplaceTitle 
