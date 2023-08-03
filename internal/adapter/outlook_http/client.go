@@ -272,7 +272,7 @@ func (o OutlookClient) outlookEventToEvent(oe Event, adapterSourceID string) (e 
 		ICalUID:     oe.UID,
 		ID:          oe.ID,
 		Title:       oe.Subject,
-		Description: e.Description,
+		Description: oe.Body.Content,
 		Location:    oe.Location.Name,
 		StartTime:   startTime,
 		EndTime:     endTime,
