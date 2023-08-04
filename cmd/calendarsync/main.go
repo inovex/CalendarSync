@@ -23,21 +23,20 @@ const (
 	flagClean                = "clean"
 	flagDryRun               = "dry-run"
 	flagPort                 = "port"
+	flagVersion              = "version"
 )
 
 var (
 	// The following vars are set during linking
 	// Version is the version from which the binary was built.
 	Version string
-	// BuildTime is the timestamp of building the binary.
-	BuildTime string
 )
 
 func main() {
 	app := &cli.App{
 		Name:        "CalendarSync",
 		Usage:       "Stateless calendar sync across providers",
-		Description: fmt.Sprintf("Version %s - Build date %s", Version, BuildTime),
+		Description: fmt.Sprintf("Version: %s", Version),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  flagLogLevel,
@@ -62,6 +61,11 @@ func main() {
 				Usage: "This flag helps you see which events would get created, updated or deleted without actually doing these operations",
 				Value: false,
 			},
+			&cli.BoolFlag{
+				Name:  flagVersion,
+				Usage: "shows the version of CalendarSync",
+				Value: false,
+			},
 			&cli.UintFlag{
 				Name:   flagPort,
 				Usage:  "set manual free port for the authentication process",
@@ -80,17 +84,6 @@ func main() {
 			return nil
 		},
 		Action: Run,
-		Commands: []*cli.Command{
-			{
-				Name:    "version",
-				Aliases: []string{"v"},
-				Usage:   "shows the version of CalendarSync",
-				Action: func(cCtx *cli.Context) error {
-					fmt.Println("Version:", Version)
-					return nil
-				},
-			},
-		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
@@ -100,6 +93,11 @@ func main() {
 }
 
 func Run(c *cli.Context) error {
+	if c.Bool(flagVersion) {
+		fmt.Println("Version:", Version)
+		os.Exit(0)
+	}
+
 	cfg, err := config.NewFromFile(c.String(flagConfigFilePath))
 	if err != nil {
 		return err
