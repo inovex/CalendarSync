@@ -8,7 +8,6 @@ builds:
       - CGO_ENABLED=0
     dir: ./cmd/calendarsync
     ldflags:
-      - -X 'main.BuildTime={{.Date}}'
       - -X 'main.Version={{.Version}}'
     goos:
       - linux
