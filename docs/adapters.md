@@ -47,7 +47,7 @@ source:
 To get your calendar ID, use the [Microsoft Graph Explorer](https://developer.microsoft.com/en-us/graph/graph-explorer) and query `GET https://graph.microsoft.com/v1.0/me/calendar`.
 
 
-### Google Adapter Setup
+## Google Adapter Setup
 
 + Open the [Google Cloud Console](https://console.cloud.google.com/home/dashboard) and login.
 + Now you can either select *New Project* at the top left of the screen or just [click here](https://console.cloud.google.com/projectcreate)
