@@ -8,11 +8,11 @@
 
 # Motivation
 
-As consultants you may need to use multiple calendars (2-n). Additionally you
+As consultants, you may need to use multiple calendars (2-n). Additionally, you
 need to keep up with all existing appointments in each of your calendars when
 you want to make new appointments. This means you have to check each calendar on
 its own. What we wanted to achieve is a single overview over all events in each
-of the calendars. Preferrably in your primary calendar.
+of the calendars. Preferably in your primary calendar.
 
 There are some commercial / freemium solutions for this
 ([reclaim.ai](https://reclaim.ai/),
@@ -36,7 +36,7 @@ for your platform, create a modified `sync.yaml` file based on the content of
   --config sync.yaml --storage-encryption-key <YourSecretPassword>` and follow
   the instructions in the output.
 
-The app will create a file in the execution folder called `auth-storage.yml`. In
+The app will create a file in the execution folder called `auth-storage.yaml`. In
 this file the OAuth2 Credentials will be saved encrypted by your
 `storage-encryption-key`.
 
@@ -124,12 +124,13 @@ transformations:
   - name: KeepLocation
   - name: KeepReminders
   - name: KeepTitle
-  - name: PrefixTitle 
+  - name: PrefixTitle
     config: 
       Prefix: "[Sync] "
   - name: ReplaceTitle 
     config: 
-      NewTitle: "[synchronized appointment]" # Do not use KeepAttendees when the Outlook Adapter is used as a sink. There is no way to suppress mail invitations
+      NewTitle: "[synchronized appointment]"
+  # Do not use KeepAttendees when the Outlook Adapter is used as a sink. There is no way to suppress mail invitations
   - name: KeepAttendees 
     config: 
       UseEmailAsDisplayName: true 
@@ -145,7 +146,7 @@ separate calendar for this? Or you simply want to remove all the synced events
 from your calendar?
 
 Use the `--clean` flag to get rid of all the unwanted events. (We leave your
-events which were't synced with CalendarSync alone! :) )
+events which weren't synced with CalendarSync alone! :) )
 
 # Trademarks
 
@@ -155,7 +156,7 @@ Corporation
 # Relevant RFCs and Links
 
 [RFC 5545](https://datatracker.ietf.org/doc/html/rfc5545)  Internet Calendaring
-and Scheduling Core Object Specification (iCalendar) is used in the google
+and Scheduling Core Object Specification (iCalendar) is used in the Google
 calendar API to denote recurrence patterns. CalDav [RFC
 4791](https://datatracker.ietf.org/doc/html/rfc4791) uses the dateformat
 specified in RFC 5545.
