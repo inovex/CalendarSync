@@ -56,3 +56,13 @@ func (suite *ConfigTestSuite) TestAuthStorageDefaultsFromFile() {
 	assert.Equal(suite.T(), "yaml", sut.Auth.StorageMode)
 	assert.Equal(suite.T(), "./auth-storage.yaml", sut.Auth.Config["path"])
 }
+
+func (suite *ConfigTestSuite) TestCustomAuthStorageFromFile() {
+	sut, err := config.NewFromFile("../../testdata/custom_auth_storage.yaml")
+
+	assert.Nil(suite.T(), err)
+	assert.NotNil(suite.T(), sut)
+
+	assert.Equal(suite.T(), "custom", sut.Auth.StorageMode)
+	assert.Equal(suite.T(), "./auth-storage.custom", sut.Auth.Config["path"])
+}

@@ -1,0 +1,4 @@
+auth:
+  storage_mode: custom
+  config:
+    path: "./auth-storage.custom"
