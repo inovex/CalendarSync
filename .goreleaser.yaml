@@ -7,6 +7,8 @@ builds:
   - env:
       - CGO_ENABLED=0
     dir: ./cmd/calendarsync
+    ldflags:
+      - -X 'main.Version={{.Version}}'
     goos:
       - linux
       - windows

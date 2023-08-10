@@ -23,21 +23,20 @@ const (
 	flagClean                = "clean"
 	flagDryRun               = "dry-run"
 	flagPort                 = "port"
+	flagVersion              = "version"
 )
 
 var (
 	// The following vars are set during linking
 	// Version is the version from which the binary was built.
 	Version string
-	// BuildTime is the timestamp of building the binary.
-	BuildTime string
 )
 
 func main() {
 	app := &cli.App{
 		Name:        "CalendarSync",
 		Usage:       "Stateless calendar sync across providers",
-		Description: fmt.Sprintf("Version %s - Build date %s", Version, BuildTime),
+		Description: fmt.Sprintf("Version: %s", Version),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  flagLogLevel,
@@ -49,9 +48,8 @@ func main() {
 				Value: "sync.yaml",
 			},
 			&cli.StringFlag{
-				Name:     flagStorageEncryptionKey,
-				Usage:    "encryption string",
-				Required: true,
+				Name:  flagStorageEncryptionKey,
+				Usage: "encryption string",
 			},
 			&cli.BoolFlag{
 				Name:  flagClean,
@@ -61,6 +59,11 @@ func main() {
 			&cli.BoolFlag{
 				Name:  flagDryRun,
 				Usage: "This flag helps you see which events would get created, updated or deleted without actually doing these operations",
+				Value: false,
+			},
+			&cli.BoolFlag{
+				Name:  flagVersion,
+				Usage: "shows the version of CalendarSync",
 				Value: false,
 			},
 			&cli.UintFlag{
@@ -86,14 +89,24 @@ func main() {
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
+
 }
 
 func Run(c *cli.Context) error {
+	if c.Bool(flagVersion) {
+		fmt.Println("Version:", Version)
+		os.Exit(0)
+	}
+
 	cfg, err := config.NewFromFile(c.String(flagConfigFilePath))
 	if err != nil {
 		return err
 	}
 	log.Info("loaded config file", "path", cfg.Path)
+
+	if len(c.String(flagStorageEncryptionKey)) == 0 {
+		return fmt.Errorf("flag --storage-encryption-key needs to be set")
+	}
 
 	startTime, err := models.TimeFromConfig(cfg.Sync.StartTime)
 	if err != nil {
