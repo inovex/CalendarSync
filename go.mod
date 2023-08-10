@@ -6,7 +6,7 @@ require (
 	filippo.io/age v1.1.1
 	github.com/aquilax/truncate v1.0.0
 	github.com/cenkalti/backoff/v4 v4.2.1
-	github.com/charmbracelet/log v0.2.2
+	github.com/charmbracelet/log v0.2.3
 	github.com/emersion/go-ical v0.0.0-20220601085725-0864dccc089f
 	github.com/emersion/go-webdav v0.4.0
 	github.com/microcosm-cc/bluemonday v1.0.25
@@ -42,7 +42,7 @@ require (
 	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
-	github.com/muesli/termenv v0.15.1 // indirect
+	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
