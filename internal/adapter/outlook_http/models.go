@@ -12,21 +12,22 @@ type EventList struct {
 }
 
 type Event struct {
-	ID                         string       `json:"id"`
-	UID                        string       `json:"iCalUId"`
-	ChangeKey                  string       `json:"changeKey"`
-	HtmlLink                   string       `json:"webLink"`
-	Subject                    string       `json:"subject"`
-	Start                      Time         `json:"start"`
-	End                        Time         `json:"end"`
-	Body                       Body         `json:"body,omitempty"`
-	Attendees                  []Attendee   `json:"attendees,omitempty"`
-	Location                   Location     `json:"location"`
-	IsReminderOn               bool         `json:"isReminderOn"`
-	ReminderMinutesBeforeStart int          `json:"reminderMinutesBeforeStart"`
-	Extensions                 []Extensions `json:"extensions"`
-	IsAllDay                   bool         `json:"isAllDay"`
-	OnlineMeetingUrl           string       `json:"onlineMeetingUrl"`
+	ID                         string         `json:"id"`
+	UID                        string         `json:"iCalUId"`
+	ChangeKey                  string         `json:"changeKey"`
+	HtmlLink                   string         `json:"webLink"`
+	Subject                    string         `json:"subject"`
+	Start                      Time           `json:"start"`
+	End                        Time           `json:"end"`
+	Body                       Body           `json:"body,omitempty"`
+	Attendees                  []Attendee     `json:"attendees,omitempty"`
+	Location                   Location       `json:"location"`
+	IsReminderOn               bool           `json:"isReminderOn"`
+	ReminderMinutesBeforeStart int            `json:"reminderMinutesBeforeStart"`
+	Extensions                 []Extensions   `json:"extensions"`
+	IsAllDay                   bool           `json:"isAllDay"`
+	OnlineMeetingUrl           string         `json:"onlineMeetingUrl"`
+	ResponseStatus             ResponseStatus `json:"responseStatus,omitempty"`
 }
 
 type Extensions struct {
@@ -34,6 +35,12 @@ type Extensions struct {
 	ExtensionName string `json:"extensionName"`
 	// needs to be embedded, Microsoft returns a 500 on an non-embedded object
 	models.Metadata
+}
+
+type ResponseStatus struct {
+	Response string `json:"response,omitempty"`
+	// there's an additional field called `time` which returns date and time when the response was returned
+	// but we don't need that
 }
 
 type Body struct {
