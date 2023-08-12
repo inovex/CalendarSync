@@ -20,20 +20,22 @@ var (
 type Controller struct {
 	source Source
 	// transformers are applied in order
-	transformers []Transformer
-	sink         Sink
-	concurrency  int
-	logger       *log.Logger
+	transformers       []Transformer
+	sink               Sink
+	concurrency        int
+	logger             *log.Logger
+	SyncDeclinedEvents bool
 }
 
 // NewController constructs a new Controller.
-func NewController(logger *log.Logger, source Source, sink Sink, transformer ...Transformer) Controller {
+func NewController(logger *log.Logger, source Source, sink Sink, SyncDeclinedEvents bool, transformer ...Transformer) Controller {
 	return Controller{
-		concurrency:  1,
-		source:       source,
-		transformers: transformer,
-		sink:         sink,
-		logger:       logger,
+		concurrency:        1,
+		source:             source,
+		transformers:       transformer,
+		sink:               sink,
+		logger:             logger,
+		SyncDeclinedEvents: SyncDeclinedEvents,
 	}
 }
 
