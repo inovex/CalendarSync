@@ -60,6 +60,7 @@ sync:
   end: 
     identifier: MonthEnd # last day of the current month 
     offset: +1 # MonthEnd +1 month (end of next month)
+  sync_declined_events: false # If you want to sync events which you declined in the source calendar, set to true
 ```
 
 ## Source
