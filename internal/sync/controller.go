@@ -3,6 +3,7 @@ package sync
 import (
 	"context"
 	"fmt"
+	"slices"
 	"time"
 
 	"github.com/inovex/CalendarSync/internal/models"
@@ -75,6 +76,12 @@ func (p Controller) SynchroniseTimeframe(ctx context.Context, start time.Time, e
 	eventsInSource, eventsInSink, err := p.loadEvents(ctx, start, end)
 	if err != nil {
 		return err
+	}
+
+	// remove declined events
+	if !p.SyncDeclinedEvents {
+		log.Debug("We're not syncing declined events, to enable set sync.sync_declined_events to true in your config.yaml")
+		eventsInSource = removeDeclinedEvents(eventsInSource)
 	}
 
 	// Transform source events before comparing them to the sink events
@@ -227,4 +234,19 @@ func maps(events []models.Event) map[string]models.Event {
 		}
 	}
 	return result
+}
+
+func removeDeclinedEvents(events []models.Event) []models.Event {
+	var toDeleteIndex []int
+	for i, event := range events {
+		log.Warn("event accept check", "accepted", event.Accepted)
+		if !event.Accepted {
+			toDeleteIndex = append(toDeleteIndex, i)
+		}
+	}
+	for _, k := range toDeleteIndex {
+		log.Warn("Deleting event id", "id", k)
+		events = slices.Delete(events, k, k+1)
+	}
+	return events
 }
