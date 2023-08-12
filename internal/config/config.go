@@ -79,8 +79,9 @@ type Transformer struct {
 
 // Sync configuration
 type Sync struct {
-	StartTime SyncTime `yaml:"start"`
-	EndTime   SyncTime `yaml:"end"`
+	StartTime          SyncTime `yaml:"start"`
+	EndTime            SyncTime `yaml:"end"`
+	SyncDeclinedEvents bool     `yaml:"sync_declined_events"`
 }
 
 type SyncTime struct {
