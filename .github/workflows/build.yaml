@@ -3,8 +3,8 @@ name: Build
 on: [ push ]
 
 env:
-  GO_VERSION: '1.20.4'
-  GO_VERSION_SHORT: '1.20'
+  GO_VERSION: '1.21.0'
+  GO_VERSION_SHORT: '1.21'
   GOLANGCI_VERSION: 'v1.52.2'
   STATICCHECK_VERSION: '2023.1.3'
 
