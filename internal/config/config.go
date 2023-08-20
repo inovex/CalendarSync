@@ -32,6 +32,14 @@ func NewFromFile(file string) (cfg *File, err error) {
 		return nil, fmt.Errorf("cannot unmarshal config file: %w", err)
 	}
 
+	if cfg.Auth.StorageMode == "" {
+		cfg.Auth.StorageMode = "yaml"
+	}
+	if cfg.Auth.Config == nil {
+		cfg.Auth.Config = make(CustomMap)
+		cfg.Auth.Config["path"] = "./auth-storage.yaml"
+	}
+
 	return cfg, nil
 }
 
