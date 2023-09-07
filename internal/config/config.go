@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 type File struct {
@@ -18,29 +18,27 @@ type File struct {
 	UpdateConcurrency int           `yaml:"updateConcurrency,omitempty"`
 }
 
-func NewFromFile(file string) (cfg *File, err error) {
-	yamlFile, err := os.ReadFile(file)
+func NewFromFile(path string) (*File, error) {
+	yamlFile, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("cannot read config file: %w", err)
 	}
 
-	cfg = &File{
-		Path: file,
+	config := File{
+		Path: path,
+		Auth: AuthStorage{
+			StorageMode: "yaml",
+			Config: CustomMap{
+				"path": "./auth-storage.yaml",
+			},
+		},
 	}
-	err = yaml.Unmarshal(yamlFile, cfg)
-	if err != nil {
+
+	if err := yaml.Unmarshal(yamlFile, &config); err != nil {
 		return nil, fmt.Errorf("cannot unmarshal config file: %w", err)
 	}
 
-	if cfg.Auth.StorageMode == "" {
-		cfg.Auth.StorageMode = "yaml"
-	}
-	if cfg.Auth.Config == nil {
-		cfg.Auth.Config = make(CustomMap)
-		cfg.Auth.Config["path"] = "./auth-storage.yaml"
-	}
-
-	return cfg, nil
+	return &config, nil
 }
 
 type AuthStorage struct {
