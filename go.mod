@@ -6,7 +6,7 @@ require (
 	filippo.io/age v1.1.1
 	github.com/aquilax/truncate v1.0.0
 	github.com/cenkalti/backoff/v4 v4.2.1
-	github.com/charmbracelet/log v0.2.3
+	github.com/charmbracelet/log v0.2.4
 	github.com/emersion/go-ical v0.0.0-20220601085725-0864dccc089f
 	github.com/emersion/go-webdav v0.4.0
 	github.com/microcosm-cc/bluemonday v1.0.25
@@ -27,7 +27,7 @@ require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/benbjohnson/clock v1.3.0 // indirect
-	github.com/charmbracelet/lipgloss v0.7.1 // indirect
+	github.com/charmbracelet/lipgloss v0.8.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
