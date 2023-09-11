@@ -57,6 +57,16 @@ func (suite *ConfigTestSuite) TestAuthStorageDefaultsFromFile() {
 	assert.Equal(suite.T(), "./auth-storage.yaml", sut.Auth.Config["path"])
 }
 
+func (suite *ConfigTestSuite) TestAuthStorageMixesFromFile() {
+	sut, err := config.NewFromFile("../../testdata/mixed_auth_storage.yaml")
+
+	assert.Nil(suite.T(), err)
+	assert.NotNil(suite.T(), sut)
+
+	assert.Equal(suite.T(), "yaml", sut.Auth.StorageMode)
+	assert.Equal(suite.T(), "./foo.mixed", sut.Auth.Config["path"])
+}
+
 func (suite *ConfigTestSuite) TestCustomAuthStorageFromFile() {
 	sut, err := config.NewFromFile("../../testdata/custom_auth_storage.yaml")
 

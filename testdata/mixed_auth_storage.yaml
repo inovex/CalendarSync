@@ -1,0 +1,3 @@
+auth:
+  config:
+    path: "./foo.mixed"
