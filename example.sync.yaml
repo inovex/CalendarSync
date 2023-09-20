@@ -55,6 +55,13 @@ transformations:
     config:
       UseEmailAsDisplayName: true
 
+# Filters remove events from being synced due to different criteria
+filters:
+  # Events where you declined the invitation aren't synced
+  - name: DeclinedEvents
+  # Events which cover the full day aren't synced
+  - name: AllDayEvents
+
 # Perform multiple calendar updates concurrently
 # Defaults to 1 if not set
 updateConcurrency: 3
