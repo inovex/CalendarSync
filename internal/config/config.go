@@ -8,11 +8,11 @@ import (
 )
 
 type File struct {
-	Path   string
-	Auth   AuthStorage
-	Source Source `yaml:"source"`
-	Sink   Sink   `yaml:"sink"`
-	// TODO: filters for source events
+	Path              string
+	Auth              AuthStorage
+	Source            Source        `yaml:"source"`
+	Sink              Sink          `yaml:"sink"`
+	Filters           []Filter      `yaml:"filters,omitempty"`
 	Transformations   []Transformer `yaml:"transformations,omitempty"`
 	Sync              Sync          `yaml:"sync"`
 	UpdateConcurrency int           `yaml:"updateConcurrency,omitempty"`
@@ -77,11 +77,17 @@ type Transformer struct {
 	Config CustomMap `yaml:"config"`
 }
 
+type Filter struct {
+	// Name of the filter
+	Name string `yaml:"name"`
+	// Any kind of parameter which can be passed to a filter.
+	Config CustomMap `yaml:"config"`
+}
+
 // Sync configuration
 type Sync struct {
-	StartTime          SyncTime `yaml:"start"`
-	EndTime            SyncTime `yaml:"end"`
-	SyncDeclinedEvents bool     `yaml:"sync_declined_events"`
+	StartTime SyncTime `yaml:"start"`
+	EndTime   SyncTime `yaml:"end"`
 }
 
 type SyncTime struct {

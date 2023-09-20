@@ -29,14 +29,14 @@ type Controller struct {
 }
 
 // NewController constructs a new Controller.
-func NewController(logger *log.Logger, source Source, sink Sink, SyncDeclinedEvents bool, transformer ...Transformer) Controller {
+func NewController(logger *log.Logger, source Source, sink Sink, transformer []Transformer, filters []Filter) Controller {
 	return Controller{
-		concurrency:        1,
-		source:             source,
-		transformers:       transformer,
-		sink:               sink,
-		logger:             logger,
-		SyncDeclinedEvents: SyncDeclinedEvents,
+		concurrency:  1,
+		source:       source,
+		transformers: transformer,
+		filters:      filters,
+		sink:         sink,
+		logger:       logger,
 	}
 }
 
