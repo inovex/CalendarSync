@@ -21,11 +21,11 @@ var (
 type Controller struct {
 	source Source
 	// transformers are applied in order
-	transformers       []Transformer
-	sink               Sink
-	concurrency        int
-	logger             *log.Logger
-	SyncDeclinedEvents bool
+	transformers []Transformer
+	filters      []Filter
+	sink         Sink
+	concurrency  int
+	logger       *log.Logger
 }
 
 // NewController constructs a new Controller.
@@ -78,11 +78,13 @@ func (p Controller) SynchroniseTimeframe(ctx context.Context, start time.Time, e
 		return err
 	}
 
-	// remove declined events
-	if !p.SyncDeclinedEvents {
-		log.Debug("We're not syncing declined events, to enable set sync.sync_declined_events to true in your config.yaml")
-		eventsInSource = removeDeclinedEvents(eventsInSource)
+	filteredEventsInSource := []models.Event{}
+
+	for _, filter := range p.filters {
+		p.logger.Info("loaded filter", "name", filter.Name())
 	}
+
+	filteredEventsInSource = FilterEvents(eventsInSource, p.filters...)
 
 	// Transform source events before comparing them to the sink events
 	transformedEventsInSource := []models.Event{}
@@ -92,7 +94,7 @@ func (p Controller) SynchroniseTimeframe(ctx context.Context, start time.Time, e
 		p.logger.Info("loaded transformer", "name", trans.Name())
 	}
 
-	for _, event := range eventsInSource {
+	for _, event := range filteredEventsInSource {
 		transformedEventsInSource = append(transformedEventsInSource, TransformEvent(event, p.transformers...))
 	}
 
@@ -234,19 +236,4 @@ func maps(events []models.Event) map[string]models.Event {
 		}
 	}
 	return result
-}
-
-func removeDeclinedEvents(events []models.Event) []models.Event {
-	var toDeleteIndex []int
-	for i, event := range events {
-		log.Warn("event accept check", "accepted", event.Accepted)
-		if !event.Accepted {
-			toDeleteIndex = append(toDeleteIndex, i)
-		}
-	}
-	for _, k := range toDeleteIndex {
-		log.Warn("Deleting event id", "id", k)
-		events = slices.Delete(events, k, k+1)
-	}
-	return events
 }
