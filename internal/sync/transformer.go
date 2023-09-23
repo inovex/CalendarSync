@@ -2,7 +2,6 @@ package sync
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/inovex/CalendarSync/internal/config"
@@ -77,34 +76,6 @@ func TransformerFactory(configuredTransformers []config.Transformer) (loadedTran
 	}
 
 	return sortedAndLoadedTransformer
-}
-
-// autoConfigure can automatically map keys of the config.CustomMap to fields of a given Transformer implementation.
-// TODO: I kinda wrote this in a hurry. Re-visit this.
-func autoConfigure(transformer Transformer, config config.CustomMap) {
-	ps := reflect.ValueOf(transformer)
-	s := ps.Elem()
-	if s.Kind() == reflect.Struct {
-		for key, value := range config {
-			field := s.FieldByName(key)
-			if field.IsValid() && field.CanSet() {
-				switch field.Kind() {
-				case reflect.Int,
-					reflect.Int8,
-					reflect.Int16,
-					reflect.Int32,
-					reflect.Int64:
-					field.SetInt(value.(int64))
-				case reflect.Bool:
-					field.SetBool(value.(bool))
-				case reflect.String:
-					field.SetString(value.(string))
-				default:
-					panic(fmt.Sprintf("autoConfigure(): unknown kind '%s' for field '%s'", key, field.Kind().String()))
-				}
-			}
-		}
-	}
 }
 
 func TransformerFromConfig(transformer Transformer, config config.CustomMap) Transformer {

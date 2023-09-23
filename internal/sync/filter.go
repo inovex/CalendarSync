@@ -2,7 +2,6 @@ package sync
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/inovex/CalendarSync/internal/config"
@@ -57,45 +56,7 @@ func FilterFactory(configuredFilters []config.Filter) (loadedFilters []Filter) {
 	return sortedAndLoadedFilter
 }
 
-func autoConfigureFilter(filter Filter, config config.CustomMap) {
-	ps := reflect.ValueOf(filter)
-	s := ps.Elem()
-	if s.Kind() == reflect.Struct {
-		for key, value := range config {
-			field := s.FieldByName(key)
-			if field.IsValid() && field.CanSet() {
-				switch field.Kind() {
-				case reflect.Int,
-					reflect.Int8,
-					reflect.Int16,
-					reflect.Int32,
-					reflect.Int64:
-					field.SetInt(value.(int64))
-				case reflect.Bool:
-					field.SetBool(value.(bool))
-				case reflect.String:
-					field.SetString(value.(string))
-				default:
-					panic(fmt.Sprintf("autoConfigure(): unknown kind '%s' for field '%s'", key, field.Kind().String()))
-				}
-			}
-		}
-	}
-}
-
 func filterFromConfig(filter Filter, config config.CustomMap) Filter {
-	autoConfigureFilter(filter, config)
+	autoConfigure(filter, config)
 	return filter
-}
-
-func removeDuplicateInt(intSlice []int) []int {
-	allKeys := make(map[int]bool)
-	list := []int{}
-	for _, item := range intSlice {
-		if _, value := allKeys[item]; !value {
-			allKeys[item] = true
-			list = append(list, item)
-		}
-	}
-	return list
 }
