@@ -7,6 +7,9 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"os/user"
+	"path/filepath"
+	"strings"
 
 	"github.com/charmbracelet/log"
 	"github.com/inovex/CalendarSync/internal/config"
@@ -113,6 +116,10 @@ func (y *YamlStorage) RemoveCalendarAuth(calendarID string) error {
 
 func (y *YamlStorage) writeFile(cals []CalendarAuth) error {
 	var writer io.Writer
+	if strings.HasPrefix(y.StoragePath, "~/") {
+		usr, _ := user.Current()
+		y.StoragePath = filepath.Join(usr.HomeDir, y.StoragePath[2:])
+	}
 	file, err := os.OpenFile(y.StoragePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to open storage file: %w", err)
