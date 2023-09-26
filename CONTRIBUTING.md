@@ -18,7 +18,7 @@ make build
 ## To run without a build
 
 ```bash
-go run cmd/calendarsync/main.go --config <yourConfigFile> --storage-encryption-key <yourPasswordForTheLocalAuthFile>
+CALENDARSYNC_ENCRYPTION_KEY=<yourPasswordForTheLocalAuthFile> go run cmd/calendarsync/main.go --config <yourConfigFile>
 ```
 
 ## Git commit messages
