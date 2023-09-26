@@ -11,14 +11,20 @@ import (
 
 type Filter interface {
 	NamedComponent
-	Filter(events []models.Event) []models.Event
+	// Filter returns true to keep the event
+	Filter(event models.Event) bool
 }
 
-func FilterEvents(events []models.Event, filters ...Filter) (filteredEvents []models.Event) {
+// FilterEvent returns false if one of the filters rejects the event
+func FilterEvent(event models.Event, filters ...Filter) (result bool) {
 	for _, filter := range filters {
-		events = filter.Filter(events)
+		// If the filter returns false (or: filters the event), then return false
+		if !filter.Filter(event) {
+			return false
+		}
 	}
-	return events
+	// otherwise keep the event
+	return true
 }
 
 var (

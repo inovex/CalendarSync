@@ -3,7 +3,6 @@ package sync
 import (
 	"context"
 	"fmt"
-	"slices"
 	"time"
 
 	"github.com/inovex/CalendarSync/internal/models"
@@ -84,7 +83,13 @@ func (p Controller) SynchroniseTimeframe(ctx context.Context, start time.Time, e
 		p.logger.Info("loaded filter", "name", filter.Name())
 	}
 
-	filteredEventsInSource = FilterEvents(eventsInSource, p.filters...)
+	for _, event := range eventsInSource {
+		if FilterEvent(event, p.filters...) {
+			filteredEventsInSource = append(filteredEventsInSource, event)
+		} else {
+			p.logger.Debug("filter rejects event", logFields(event)...)
+		}
+	}
 
 	// Transform source events before comparing them to the sink events
 	transformedEventsInSource := []models.Event{}

@@ -10,11 +10,6 @@ func (d DeclinedEvents) Name() string {
 	return "DeclinedEvents"
 }
 
-func (d DeclinedEvents) Filter(events []models.Event) (filteredEvents []models.Event) {
-	for _, event := range events {
-		if event.Accepted {
-			filteredEvents = append(filteredEvents, event)
-		}
-	}
-	return filteredEvents
+func (d DeclinedEvents) Filter(event models.Event) bool {
+	return event.Accepted
 }
