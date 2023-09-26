@@ -34,7 +34,10 @@ func (suite *ControllerTestSuite) SetupTest() {
 		{Name: "KeepTitle"},
 		{Name: "KeepReminders"},
 	})
-	suite.controller = NewController(log.Default(), suite.source, suite.sink, false, transformers...)
+	filters := FilterFactory([]config.Filter{
+		{Name: "DeclinedEvents"},
+	})
+	suite.controller = NewController(log.Default(), suite.source, suite.sink, transformers, filters)
 }
 
 // TestDryRun tests that no acutal adapter func is called
