@@ -60,7 +60,6 @@ sync:
   end: 
     identifier: MonthEnd # last day of the current month 
     offset: +1 # MonthEnd +1 month (end of next month)
-  sync_declined_events: false # If you want to sync events which you declined in the source calendar, set to true
 ```
 
 ## Source
@@ -135,6 +134,21 @@ transformations:
 
 The transformers are applied in a specific order. The order is defined here:
 [`internal/sync/transformer.go`](./internal/sync/transformer.go)
+
+## Filters
+
+In some cases events should not be synced. For example, declined events might
+create too much noise in the target calendar. These can be filtered by enabling
+the corresponding filter.
+
+```yaml
+# Filters remove events from being synced due to different criteria
+filters:
+  # Events where you declined the invitation aren't synced
+  - name: DeclinedEvents
+  # Events which cover the full day aren't synced
+  - name: AllDayEvents
+```
 
 # Cleaning Up
 
