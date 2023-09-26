@@ -36,4 +36,5 @@ type Sink interface {
 	UpdateEvent(ctx context.Context, e models.Event) error
 	// DeleteEvent deletes the given Event in the external calendar
 	DeleteEvent(ctx context.Context, e models.Event) error
+	GetSourceID() string
 }
