@@ -12,7 +12,8 @@ The following content should be placed under: `.config/systemd/user/CalendarSync
 Description=Run CalendarSync
 
 [Service]
-ExecStart=/path/to/binary/calendarsync --config path/to/your/sync.yaml --storage-encryption-key $key
+Environment=CALENDARSYNC_ENCRYPTION_KEY='supersecret'
+ExecStart=/path/to/binary/calendarsync --config path/to/your/sync.yaml 
 ```
 
 The following content should be placed under: `.config/systemd/user/CalendarSync.timer`
