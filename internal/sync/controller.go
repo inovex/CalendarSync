@@ -177,6 +177,18 @@ func (p Controller) diffEvents(sourceEvents []models.Event, sinkEvents []models.
 
 		switch {
 		case !exists:
+			// Don't sync synced events back to their original calendar to prevent resurrecting
+			// deleted events.
+			// Problem:
+			// - Sync event (from calendar A) to create eventCopy (calendar B, SourceID = calendar A).
+			// - Delete event (in calendar A)
+			// - Run sync from calendar B to calendar A. This will copy (and thereby resurrect) the event.
+			//
+			// Solution: Ignore events the originate from the sink, but no longer exist there.
+			if event.Metadata.SourceID == p.sink.GetSourceID() {
+				p.logger.Info("skipping event as it originates from the sink, but no longer exists there", logFields(event)...)
+				continue
+			}
 			p.logger.Info("new event, needs sync", logFields(event)...)
 			createEvents = append(createEvents, event)
 
