@@ -94,6 +94,7 @@ func (suite *ControllerTestSuite) TestDryRun() {
 	suite.source.On("EventsInTimeframe", ctx, startTime, endTime).Return(sourceEvents, nil)
 	suite.sink.On("EventsInTimeframe", ctx, startTime, endTime).Return(sinkEvents, nil)
 	suite.sink.On("DeleteEvent", ctx, mock.AnythingOfType("models.Event")).Return(nil)
+	suite.sink.On("GetSourceID").Return("sinkID")
 	suite.source.On("GetSourceID").Return("sourceID")
 
 	err := suite.controller.SynchroniseTimeframe(ctx, startTime, endTime, true)
@@ -170,6 +171,7 @@ func (suite *ControllerTestSuite) TestCleanUp() {
 	suite.source.On("EventsInTimeframe", ctx, startTime, endTime).Return(sourceEvents, nil)
 	suite.sink.On("EventsInTimeframe", ctx, startTime, endTime).Return(sinkEvents, nil)
 	suite.sink.On("DeleteEvent", ctx, mock.AnythingOfType("models.Event")).Return(nil)
+	suite.sink.On("GetSourceID").Return("sinkID")
 	suite.source.On("GetSourceID").Return("sourceID")
 
 	err := suite.controller.CleanUp(ctx, startTime, endTime)
@@ -213,6 +215,7 @@ func (suite *ControllerTestSuite) TestCreateEventsEmptySink() {
 	suite.source.On("EventsInTimeframe", ctx, startTime, endTime).Return(eventsToCreate, nil)
 	suite.sink.On("EventsInTimeframe", ctx, startTime, endTime).Return(nil, nil)
 	suite.sink.On("CreateEvent", ctx, mock.AnythingOfType("models.Event")).Return(nil)
+	suite.sink.On("GetSourceID").Return("sinkID")
 
 	err := suite.controller.SynchroniseTimeframe(ctx, startTime, endTime, false)
 	assert.NoError(suite.T(), err)
@@ -224,7 +227,7 @@ func (suite *ControllerTestSuite) TestCreateEventsEmptySink() {
 	suite.sink.AssertNotCalled(suite.T(), "DeleteEvent", ctx, mock.AnythingOfType("models.Event"))
 }
 
-// TestDeleteEventsNotInSink verifies that if events are present in the source-adapter, but not in the sink, these
+// TestDeleteEventsNotInSink verifies that if events are present in the sink-adapter, but not in the source, these
 // events are deleted in the sink.
 func (suite *ControllerTestSuite) TestDeleteEventsNotInSink() {
 	ctx := context.Background()
@@ -296,6 +299,7 @@ func (suite *ControllerTestSuite) TestDeleteEventsNotInSink() {
 	suite.sink.On("DeleteEvent", ctx, mock.AnythingOfType("models.Event")).Return(nil)
 	// UpdateEvent gets called because the remaining event in the sink will get updated because there are no transformers configured
 	suite.sink.On("UpdateEvent", ctx, mock.AnythingOfType("models.Event")).Return(nil)
+	suite.sink.On("GetSourceID").Return("sinkID")
 	suite.source.On("GetSourceID").Return("sourceID")
 
 	err := suite.controller.SynchroniseTimeframe(ctx, startTime, endTime, false)
@@ -304,6 +308,43 @@ func (suite *ControllerTestSuite) TestDeleteEventsNotInSink() {
 	suite.sink.AssertNotCalled(suite.T(), "CreateEvent", ctx, mock.AnythingOfType("models.Event"))
 	suite.sink.AssertNotCalled(suite.T(), "UpdateEvent", ctx, mock.AnythingOfType("models.Event"))
 	suite.sink.AssertNumberOfCalls(suite.T(), "DeleteEvent", expectedDelete)
+}
+
+// TestDoNotResurrectEvents verifies that if events are present in the source-adapter that originated
+// from the sink, but have been deleted there, these events are not copied to the sink.
+// This ensures that for two calendars A and B, with sync A->B and B->A, that an event
+// will not be restored if the original event was deleted.
+func (suite *ControllerTestSuite) TestDoNotResurrectEvents() {
+	ctx := context.Background()
+	startTime := time.Now()
+	endTime := startTime.Add(2 * time.Hour)
+	sourceEvents := []models.Event{
+		{
+			ICalUID:     "testID",
+			ID:          "testUID",
+			Title:       "Title 1",
+			Description: "Description",
+			StartTime:   startTime,
+			EndTime:     endTime,
+			AllDay:      false,
+			// originates from sink
+			Metadata:  models.NewEventMetadata("seed1", "uri", "sinkID"),
+			Reminders: []models.Reminder{{Actions: models.ReminderActionDisplay, Trigger: models.ReminderTrigger{PointInTime: startTime.Add(-10 * time.Minute)}}},
+		},
+	}
+	sinkEvents := []models.Event{}
+
+	suite.source.On("EventsInTimeframe", ctx, startTime, endTime).Return(sourceEvents, nil)
+	suite.sink.On("EventsInTimeframe", ctx, startTime, endTime).Return(sinkEvents, nil)
+	suite.sink.On("GetSourceID").Return("sinkID")
+	suite.source.On("GetSourceID").Return("sourceID")
+
+	err := suite.controller.SynchroniseTimeframe(ctx, startTime, endTime, false)
+	assert.NoError(suite.T(), err)
+
+	suite.sink.AssertNotCalled(suite.T(), "CreateEvent", ctx, mock.AnythingOfType("models.Event"))
+	suite.sink.AssertNotCalled(suite.T(), "UpdateEvent", ctx, mock.AnythingOfType("models.Event"))
+	suite.sink.AssertNotCalled(suite.T(), "DeleteEvent", ctx, mock.AnythingOfType("models.Event"))
 }
 
 // TestUpdateEventsPrefilledSink asserts that, given that the sink does contain any events,
@@ -425,6 +466,7 @@ func (suite *ControllerTestSuite) TestUpdateEventsPrefilledSink() {
 	suite.source.On("EventsInTimeframe", ctx, startTime, endTime).Return(sourceEvents, nil)
 	suite.sink.On("EventsInTimeframe", ctx, startTime, endTime).Return(sinkEvents, nil)
 	suite.sink.On("UpdateEvent", ctx, mock.AnythingOfType("models.Event")).Return(nil)
+	suite.sink.On("GetSourceID").Return("sinkID")
 	suite.source.On("GetSourceID").Return("sourceID")
 
 	err := suite.controller.SynchroniseTimeframe(ctx, startTime, endTime, false)
@@ -651,6 +693,19 @@ func TestController_diffEvents(t *testing.T) {
 			expectedUpdateEvents: []models.Event{},
 			expectedDeleteEvents: []models.Event{},
 		},
+		{
+			name: "should not resurrect events already deleted from source when syncing back from sink",
+			source: []models.Event{{
+				Metadata: &models.Metadata{
+					SyncID:   "unicorn",
+					SourceID: "sinkID",
+				},
+				Title: "Foo",
+			}},
+			expectedCreateEvents: []models.Event{},
+			expectedUpdateEvents: []models.Event{},
+			expectedDeleteEvents: []models.Event{},
+		},
 	}
 
 	for _, tc := range tt {
@@ -658,8 +713,12 @@ func TestController_diffEvents(t *testing.T) {
 			var source mocks.Source
 			source.On("GetSourceID").Return("sourceID")
 
+			var sink mocks.Sink
+			sink.On("GetSourceID").Return("sinkID")
+
 			var controller = Controller{
 				source: &source,
+				sink:   &sink,
 				logger: log.Default(),
 			}
 
