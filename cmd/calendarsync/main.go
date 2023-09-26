@@ -116,7 +116,7 @@ func Run(c *cli.Context) error {
 	}
 
 	if len(c.String(flagStorageEncryptionKey)) == 0 {
-		return fmt.Errorf("Storage Encryption key needs to be set")
+		return fmt.Errorf("storage encryption key needs to be set")
 	}
 
 	startTime, err := models.TimeFromConfig(cfg.Sync.StartTime)
