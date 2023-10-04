@@ -48,6 +48,8 @@ vendor: ## Vendor dependencies
 ## Test
 
 test: ## Run all tests
+	$(GO) install github.com/vektra/mockery/v2@v2.34.2
+	mockery
 	$(GOTEST) -race $(GOLIST)
 
 coverage: ## Run tests with coverage and export it into 'profile.cov'. If 'COVERAGE_EXPORT' is true, 'COVERAGE_FILE' is written
