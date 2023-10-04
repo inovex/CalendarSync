@@ -49,7 +49,7 @@ func main() {
 			},
 			&cli.StringFlag{
 				Name:  flagStorageEncryptionKey,
-				Usage: "encryption string",
+				Usage: "encryption string to be used for encrypting the local auth-storage file. NOTE: This option is deprecated. Please use the CALENDARSYNC_ENCRYPTION_KEY env variable. The flag will be removed in later versions",
 			},
 			&cli.BoolFlag{
 				Name:  flagClean,
@@ -104,8 +104,19 @@ func Run(c *cli.Context) error {
 	}
 	log.Info("loaded config file", "path", cfg.Path)
 
+	if len(c.String(flagStorageEncryptionKey)) > 0 {
+		log.Warn("Parsing the encryption key using the flag is deprecated. Please use the environment variable $CALENDARSYNC_ENCRYPTION_KEY instead.")
+	} else {
+		if encKeyEnv, envSet := os.LookupEnv("CALENDARSYNC_ENCRYPTION_KEY"); envSet {
+			err := c.Set(flagStorageEncryptionKey, encKeyEnv)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	if len(c.String(flagStorageEncryptionKey)) == 0 {
-		return fmt.Errorf("flag --storage-encryption-key needs to be set")
+		return fmt.Errorf("storage encryption key needs to be set")
 	}
 
 	startTime, err := models.TimeFromConfig(cfg.Sync.StartTime)

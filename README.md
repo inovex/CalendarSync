@@ -30,11 +30,11 @@ data to a third party.
 # How to use
 
 Download the newest [release](https://github.com/inovex/CalendarSync/releases)
-for your platform or install from [the AUR](https://aur.archlinux.org/packages/calendarsync-bin), create a modified `sync.yaml` file based on the content of the `./example.sync.yaml` file. Finally, start the app using `./calendarsync --config sync.yaml --storage-encryption-key <YourSecretPassword>` and follow the instructions in the output.
+for your platform or install from [the AUR](https://aur.archlinux.org/packages/calendarsync-bin), create a modified `sync.yaml` file based on the content of the `./example.sync.yaml` file. Finally, start the app using `CALENDARSYNC_ENCRYPTION_KEY=<YourSecretPassword> ./calendarsync --config sync.yaml` and follow the instructions in the output.
 
 The app will create a file in the execution folder called `auth-storage.yaml`. In
 this file the OAuth2 Credentials will be saved encrypted by your
-`storage-encryption-key`.
+`$CALENDARSYNC_ENCRYPTION_KEY`.
 
 # Configuration
 
