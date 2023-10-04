@@ -15,7 +15,11 @@ func calendarEventToEvent(e *calendar.Event, adapterSourceID string) models.Even
 	metadata := ensureMetadata(e, adapterSourceID)
 
 	var attendees []models.Attendee
+	var hasEventAccepted bool = true
 	for _, eventAttendee := range e.Attendees {
+		if eventAttendee.Self && eventAttendee.ResponseStatus == "declined" {
+			hasEventAccepted = false
+		}
 		attendees = append(attendees, models.Attendee{
 			Email:       eventAttendee.Email,
 			DisplayName: eventAttendee.DisplayName,
@@ -47,6 +51,7 @@ func calendarEventToEvent(e *calendar.Event, adapterSourceID string) models.Even
 		Attendees:   attendees,
 		Reminders:   reminders,
 		MeetingLink: e.HangoutLink,
+		Accepted:    hasEventAccepted,
 	}
 }
 

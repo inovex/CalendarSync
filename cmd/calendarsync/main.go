@@ -175,7 +175,7 @@ func Run(c *cli.Context) error {
 		}
 	}
 
-	controller := sync.NewController(log.Default(), sourceAdapter, sinkAdapter, sync.TransformerFactory(cfg.Transformations)...)
+	controller := sync.NewController(log.Default(), sourceAdapter, sinkAdapter, sync.TransformerFactory(cfg.Transformations), sync.FilterFactory(cfg.Filters))
 	if cfg.UpdateConcurrency != 0 {
 		controller.SetConcurrency(cfg.UpdateConcurrency)
 	}

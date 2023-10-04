@@ -1,3 +1,4 @@
+---
 sync:
   start:
     identifier: MonthStart # 1st of the current month

@@ -21,17 +21,19 @@ type Controller struct {
 	source Source
 	// transformers are applied in order
 	transformers []Transformer
+	filters      []Filter
 	sink         Sink
 	concurrency  int
 	logger       *log.Logger
 }
 
 // NewController constructs a new Controller.
-func NewController(logger *log.Logger, source Source, sink Sink, transformer ...Transformer) Controller {
+func NewController(logger *log.Logger, source Source, sink Sink, transformer []Transformer, filters []Filter) Controller {
 	return Controller{
 		concurrency:  1,
 		source:       source,
 		transformers: transformer,
+		filters:      filters,
 		sink:         sink,
 		logger:       logger,
 	}
@@ -75,6 +77,20 @@ func (p Controller) SynchroniseTimeframe(ctx context.Context, start time.Time, e
 		return err
 	}
 
+	filteredEventsInSource := []models.Event{}
+
+	for _, filter := range p.filters {
+		p.logger.Info("loaded filter", "name", filter.Name())
+	}
+
+	for _, event := range eventsInSource {
+		if FilterEvent(event, p.filters...) {
+			filteredEventsInSource = append(filteredEventsInSource, event)
+		} else {
+			p.logger.Debug("filter rejects event", logFields(event)...)
+		}
+	}
+
 	// Transform source events before comparing them to the sink events
 	transformedEventsInSource := []models.Event{}
 
@@ -83,7 +99,7 @@ func (p Controller) SynchroniseTimeframe(ctx context.Context, start time.Time, e
 		p.logger.Info("loaded transformer", "name", trans.Name())
 	}
 
-	for _, event := range eventsInSource {
+	for _, event := range filteredEventsInSource {
 		transformedEventsInSource = append(transformedEventsInSource, TransformEvent(event, p.transformers...))
 	}
 

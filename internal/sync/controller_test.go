@@ -34,7 +34,10 @@ func (suite *ControllerTestSuite) SetupTest() {
 		{Name: "KeepTitle"},
 		{Name: "KeepReminders"},
 	})
-	suite.controller = NewController(log.Default(), suite.source, suite.sink, transformers...)
+	filters := FilterFactory([]config.Filter{
+		{Name: "DeclinedEvents"},
+	})
+	suite.controller = NewController(log.Default(), suite.source, suite.sink, transformers, filters)
 }
 
 // TestDryRun tests that no acutal adapter func is called
@@ -54,6 +57,7 @@ func (suite *ControllerTestSuite) TestDryRun() {
 			AllDay:      false,
 			Metadata:    models.NewEventMetadata("seed1", "uri", "sourceID"),
 			Reminders:   []models.Reminder{{Actions: models.ReminderActionDisplay, Trigger: models.ReminderTrigger{PointInTime: startTime.Add(-10 * time.Minute)}}},
+			Accepted:    true,
 		},
 		{
 			ICalUID:     "testID3",
@@ -65,6 +69,7 @@ func (suite *ControllerTestSuite) TestDryRun() {
 			AllDay:      false,
 			Metadata:    models.NewEventMetadata("seed3", "uri", "sourceID"),
 			Reminders:   []models.Reminder{{Actions: models.ReminderActionDisplay, Trigger: models.ReminderTrigger{PointInTime: startTime.Add(-10 * time.Minute)}}},
+			Accepted:    true,
 		},
 	}
 
@@ -197,6 +202,7 @@ func (suite *ControllerTestSuite) TestCreateEventsEmptySink() {
 			AllDay:      false,
 			Metadata:    models.NewEventMetadata("seed1", "uri", "sourceID"),
 			Reminders:   []models.Reminder{{Actions: models.ReminderActionDisplay, Trigger: models.ReminderTrigger{PointInTime: time.Now().Add(-10 * time.Minute)}}},
+			Accepted:    true,
 		},
 		{
 			ICalUID:     "testID2",
@@ -207,6 +213,7 @@ func (suite *ControllerTestSuite) TestCreateEventsEmptySink() {
 			EndTime:     time.Now().Add(time.Hour),
 			AllDay:      false,
 			Metadata:    models.NewEventMetadata("seed2", "uri", "sourceID"),
+			Accepted:    true,
 		},
 	}
 
@@ -241,6 +248,7 @@ func (suite *ControllerTestSuite) TestDeleteEventsNotInSink() {
 			AllDay:      false,
 			Metadata:    models.NewEventMetadata("seed1", "uri", "sourceID"),
 			Reminders:   []models.Reminder{{Actions: models.ReminderActionDisplay, Trigger: models.ReminderTrigger{PointInTime: startTime.Add(-10 * time.Minute)}}},
+			Accepted:    true,
 		},
 	}
 	sinkEvents := []models.Event{
@@ -325,6 +333,7 @@ func (suite *ControllerTestSuite) TestUpdateEventsPrefilledSink() {
 			AllDay:      false,
 			Metadata:    models.NewEventMetadata("seed1", "uri", "sourceID"),
 			Reminders:   []models.Reminder{{Actions: models.ReminderActionDisplay, Trigger: models.ReminderTrigger{PointInTime: time.Now().Add(-10 * time.Minute)}}},
+			Accepted:    true,
 		},
 		{
 			ICalUID:     "testID2",
@@ -335,6 +344,7 @@ func (suite *ControllerTestSuite) TestUpdateEventsPrefilledSink() {
 			EndTime:     endTime,
 			AllDay:      false,
 			Metadata:    models.NewEventMetadata("seed2", "uri", "sourceID"),
+			Accepted:    true,
 		},
 		{
 			ICalUID:     "testID3",
@@ -345,6 +355,7 @@ func (suite *ControllerTestSuite) TestUpdateEventsPrefilledSink() {
 			EndTime:     endTime,
 			AllDay:      false,
 			Metadata:    models.NewEventMetadata("seed3", "uri", "sourceID"),
+			Accepted:    true,
 		},
 		{
 			ICalUID:     "testID4",
@@ -356,6 +367,7 @@ func (suite *ControllerTestSuite) TestUpdateEventsPrefilledSink() {
 			AllDay:      false,
 			Metadata:    models.NewEventMetadata("seed4", "uri", "sourceID"),
 			Reminders:   []models.Reminder{{Actions: models.ReminderActionDisplay, Trigger: models.ReminderTrigger{PointInTime: time.Now().Add(-30 * time.Minute)}}},
+			Accepted:    true,
 		},
 	}
 
@@ -434,6 +446,51 @@ func (suite *ControllerTestSuite) TestUpdateEventsPrefilledSink() {
 	suite.sink.AssertCalled(suite.T(), "EventsInTimeframe", ctx, startTime, endTime)
 	suite.sink.AssertNumberOfCalls(suite.T(), "UpdateEvent", eventsToBeUpdated)
 	suite.sink.AssertNotCalled(suite.T(), "CreateEvent", ctx, mock.AnythingOfType("models.Event"))
+	suite.sink.AssertNotCalled(suite.T(), "DeleteEvent", ctx, mock.AnythingOfType("models.Event"))
+}
+
+// TestCreateEventsDeclined asserts that, only the accepted event gets synced
+func (suite *ControllerTestSuite) TestCreateEventsDeclined() {
+	ctx := context.Background()
+	startTime := time.Now()
+	endTime := startTime.Add(2 * time.Hour)
+	eventsToCreate := []models.Event{
+		{
+			ICalUID:     "testID",
+			ID:          "testUID",
+			Title:       "Title",
+			Description: "Description",
+			StartTime:   time.Now(),
+			EndTime:     time.Now().Add(time.Hour),
+			AllDay:      false,
+			Metadata:    models.NewEventMetadata("seed1", "uri", "sourceID"),
+			Reminders:   []models.Reminder{{Actions: models.ReminderActionDisplay, Trigger: models.ReminderTrigger{PointInTime: time.Now().Add(-10 * time.Minute)}}},
+			Accepted:    true,
+		},
+		{
+			ICalUID:     "testID2",
+			ID:          "testUID2",
+			Title:       "Title",
+			Description: "Description",
+			StartTime:   time.Now(),
+			EndTime:     time.Now().Add(time.Hour),
+			AllDay:      false,
+			Metadata:    models.NewEventMetadata("seed2", "uri", "sourceID"),
+			Accepted:    false,
+		},
+	}
+
+	suite.source.On("EventsInTimeframe", ctx, startTime, endTime).Return(eventsToCreate, nil)
+	suite.sink.On("EventsInTimeframe", ctx, startTime, endTime).Return(nil, nil)
+	suite.sink.On("CreateEvent", ctx, mock.AnythingOfType("models.Event")).Return(nil)
+
+	err := suite.controller.SynchroniseTimeframe(ctx, startTime, endTime, false)
+	assert.NoError(suite.T(), err)
+
+	suite.source.AssertCalled(suite.T(), "EventsInTimeframe", ctx, startTime, endTime)
+	suite.sink.AssertCalled(suite.T(), "EventsInTimeframe", ctx, startTime, endTime)
+	suite.sink.AssertNumberOfCalls(suite.T(), "CreateEvent", len(eventsToCreate)-1)
+	suite.sink.AssertNotCalled(suite.T(), "UpdateEvent", ctx, mock.AnythingOfType("models.Event"))
 	suite.sink.AssertNotCalled(suite.T(), "DeleteEvent", ctx, mock.AnythingOfType("models.Event"))
 }
 

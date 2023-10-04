@@ -267,6 +267,10 @@ func (o OutlookClient) outlookEventToEvent(oe Event, adapterSourceID string) (e 
 			},
 		})
 	}
+	var hasEventAccepted bool = true
+	if oe.ResponseStatus.Response == "declined" {
+		hasEventAccepted = false
+	}
 
 	bufEvent = models.Event{
 		ICalUID:     oe.UID,
@@ -280,6 +284,7 @@ func (o OutlookClient) outlookEventToEvent(oe Event, adapterSourceID string) (e 
 		Attendees:   attendees,
 		Reminders:   reminders,
 		MeetingLink: oe.OnlineMeetingUrl,
+		Accepted:    hasEventAccepted,
 	}
 
 	if oe.IsAllDay {
