@@ -103,6 +103,6 @@ func (a SinkAdapter) EventsInTimeframe(ctx context.Context, start time.Time, end
 	return a.client.EventsInTimeframe(ctx, start, end)
 }
 
-func (a SinkAdapter) GetSourceID() string {
-	return a.client.GetSourceID()
+func (a SinkAdapter) GetCalendarID() string {
+	return a.client.GetCalendarID()
 }

@@ -42,8 +42,8 @@ func (_m *Source) EventsInTimeframe(ctx context.Context, start time.Time, end ti
 	return r0, r1
 }
 
-// GetSourceID provides a mock function with given fields:
-func (_m *Source) GetSourceID() string {
+// GetCalendarID provides a mock function with given fields:
+func (_m *Source) GetCalendarID() string {
 	ret := _m.Called()
 
 	var r0 string

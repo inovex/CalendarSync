@@ -94,8 +94,8 @@ func (suite *ControllerTestSuite) TestDryRun() {
 	suite.source.On("EventsInTimeframe", ctx, startTime, endTime).Return(sourceEvents, nil)
 	suite.sink.On("EventsInTimeframe", ctx, startTime, endTime).Return(sinkEvents, nil)
 	suite.sink.On("DeleteEvent", ctx, mock.AnythingOfType("models.Event")).Return(nil)
-	suite.sink.On("GetSourceID").Return("sinkID")
-	suite.source.On("GetSourceID").Return("sourceID")
+	suite.sink.On("GetCalendarID").Return("sinkID")
+	suite.source.On("GetCalendarID").Return("sourceID")
 
 	err := suite.controller.SynchroniseTimeframe(ctx, startTime, endTime, true)
 	assert.NoError(suite.T(), err)
@@ -171,8 +171,8 @@ func (suite *ControllerTestSuite) TestCleanUp() {
 	suite.source.On("EventsInTimeframe", ctx, startTime, endTime).Return(sourceEvents, nil)
 	suite.sink.On("EventsInTimeframe", ctx, startTime, endTime).Return(sinkEvents, nil)
 	suite.sink.On("DeleteEvent", ctx, mock.AnythingOfType("models.Event")).Return(nil)
-	suite.sink.On("GetSourceID").Return("sinkID")
-	suite.source.On("GetSourceID").Return("sourceID")
+	suite.sink.On("GetCalendarID").Return("sinkID")
+	suite.source.On("GetCalendarID").Return("sourceID")
 
 	err := suite.controller.CleanUp(ctx, startTime, endTime)
 	assert.NoError(suite.T(), err)
@@ -215,7 +215,7 @@ func (suite *ControllerTestSuite) TestCreateEventsEmptySink() {
 	suite.source.On("EventsInTimeframe", ctx, startTime, endTime).Return(eventsToCreate, nil)
 	suite.sink.On("EventsInTimeframe", ctx, startTime, endTime).Return(nil, nil)
 	suite.sink.On("CreateEvent", ctx, mock.AnythingOfType("models.Event")).Return(nil)
-	suite.sink.On("GetSourceID").Return("sinkID")
+	suite.sink.On("GetCalendarID").Return("sinkID")
 
 	err := suite.controller.SynchroniseTimeframe(ctx, startTime, endTime, false)
 	assert.NoError(suite.T(), err)
@@ -299,8 +299,8 @@ func (suite *ControllerTestSuite) TestDeleteEventsNotInSink() {
 	suite.sink.On("DeleteEvent", ctx, mock.AnythingOfType("models.Event")).Return(nil)
 	// UpdateEvent gets called because the remaining event in the sink will get updated because there are no transformers configured
 	suite.sink.On("UpdateEvent", ctx, mock.AnythingOfType("models.Event")).Return(nil)
-	suite.sink.On("GetSourceID").Return("sinkID")
-	suite.source.On("GetSourceID").Return("sourceID")
+	suite.sink.On("GetCalendarID").Return("sinkID")
+	suite.source.On("GetCalendarID").Return("sourceID")
 
 	err := suite.controller.SynchroniseTimeframe(ctx, startTime, endTime, false)
 	assert.NoError(suite.T(), err)
@@ -336,8 +336,8 @@ func (suite *ControllerTestSuite) TestDoNotResurrectEvents() {
 
 	suite.source.On("EventsInTimeframe", ctx, startTime, endTime).Return(sourceEvents, nil)
 	suite.sink.On("EventsInTimeframe", ctx, startTime, endTime).Return(sinkEvents, nil)
-	suite.sink.On("GetSourceID").Return("sinkID")
-	suite.source.On("GetSourceID").Return("sourceID")
+	suite.sink.On("GetCalendarID").Return("sinkID")
+	suite.source.On("GetCalendarID").Return("sourceID")
 
 	err := suite.controller.SynchroniseTimeframe(ctx, startTime, endTime, false)
 	assert.NoError(suite.T(), err)
@@ -466,8 +466,8 @@ func (suite *ControllerTestSuite) TestUpdateEventsPrefilledSink() {
 	suite.source.On("EventsInTimeframe", ctx, startTime, endTime).Return(sourceEvents, nil)
 	suite.sink.On("EventsInTimeframe", ctx, startTime, endTime).Return(sinkEvents, nil)
 	suite.sink.On("UpdateEvent", ctx, mock.AnythingOfType("models.Event")).Return(nil)
-	suite.sink.On("GetSourceID").Return("sinkID")
-	suite.source.On("GetSourceID").Return("sourceID")
+	suite.sink.On("GetCalendarID").Return("sinkID")
+	suite.source.On("GetCalendarID").Return("sourceID")
 
 	err := suite.controller.SynchroniseTimeframe(ctx, startTime, endTime, false)
 	assert.NoError(suite.T(), err)
@@ -711,10 +711,10 @@ func TestController_diffEvents(t *testing.T) {
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
 			var source mocks.Source
-			source.On("GetSourceID").Return("sourceID")
+			source.On("GetCalendarID").Return("sourceID")
 
 			var sink mocks.Sink
-			sink.On("GetSourceID").Return("sinkID")
+			sink.On("GetCalendarID").Return("sinkID")
 
 			var controller = Controller{
 				source: &source,
