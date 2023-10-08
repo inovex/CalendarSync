@@ -525,6 +525,7 @@ func (suite *ControllerTestSuite) TestCreateEventsDeclined() {
 	suite.source.On("EventsInTimeframe", ctx, startTime, endTime).Return(eventsToCreate, nil)
 	suite.sink.On("EventsInTimeframe", ctx, startTime, endTime).Return(nil, nil)
 	suite.sink.On("CreateEvent", ctx, mock.AnythingOfType("models.Event")).Return(nil)
+	suite.sink.On("GetCalendarID").Return("sinkID")
 
 	err := suite.controller.SynchroniseTimeframe(ctx, startTime, endTime, false)
 	assert.NoError(suite.T(), err)
