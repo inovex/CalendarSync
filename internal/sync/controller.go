@@ -159,7 +159,7 @@ func (p Controller) CleanUp(ctx context.Context, start time.Time, end time.Time)
 	for _, event := range sink {
 		// Check if the sink event was synced by us, if there's no metadata the event may
 		// be there because we were invited or because it is not managed by us
-		if event.Metadata.SourceID == p.source.GetSourceID() {
+		if event.Metadata.SourceID == p.source.GetCalendarID() {
 			// redefine to let the closure capture individual variables
 			event := event
 			tasks = append(tasks, func() error {
@@ -193,14 +193,26 @@ func (p Controller) diffEvents(sourceEvents []models.Event, sinkEvents []models.
 
 		switch {
 		case !exists:
+			// Don't sync synced events back to their original calendar to prevent resurrecting
+			// deleted events.
+			// Problem:
+			// - Sync event (from calendar A) to create eventCopy (calendar B, SourceID = calendar A).
+			// - Delete event (in calendar A)
+			// - Run sync from calendar B to calendar A. This will copy (and thereby resurrect) the event.
+			//
+			// Solution: Ignore events the originate from the sink, but no longer exist there.
+			if event.Metadata.SourceID == p.sink.GetCalendarID() {
+				p.logger.Info("skipping event as it originates from the sink, but no longer exists there", logFields(event)...)
+				continue
+			}
 			p.logger.Info("new event, needs sync", logFields(event)...)
 			createEvents = append(createEvents, event)
 
-		case sinkEvent.Metadata.SourceID != p.source.GetSourceID():
+		case sinkEvent.Metadata.SourceID != p.source.GetCalendarID():
 			p.logger.Info("event was not synced by this source adapter, skipping", logFields(event)...)
 
 			// Only update the event if the event differs AND we synced it prior and set the correct metadata
-		case !models.IsSameEvent(event, sinkEvent) && sinkEvent.Metadata.SourceID == p.source.GetSourceID():
+		case !models.IsSameEvent(event, sinkEvent) && sinkEvent.Metadata.SourceID == p.source.GetCalendarID():
 			p.logger.Info("event content changed, needs sync", logFields(event)...)
 			updateEvents = append(updateEvents, sinkEvent.Overwrite(event))
 
@@ -219,7 +231,7 @@ func (p Controller) diffEvents(sourceEvents []models.Event, sinkEvents []models.
 		case exists:
 			// Nothing to do
 
-		case event.Metadata.SourceID == p.source.GetSourceID():
+		case event.Metadata.SourceID == p.source.GetCalendarID():
 			p.logger.Info("sinkEvent is not (anymore) in sourceEvents, marked for removal", logFields(event)...)
 			deleteEvents = append(deleteEvents, event)
 

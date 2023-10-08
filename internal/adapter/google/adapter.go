@@ -24,7 +24,7 @@ type GoogleCalendarClient interface {
 	CreateEvent(ctx context.Context, event models.Event) error
 	UpdateEvent(ctx context.Context, event models.Event) error
 	DeleteEvent(ctx context.Context, event models.Event) error
-	GetSourceID() string
+	GetCalendarID() string
 	InitGoogleCalendarClient(calId string, log *log.Logger) error
 }
 
@@ -219,12 +219,12 @@ func (c *CalendarAPI) Name() string {
 	return "Google Calendar"
 }
 
-// GetSourceID calculates a unique SourceID for this adapter based on the current calendar.
+// GetCalendarID calculates a unique ID for this adapter based on the current calendar.
 // This is used to distinguish between adapters in order to not overwrite or delete events
 // which are maintained by different adapters.
 // A simple use-case for this is if you have multiple google calendars as source adapters configured.
-func (c *CalendarAPI) GetSourceID() string {
-	return c.gcalClient.GetSourceID()
+func (c *CalendarAPI) GetCalendarID() string {
+	return c.gcalClient.GetCalendarID()
 }
 
 func (c *CalendarAPI) SetLogger(logger *log.Logger) {

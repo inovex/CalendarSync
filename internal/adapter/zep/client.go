@@ -36,11 +36,11 @@ type CalendarAPI struct {
 	homeSet   string
 }
 
-func (zep *CalendarAPI) GetSourceID() string {
-	return zep.generateSourceID()
+func (zep *CalendarAPI) GetCalendarID() string {
+	return zep.generateCalendarID()
 }
 
-func (zep *CalendarAPI) generateSourceID() string {
+func (zep *CalendarAPI) generateCalendarID() string {
 	var id []byte
 	components := []string{zep.username, zep.homeSet, zep.calendarID}
 
@@ -104,7 +104,7 @@ func (zep *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, 
 				Description: v.Description,
 				StartTime:   v.Start,
 				EndTime:     v.End,
-				Metadata:    models.NewEventMetadata(v.ID, "", zep.GetSourceID()),
+				Metadata:    models.NewEventMetadata(v.ID, "", zep.GetCalendarID()),
 			})
 	}
 

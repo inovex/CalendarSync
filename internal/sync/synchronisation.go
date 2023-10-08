@@ -22,7 +22,7 @@ type Source interface {
 	NamedComponent
 	// EventsInTimeframe return all events in a certain timeframe
 	EventsInTimeframe(ctx context.Context, start time.Time, end time.Time) ([]models.Event, error)
-	GetSourceID() string
+	GetCalendarID() string
 }
 
 // Sink describes a NamedComponent allows write-access to events.
@@ -36,4 +36,5 @@ type Sink interface {
 	UpdateEvent(ctx context.Context, e models.Event) error
 	// DeleteEvent deletes the given Event in the external calendar
 	DeleteEvent(ctx context.Context, e models.Event) error
+	GetCalendarID() string
 }

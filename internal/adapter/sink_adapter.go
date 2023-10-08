@@ -102,3 +102,7 @@ func (a SinkAdapter) DeleteEvent(ctx context.Context, e models.Event) error {
 func (a SinkAdapter) EventsInTimeframe(ctx context.Context, start time.Time, end time.Time) ([]models.Event, error) {
 	return a.client.EventsInTimeframe(ctx, start, end)
 }
+
+func (a SinkAdapter) GetCalendarID() string {
+	return a.client.GetCalendarID()
+}
