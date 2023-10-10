@@ -7,7 +7,6 @@ import (
 	"io"
 	"io/fs"
 	"os"
-	"os/user"
 	"path/filepath"
 	"strings"
 
@@ -26,6 +25,13 @@ type YamlStorage struct {
 func (y *YamlStorage) Setup(config config.AuthStorage, encryptionPassphrase string) error {
 	y.StorageEncryptionKey = encryptionPassphrase
 	y.StoragePath = config.Config["path"].(string)
+	if strings.HasPrefix(y.StoragePath, "~/") {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			return err
+		}
+		y.StoragePath = filepath.Join(homeDir, y.StoragePath[2:])
+	}
 	return nil
 }
 
@@ -116,10 +122,6 @@ func (y *YamlStorage) RemoveCalendarAuth(calendarID string) error {
 
 func (y *YamlStorage) writeFile(cals []CalendarAuth) error {
 	var writer io.Writer
-	if strings.HasPrefix(y.StoragePath, "~/") {
-		usr, _ := user.Current()
-		y.StoragePath = filepath.Join(usr.HomeDir, y.StoragePath[2:])
-	}
 	file, err := os.OpenFile(y.StoragePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to open storage file: %w", err)
