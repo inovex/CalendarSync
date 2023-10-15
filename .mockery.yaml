@@ -1,0 +1,12 @@
+inpackage: false
+dir: "{{.InterfaceDirRelative}}/mocks"
+mockname: "{{.InterfaceName}}"
+outpkg: "mocks"
+filename: "{{.InterfaceName}}.go"
+packages:
+  github.com/inovex/CalendarSync/internal/sync:
+    config:
+      recursive: True
+    interfaces:
+      Source:
+      Sink:
