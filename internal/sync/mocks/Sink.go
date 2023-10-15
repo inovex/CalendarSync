@@ -136,6 +136,36 @@ func (_m *Sink) EventsInTimeframe(ctx context.Context, start time.Time, end time
 	return r0, r1
 }
 
+// Sink_EventsInTimeframe_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'EventsInTimeframe'
+type Sink_EventsInTimeframe_Call struct {
+	*mock.Call
+}
+
+// EventsInTimeframe is a helper method to define mock.On call
+//   - ctx context.Context
+//   - start time.Time
+//   - end time.Time
+func (_e *Sink_Expecter) EventsInTimeframe(ctx interface{}, start interface{}, end interface{}) *Sink_EventsInTimeframe_Call {
+	return &Sink_EventsInTimeframe_Call{Call: _e.mock.On("EventsInTimeframe", ctx, start, end)}
+}
+
+func (_c *Sink_EventsInTimeframe_Call) Run(run func(ctx context.Context, start time.Time, end time.Time)) *Sink_EventsInTimeframe_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(time.Time), args[2].(time.Time))
+	})
+	return _c
+}
+
+func (_c *Sink_EventsInTimeframe_Call) Return(_a0 []models.Event, _a1 error) *Sink_EventsInTimeframe_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *Sink_EventsInTimeframe_Call) RunAndReturn(run func(context.Context, time.Time, time.Time) ([]models.Event, error)) *Sink_EventsInTimeframe_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetCalendarID provides a mock function with given fields:
 func (_m *Sink) GetCalendarID() string {
 	ret := _m.Called()
@@ -150,29 +180,29 @@ func (_m *Sink) GetCalendarID() string {
 	return r0
 }
 
-// Sink_GetSourceID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetSourceID'
-type Sink_GetSourceID_Call struct {
+// Sink_GetCalendarID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetCalendarID'
+type Sink_GetCalendarID_Call struct {
 	*mock.Call
 }
 
-// GetSourceID is a helper method to define mock.On call
-func (_e *Sink_Expecter) GetSourceID() *Sink_GetSourceID_Call {
-	return &Sink_GetSourceID_Call{Call: _e.mock.On("GetSourceID")}
+// GetCalendarID is a helper method to define mock.On call
+func (_e *Sink_Expecter) GetCalendarID() *Sink_GetCalendarID_Call {
+	return &Sink_GetCalendarID_Call{Call: _e.mock.On("GetCalendarID")}
 }
 
-func (_c *Sink_GetSourceID_Call) Run(run func()) *Sink_GetSourceID_Call {
+func (_c *Sink_GetCalendarID_Call) Run(run func()) *Sink_GetCalendarID_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run()
 	})
 	return _c
 }
 
-func (_c *Sink_GetSourceID_Call) Return(_a0 string) *Sink_GetSourceID_Call {
+func (_c *Sink_GetCalendarID_Call) Return(_a0 string) *Sink_GetCalendarID_Call {
 	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *Sink_GetSourceID_Call) RunAndReturn(run func() string) *Sink_GetSourceID_Call {
+func (_c *Sink_GetCalendarID_Call) RunAndReturn(run func() string) *Sink_GetCalendarID_Call {
 	_c.Call.Return(run)
 	return _c
 }
