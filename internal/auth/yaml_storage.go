@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"os"
 
+	"github.com/charmbracelet/log"
 	"github.com/inovex/CalendarSync/internal/config"
 	"gopkg.in/yaml.v3"
 )
@@ -15,11 +16,22 @@ import (
 type YamlStorage struct {
 	StoragePath          string
 	StorageEncryptionKey string
+	// Holds the decrypted CalendarAuth Config in memory, so the file does not have to be read multiple times
+	DecryptedAuth []CalendarAuth
 }
 
 func (y *YamlStorage) Setup(config config.AuthStorage, encryptionPassphrase string) error {
 	y.StorageEncryptionKey = encryptionPassphrase
 	y.StoragePath = config.Config["path"].(string)
+
+	log.Debug("Loading saved auth data into memory")
+	stor, err := y.readAndParseFile()
+	if errors.Is(err, os.ErrNotExist) {
+		log.Debug("No storage file found, skipping loading from memory")
+	} else {
+		// Put the data into DecryptedAuth
+		y.DecryptedAuth = stor.Calendars
+	}
 	return nil
 }
 
@@ -47,10 +59,25 @@ func (y *YamlStorage) WriteCalendarAuth(newCal CalendarAuth) (bool, error) {
 		return false, err
 	}
 
+	// Adding freshly written CalendarAuth to memory
+	// Probably unneeded, the next time this data will be retrieved is on the next calendarsync run
+	log.Debugf("Adding calendar auth for cal %s to memory", newCal.CalendarID)
+	y.DecryptedAuth = append(y.DecryptedAuth, newCal)
+
 	return true, nil
 }
 
 func (y *YamlStorage) ReadCalendarAuth(calendarID string) (*CalendarAuth, error) {
+	// if we already decrypted the file, read from memory
+	if len(y.DecryptedAuth) > 0 {
+		for _, cal := range y.DecryptedAuth {
+			if cal.CalendarID == calendarID {
+				log.Debug("loaded auth data from memory", "calendarID", cal.CalendarID)
+				return &cal, nil
+			}
+		}
+	}
+
 	file, err := y.readAndParseFile()
 	if err != nil {
 		return nil, ignoreNoFile(err)
