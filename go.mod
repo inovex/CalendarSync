@@ -1,6 +1,8 @@
 module github.com/inovex/CalendarSync
 
-go 1.20
+go 1.21
+
+toolchain go1.21.3
 
 require (
 	filippo.io/age v1.1.1
@@ -9,7 +11,7 @@ require (
 	github.com/charmbracelet/log v0.2.5
 	github.com/emersion/go-ical v0.0.0-20220601085725-0864dccc089f
 	github.com/emersion/go-webdav v0.4.0
-	github.com/microcosm-cc/bluemonday v1.0.25
+	github.com/microcosm-cc/bluemonday v1.0.26
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
 	github.com/stretchr/testify v1.8.4
 	github.com/thlib/go-timezone-local v0.0.0-20210907160436-ef149e42d28e
