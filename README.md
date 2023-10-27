@@ -46,6 +46,7 @@ The CalendarSync config file consists of `four` building blocks:
   calendar are written to
 - `transformations` - Controls the transformers applied to the events before
   syncing
+- `filters` - Controls filters, which allow events to be excluded from syncing
 
 ## Sync
 
@@ -153,7 +154,7 @@ filters:
 # Cleaning Up
 
 You just synced a lot of events in your calendar and decide you want to use a
-separate calendar for this? Or you simply want to remove all the synced events
+separate calendar for this? Or you want to remove all the synced events
 from your calendar?
 
 Use the `--clean` flag to get rid of all the unwanted events. (We leave your
