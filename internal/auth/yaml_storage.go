@@ -23,15 +23,6 @@ type YamlStorage struct {
 func (y *YamlStorage) Setup(config config.AuthStorage, encryptionPassphrase string) error {
 	y.StorageEncryptionKey = encryptionPassphrase
 	y.StoragePath = config.Config["path"].(string)
-
-	log.Debug("Loading saved auth data into memory")
-	stor, err := y.readAndParseFile()
-	if errors.Is(err, os.ErrNotExist) {
-		log.Debug("No storage file found, skipping loading from memory")
-	} else {
-		// Put the data into DecryptedAuth
-		y.DecryptedAuth = stor.Calendars
-	}
 	return nil
 }
 
