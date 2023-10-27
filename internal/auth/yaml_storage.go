@@ -59,22 +59,24 @@ func (y *YamlStorage) WriteCalendarAuth(newCal CalendarAuth) (bool, error) {
 }
 
 func (y *YamlStorage) ReadCalendarAuth(calendarID string) (*CalendarAuth, error) {
+	var calendars []CalendarAuth
 	// if we already decrypted the file, read from memory
-	if len(y.DecryptedAuth) > 0 {
-		for _, cal := range y.DecryptedAuth {
-			if cal.CalendarID == calendarID {
-				log.Debug("loaded auth data from memory", "calendarID", cal.CalendarID)
-				return &cal, nil
-			}
+	if len(y.CachedAuth) > 0 {
+		log.Debug("Loading Auth Data from memory")
+		calendars = y.CachedAuth
+	} else {
+		log.Debug("Loading Auth Data from file")
+		file, err := y.readAndParseFile()
+		if err != nil {
+			return nil, ignoreNoFile(err)
 		}
+		// Load data from file into cache
+		y.CachedAuth = file.Calendars
+		// use cached data from now on
+		calendars = y.CachedAuth
 	}
 
-	file, err := y.readAndParseFile()
-	if err != nil {
-		return nil, ignoreNoFile(err)
-	}
-
-	for _, cal := range file.Calendars {
+	for _, cal := range calendars {
 		if cal.CalendarID == calendarID {
 			return &cal, nil
 		}
