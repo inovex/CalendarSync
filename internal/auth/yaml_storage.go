@@ -53,7 +53,7 @@ func (y *YamlStorage) WriteCalendarAuth(newCal CalendarAuth) (bool, error) {
 	// Adding freshly written CalendarAuth to memory
 	// Probably unneeded, the next time this data will be retrieved is on the next calendarsync run
 	log.Debugf("Adding calendar auth for cal %s to memory", newCal.CalendarID)
-	y.DecryptedAuth = append(y.DecryptedAuth, newCal)
+	y.CachedAuth = cals
 
 	return true, nil
 }
