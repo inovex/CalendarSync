@@ -17,7 +17,7 @@ type YamlStorage struct {
 	StoragePath          string
 	StorageEncryptionKey string
 	// Holds the decrypted CalendarAuth Config in memory, so the file does not have to be read multiple times
-	DecryptedAuth []CalendarAuth
+	CachedAuth []CalendarAuth
 }
 
 func (y *YamlStorage) Setup(config config.AuthStorage, encryptionPassphrase string) error {
