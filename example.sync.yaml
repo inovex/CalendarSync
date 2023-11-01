@@ -60,6 +60,10 @@ filters:
   - name: DeclinedEvents
   # Events which cover the full day aren't synced
   - name: AllDayEvents
+  # Events which match the following regular expression, syntax here: https://github.com/google/re2/wiki/Syntax
+  - name: RegexTitle
+    config:
+      Regexp: ".*test"
 
 # Perform multiple calendar updates concurrently
 # Defaults to 1 if not set
