@@ -1,8 +1,9 @@
 package sync
 
 import (
-	"fmt"
 	"strings"
+
+	"github.com/charmbracelet/log"
 
 	"github.com/inovex/CalendarSync/internal/config"
 	"github.com/inovex/CalendarSync/internal/models"
@@ -58,8 +59,8 @@ var (
 func TransformerFactory(configuredTransformers []config.Transformer) (loadedTransformers []Transformer) {
 	for _, configuredTransformer := range configuredTransformers {
 		if _, nameExists := transformerConfigMapping[configuredTransformer.Name]; !nameExists {
-			// todo: handle properly
-			panic(fmt.Sprintf("unknown transformer: %s", configuredTransformer.Name))
+			log.Warnf("unknown transformer: %s, skipping..", configuredTransformer.Name)
+			continue
 		}
 		// load the default Transformer for the configured name and initialize it based on the config
 		transformerDefault := transformerConfigMapping[configuredTransformer.Name]
