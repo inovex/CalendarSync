@@ -1,8 +1,9 @@
 package sync
 
 import (
-	"fmt"
 	"strings"
+
+	"github.com/charmbracelet/log"
 
 	"github.com/inovex/CalendarSync/internal/config"
 	"github.com/inovex/CalendarSync/internal/filter"
@@ -42,8 +43,8 @@ var (
 func FilterFactory(configuredFilters []config.Filter) (loadedFilters []Filter) {
 	for _, configuredFilter := range configuredFilters {
 		if _, nameExists := filterConfigMapping[configuredFilter.Name]; !nameExists {
-			// todo: handle properly
-			panic(fmt.Sprintf("unknown filter: %s", configuredFilter.Name))
+			log.Warnf("unknown filter: %s, skipping..", configuredFilter.Name)
+			continue
 		}
 		// load the default Transformer for the configured name and initialize it based on the config
 		filterDefault := filterConfigMapping[configuredFilter.Name]
