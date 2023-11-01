@@ -32,11 +32,13 @@ var (
 	filterConfigMapping = map[string]Filter{
 		"DeclinedEvents": &filter.DeclinedEvents{},
 		"AllDayEvents":   &filter.AllDayEvents{},
+		"RegexTitle":     &filter.RegexTitle{},
 	}
 
 	filterOrder = []string{
 		"DeclinedEvents",
 		"AllDayEvents",
+		"RegexTitle",
 	}
 )
 
