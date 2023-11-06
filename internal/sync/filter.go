@@ -45,7 +45,7 @@ var (
 func FilterFactory(configuredFilters []config.Filter) (loadedFilters []Filter) {
 	for _, configuredFilter := range configuredFilters {
 		if _, nameExists := filterConfigMapping[configuredFilter.Name]; !nameExists {
-			log.Warnf("unknown filter: %s, skipping..", configuredFilter.Name)
+			log.Warnf("unknown filter: %s, skipping...", configuredFilter.Name)
 			continue
 		}
 		// load the default Transformer for the configured name and initialize it based on the config

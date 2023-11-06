@@ -59,7 +59,7 @@ var (
 func TransformerFactory(configuredTransformers []config.Transformer) (loadedTransformers []Transformer) {
 	for _, configuredTransformer := range configuredTransformers {
 		if _, nameExists := transformerConfigMapping[configuredTransformer.Name]; !nameExists {
-			log.Warnf("unknown transformer: %s, skipping..", configuredTransformer.Name)
+			log.Warnf("unknown transformer: %s, skipping...", configuredTransformer.Name)
 			continue
 		}
 		// load the default Transformer for the configured name and initialize it based on the config
