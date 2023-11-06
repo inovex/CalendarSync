@@ -9,7 +9,7 @@ import (
 )
 
 type RegexTitle struct {
-	ExludeRegexp string
+	ExcludeRegexp string
 }
 
 func (a RegexTitle) Name() string {
@@ -18,14 +18,14 @@ func (a RegexTitle) Name() string {
 
 func (a RegexTitle) Filter(event models.Event) bool {
 
-	if len(a.ExludeRegexp) == 0 {
+	if len(a.ExcludeRegexp) == 0 {
 		log.Debugf("Regular Expression is empty, skipping Filter %s for event: %s", a.Name(), event.Title)
 		return true
 	}
 
-	log.Debugf("Running Regexp %s on event title: %s", a.ExludeRegexp, event.Title)
+	log.Debugf("Running Regexp %s on event title: %s", a.ExcludeRegexp, event.Title)
 
-	r, err := regexp.Compile(a.ExludeRegexp)
+	r, err := regexp.Compile(a.ExcludeRegexp)
 	if err != nil {
 		log.Fatalf("Regular expression of Filter %s is not valid, please check", a.Name())
 	}

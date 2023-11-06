@@ -34,7 +34,7 @@ func TestRegexTitleFilter(t *testing.T) {
 	expectedSinkEvents := []models.Event{sourceEvents[1], sourceEvents[2]}
 
 	eventFilter := filter.RegexTitle{
-		ExludeRegexp: ".*test",
+		ExcludeRegexp: ".*test",
 	}
 	checkEventFilter(t, eventFilter, sourceEvents, expectedSinkEvents)
 }
@@ -44,7 +44,7 @@ func TestRegexTitleFilterEmptyRegex(t *testing.T) {
 	expectedSinkEvents := sourceEvents
 
 	eventFilter := filter.RegexTitle{
-		ExludeRegexp: "",
+		ExcludeRegexp: "",
 	}
 	checkEventFilter(t, eventFilter, sourceEvents, expectedSinkEvents)
 }
