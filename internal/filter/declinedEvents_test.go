@@ -15,7 +15,6 @@ func TestDeclinedEventsFilter(t *testing.T) {
 			ID:          "testUid",
 			Title:       "test",
 			Description: "bar",
-			AllDay:      true,
 			Accepted:    false,
 		},
 		{
@@ -23,7 +22,6 @@ func TestDeclinedEventsFilter(t *testing.T) {
 			ID:          "testUid2",
 			Title:       "Test 2",
 			Description: "bar",
-			AllDay:      false,
 			Accepted:    true,
 		},
 		{
@@ -35,32 +33,10 @@ func TestDeclinedEventsFilter(t *testing.T) {
 		},
 	}
 
-	expectedSinkEvents := []models.Event{
-		{
-			ICalUID:     "testId2",
-			ID:          "testUid2",
-			Title:       "Test 2",
-			Description: "bar",
-			Accepted:    true,
-		},
-		{
-			ICalUID:     "testId3",
-			ID:          "testUid3",
-			Title:       "foo",
-			Description: "bar",
-			Accepted:    true,
-		},
-	}
+	expectedSinkEvents := []models.Event{sourceEvents[1], sourceEvents[2]}
 
 	filter := DeclinedEvents{}
-
-	filteredEvents := []models.Event{}
-
-	for _, event := range sourceEvents {
-		if filter.Filter(event) {
-			filteredEvents = append(filteredEvents, event)
-		}
-	}
+	filteredEvents := FilterEvents(sourceEvents, filter)
 
 	assert.Equal(t, expectedSinkEvents, filteredEvents)
 }
