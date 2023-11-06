@@ -1,8 +1,9 @@
-package filter
+package filter_test
 
 import (
 	"testing"
 
+	"github.com/inovex/CalendarSync/internal/filter"
 	"github.com/inovex/CalendarSync/internal/models"
 	"github.com/stretchr/testify/assert"
 )
@@ -34,9 +35,9 @@ func TestAllDayEventsFilter(t *testing.T) {
 
 	expectedSinkEvents := []models.Event{sourceEvents[1], sourceEvents[2]}
 
-	filter := AllDayEvents{}
+	eventFilter := filter.AllDayEvents{}
 
-	filteredEvents := FilterEvents(sourceEvents, filter)
+	filteredEvents := FilterEvents(sourceEvents, eventFilter)
 
 	assert.Equal(t, expectedSinkEvents, filteredEvents)
 }

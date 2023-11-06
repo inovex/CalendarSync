@@ -1,8 +1,9 @@
-package filter
+package filter_test
 
 import (
 	"testing"
 
+	"github.com/inovex/CalendarSync/internal/filter"
 	"github.com/inovex/CalendarSync/internal/models"
 	"github.com/stretchr/testify/assert"
 )
@@ -33,11 +34,11 @@ func TestRegexTitleFilter(t *testing.T) {
 
 	expectedSinkEvents := []models.Event{sourceEvents[1], sourceEvents[2]}
 
-	filter := RegexTitle{
+	eventFilter := filter.RegexTitle{
 		ExludeRegexp: ".*test",
 	}
 
-	filteredEvents := FilterEvents(sourceEvents, filter)
+	filteredEvents := FilterEvents(sourceEvents, eventFilter)
 
 	assert.Equal(t, expectedSinkEvents, filteredEvents)
 }
@@ -46,11 +47,11 @@ func TestRegexTitleFilter(t *testing.T) {
 func TestRegexTitleFilterEmptyRegex(t *testing.T) {
 	expectedSinkEvents := sourceEvents
 
-	filter := RegexTitle{
+	eventFilter := filter.RegexTitle{
 		ExludeRegexp: "",
 	}
 
-	filteredEvents := FilterEvents(sourceEvents, filter)
+	filteredEvents := FilterEvents(sourceEvents, eventFilter)
 
 	assert.Equal(t, expectedSinkEvents, filteredEvents)
 }
