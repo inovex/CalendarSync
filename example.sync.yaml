@@ -25,7 +25,7 @@ source:
       tenantId: "[UUID-format string here]"
 
 # ZEP source adapter
-#source:      
+#source:
 #  adapter:
 #    type: "zep"
 #    calendar: "absences"
@@ -60,10 +60,10 @@ filters:
   - name: DeclinedEvents
   # Events which cover the full day aren't synced
   - name: AllDayEvents
-  # Events which match the following regular expression, syntax here: https://github.com/google/re2/wiki/Syntax
+  # Exlude Events which match the following regular expression, syntax here: https://github.com/google/re2/wiki/Syntax
   - name: RegexTitle
     config:
-      Regexp: ".*test"
+      ExludeRegexp: ".*test"
 
 # Perform multiple calendar updates concurrently
 # Defaults to 1 if not set
