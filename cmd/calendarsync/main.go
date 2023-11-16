@@ -75,7 +75,10 @@ func main() {
 		},
 		Before: func(c *cli.Context) error {
 			// setup global logger
-			level := log.ParseLevel(c.String(flagLogLevel))
+			level, err := log.ParseLevel(c.String(flagLogLevel))
+			if err != nil {
+				return err
+			}
 			log.SetLevel(level)
 			log.SetTimeFormat(time.Kitchen)
 			if level == log.DebugLevel {
