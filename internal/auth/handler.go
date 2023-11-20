@@ -81,7 +81,10 @@ func (l *OAuthHandler) createAuthorizationExchange(ctx context.Context) func(htt
 		if err != nil {
 			log.Fatal("could not load auth success page", err)
 		}
-		w.Write(successPage)
+		_, err = w.Write(successPage)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
