@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"embed"
 	"net"
 	"net/http"
 	"net/url"
@@ -12,18 +13,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
-const successHtml = `<!DOCTYPE html>
-<html>
-<head>
-    <title>CalendarSync</title>
-</head>
-<body style='font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;'>
-    <div style="text-align: center; padding-top: 30px;">
-        <h2 style="color:#0fad00; font-weight: 500; font-size: 30px; margin-bottom: 10px;">CalendarSync authentication successful!</h2>
-        <p style="font-size:20px; color:#5C5C5C; margin-top: 10px;">You can now close this window.</p>
-    </div>
-</body>
-</html>`
+//go:embed assets
+var assets embed.FS
 
 type OAuthHandler struct {
 	listener net.Listener
@@ -86,8 +77,13 @@ func (l *OAuthHandler) createAuthorizationExchange(ctx context.Context) func(htt
 
 		// show the user a success page and stop the http listener
 		w.WriteHeader(http.StatusOK)
-		if _, err := w.Write([]byte(successHtml)); err != nil {
-			panic(err)
+		successPage, err := assets.ReadFile("assets/index.html")
+		if err != nil {
+			log.Fatal("could not load auth success page", err)
+		}
+		_, err = w.Write(successPage)
+		if err != nil {
+			log.Fatal(err)
 		}
 	}
 }
@@ -96,6 +92,7 @@ func (l *OAuthHandler) createAuthorizationExchange(ctx context.Context) func(htt
 // and the http server will shut down.
 func (l *OAuthHandler) Listen(ctx context.Context) error {
 	mux := http.NewServeMux()
+	mux.Handle("/", http.FileServer(http.FS(assets)))
 	mux.HandleFunc("/redirect", l.createAuthorizationExchange(ctx))
 
 	if err := http.Serve(l.listener, mux); err != nil {
