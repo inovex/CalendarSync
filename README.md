@@ -149,6 +149,10 @@ filters:
   - name: DeclinedEvents
   # Events which cover the full day aren't synced
   - name: AllDayEvents
+  # Events where the title matches the ExcludeRegexp (RE2 Regex) aren't synced
+  - name: RegexTitle
+    config:
+      ExcludeRegexp: ".*test"
 ```
 
 # Cleaning Up
