@@ -43,7 +43,7 @@ type CalendarAPI struct {
 	storage auth.Storage
 }
 
-func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Storage, bindPort uint) error {
+func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credentials, storage auth.Storage, bindPort uint) error {
 	// Outlook Adapter does not need the clientKey
 	switch {
 	case credentials.Client.Id == "":

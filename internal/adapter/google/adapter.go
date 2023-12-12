@@ -46,7 +46,7 @@ type CalendarAPI struct {
 	storage auth.Storage
 }
 
-func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Storage, bindPort uint) error {
+func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credentials, storage auth.Storage, bindPort uint) error {
 	// Google Adapter does not need the tenantId
 	switch {
 	case credentials.Client.Id == "":

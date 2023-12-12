@@ -45,7 +45,7 @@ func NewSinkAdapterFromConfig(ctx context.Context, bindPort uint, config ConfigR
 	}
 
 	if c, ok := client.(OAuth2Adapter); ok {
-		if err := c.SetupOauth2(
+		if err := c.SetupOauth2(ctx,
 			auth.Credentials{
 				Client: auth.Client{
 					Id:     config.Adapter().OAuth.ClientID,

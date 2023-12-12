@@ -30,7 +30,7 @@ type Configurable interface {
 }
 
 type OAuth2Adapter interface {
-	SetupOauth2(credentials auth.Credentials, storage auth.Storage, bindPort uint) error
+	SetupOauth2(ctx context.Context, credentials auth.Credentials, storage auth.Storage, bindPort uint) error
 }
 
 // ConfigReader provides an interface for adapters to load their own configuration map.
