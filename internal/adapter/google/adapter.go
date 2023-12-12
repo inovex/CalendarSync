@@ -132,7 +132,6 @@ func (c *CalendarAPI) Initialize(ctx context.Context, config map[string]interfac
 	}
 
 	c.pageMaxResults = defaultPageMaxResults
-	// TODO: this does not seem right
 	c.gcalClient = &GCalClient{oauthClient: c.oAuthHandler.Configuration().Client(ctx, c.oAuthToken)}
 	err := c.gcalClient.InitGoogleCalendarClient(c.calendarID, c.logger)
 	if err != nil {
