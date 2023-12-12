@@ -2,8 +2,11 @@ package outlook_http
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -79,26 +82,50 @@ func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Sto
 		return err
 	}
 	if storedAuth != nil {
+		log.Debugf("stored access token expires on: %s", storedAuth.OAuth2.Expiry)
 		expiry, err := time.Parse(time.RFC3339, storedAuth.OAuth2.Expiry)
 		if err != nil {
 			return err
 		}
 
-		// this only checks the expiry field, which is the expiration time of the access token which was granted
-		// even if the refresh token is still valid
-		// TODO: unfortunately, without this part - the token will get assigned below and this triggers a panic
-		// TODO: in the oauth2 package. I'm not aware of the culprit yet.
 		now := time.Now()
+		// If the access token is expired
 		if now.After(expiry) {
-			c.logger.Info("saved credentials expired, we need to reauthenticate..")
-			c.authenticated = false
-			err := c.storage.RemoveCalendarAuth(c.calendarID)
+
+			// trying to get a new access and refresh token using the refresh token
+			c.logger.Info("stored access token expired, lets try to get a new one..")
+			newAuthData, err := getNewRefreshToken(storedAuth.OAuth2.RefreshToken, credentials.Client.Id, endpoint.TokenURL)
 			if err != nil {
-				return fmt.Errorf("failed to remove authentication for calendar %s: %w", c.calendarID, err)
+				c.logger.Info("couldn't get a new access and refresh token, maybe the refresh token is also expired..")
+				c.authenticated = false
+				err = c.storage.RemoveCalendarAuth(c.calendarID)
+				if err != nil {
+					return fmt.Errorf("failed to remove authentication for calendar %s: %w", c.calendarID, err)
+				}
+				return nil
 			}
+
+			// we got a new access token, yay! 🎉
+			newAuthExpiry, err := time.Parse(time.RFC3339, newAuthData.Expiry)
+			if err != nil {
+				return err
+			}
+
+			c.oAuthToken = &oauth2.Token{
+				AccessToken:  newAuthData.AccessToken,
+				RefreshToken: newAuthData.RefreshToken,
+				Expiry:       newAuthExpiry,
+				TokenType:    newAuthData.TokenType,
+			}
+			c.authenticated = true
+
+			c.logger.Debugf("Got a new access token, which expires on: %s", c.oAuthToken.Expiry.Format(time.RFC3339))
+			c.logger.Info("Refreshed credentials")
+
 			return nil
 		}
 
+		// if the access token isn't expired, we can use our stored Credentials
 		c.oAuthToken = &oauth2.Token{
 			AccessToken:  storedAuth.OAuth2.AccessToken,
 			RefreshToken: storedAuth.OAuth2.RefreshToken,
@@ -107,7 +134,7 @@ func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Sto
 		}
 
 		c.authenticated = true
-		c.logger.Info("using stored credentials")
+		c.logger.Info("stored credentials are still valid, we will use those")
 	}
 
 	return nil
@@ -222,4 +249,45 @@ func (c *CalendarAPI) Name() string {
 
 func (c *CalendarAPI) SetLogger(logger *log.Logger) {
 	c.logger = logger
+}
+
+// getNewRefreshToken gets a new access and refresh token from microsoft in exchange for a still valid refresh token and the clientID
+func getNewRefreshToken(currentRefreshToken string, clientID string, tokenUrl string) (a auth.OAuth2Object, e error) {
+	data := url.Values{}
+	data.Set("grant_type", "refresh_token")
+	data.Set("refresh_token", currentRefreshToken)
+	data.Set("client_id", clientID)
+
+	req, err := http.NewRequest("POST", tokenUrl, ioutil.NopCloser(strings.NewReader(data.Encode())))
+	if err != nil {
+		return a, err
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	client := &http.Client{}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return a, err
+	}
+
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return a, err
+	}
+
+	var tokenResponse TokenResponse
+
+	err = json.Unmarshal(respBody, &tokenResponse)
+	if err != nil {
+		return a, err
+	}
+
+	a.AccessToken = tokenResponse.AccessToken
+	a.RefreshToken = tokenResponse.RefreshToken
+	a.TokenType = tokenResponse.TokenType
+	a.Expiry = time.Now().Add(time.Duration(time.Second * time.Duration(tokenResponse.ExpiresIn))).Format(time.RFC3339)
+
+	return a, nil
 }
