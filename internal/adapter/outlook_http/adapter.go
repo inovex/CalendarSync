@@ -60,17 +60,20 @@ func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credenti
 		AuthStyle: oauth2.AuthStyleInParams,
 	}
 
-	oAuthListener, err := auth.NewOAuthHandler(oauth2.Config{
+	oAuthConfig := oauth2.Config{
 		ClientID: credentials.Client.Id,
 		Endpoint: endpoint,
 		Scopes:   []string{"Calendars.ReadWrite", "offline_access"}, // You need to request offline_access in order to retrieve a refresh token
-	}, bindPort)
+	}
+
+	oAuthListener, err := auth.NewOAuthHandler(oAuthConfig, bindPort)
 	if err != nil {
 		return err
 	}
 
 	c.oAuthHandler = oAuthListener
 	c.storage = storage
+	c.oAuthConfig = &oAuthConfig
 
 	storedAuth, err := c.storage.ReadCalendarAuth(credentials.CalendarId)
 	if err != nil {
@@ -82,10 +85,9 @@ func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credenti
 			return err
 		}
 
-		// now := time.Now()
-		// if now.After(expiry) {
-		if true {
-			log.Debugf("expiry time of stored token: %s", expiry.String())
+		now := time.Now()
+		if now.After(expiry) {
+			c.logger.Debugf("expiry time of stored token: %s", expiry.String())
 			src := c.oAuthConfig.TokenSource(ctx, &oauth2.Token{
 				AccessToken:  storedAuth.OAuth2.AccessToken,
 				RefreshToken: storedAuth.OAuth2.RefreshToken,
@@ -99,7 +101,7 @@ func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credenti
 			newToken, err := src.Token()
 			if err != nil {
 				// most probably the refresh token is now also expired
-				c.logger.Info("saved credentials expired, we need to reauthenticate..")
+				c.logger.Infof("saved credentials expired, we need to reauthenticate..")
 				c.authenticated = false
 				err := c.storage.RemoveCalendarAuth(c.calendarID)
 				if err != nil {
@@ -147,6 +149,7 @@ func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credenti
 
 		c.authenticated = true
 		c.logger.Info("using stored credentials")
+		c.logger.Debugf("expiry time of stored token: %s", expiry.String())
 	}
 
 	return nil
