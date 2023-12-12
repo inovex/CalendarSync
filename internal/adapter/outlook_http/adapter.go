@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -82,7 +82,6 @@ func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Sto
 		return err
 	}
 	if storedAuth != nil {
-		log.Debugf("stored access token expires on: %s", storedAuth.OAuth2.Expiry)
 		expiry, err := time.Parse(time.RFC3339, storedAuth.OAuth2.Expiry)
 		if err != nil {
 			return err
@@ -258,7 +257,7 @@ func getNewRefreshToken(currentRefreshToken string, clientID string, tokenUrl st
 	data.Set("refresh_token", currentRefreshToken)
 	data.Set("client_id", clientID)
 
-	req, err := http.NewRequest("POST", tokenUrl, ioutil.NopCloser(strings.NewReader(data.Encode())))
+	req, err := http.NewRequest("POST", tokenUrl, strings.NewReader(data.Encode()))
 	if err != nil {
 		return a, err
 	}
@@ -272,7 +271,7 @@ func getNewRefreshToken(currentRefreshToken string, clientID string, tokenUrl st
 		return a, err
 	}
 
-	respBody, err := ioutil.ReadAll(resp.Body)
+	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return a, err
 	}
