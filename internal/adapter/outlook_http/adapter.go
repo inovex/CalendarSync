@@ -3,8 +3,6 @@ package outlook_http
 import (
 	"context"
 	"fmt"
-	"net/http"
-	"strings"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -84,13 +82,11 @@ func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credenti
 			return err
 		}
 
-		// this only checks the expiry field, which is the expiration time of the access token which was granted
-		// even if the refresh token is still valid
-		// TODO: unfortunately, without this part - the token will get assigned below and this triggers a panic
-		// TODO: in the oauth2 package. I'm not aware of the culprit yet.
-		now := time.Now()
-		if now.After(expiry) {
-			src := c.oAuthConfig.TokenSource(context.TODO(), &oauth2.Token{
+		// now := time.Now()
+		// if now.After(expiry) {
+		if true {
+			log.Debugf("expiry time of stored token: %s", expiry.String())
+			src := c.oAuthConfig.TokenSource(ctx, &oauth2.Token{
 				AccessToken:  storedAuth.OAuth2.AccessToken,
 				RefreshToken: storedAuth.OAuth2.RefreshToken,
 				Expiry:       expiry,
@@ -121,6 +117,7 @@ func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credenti
 
 			c.authenticated = true
 			c.logger.Debug("Refreshed oauth credentials using the refresh token")
+			c.logger.Debugf("expiry time of new token: %s", newToken.Expiry.String())
 
 			// save the updated token to disk for the next use
 			_, err = c.storage.WriteCalendarAuth(auth.CalendarAuth{
@@ -186,26 +183,6 @@ func (c *CalendarAPI) Initialize(ctx context.Context, config map[string]interfac
 
 	client := c.oAuthConfig.Client(ctx, c.oAuthToken)
 
-	resp, err := client.Get(baseUrl + "/me/calendars/" + c.calendarID)
-	if err != nil {
-		if strings.Contains(err.Error(), "token_expired") {
-			c.logger.Info("the refresh token expired, initiating reauthentication...")
-			err := c.storage.RemoveCalendarAuth(c.calendarID)
-			if err != nil {
-				return fmt.Errorf("failed to remove authentication for calendar %s: %w", c.calendarID, err)
-			}
-			c.authenticated = false
-			err = c.Initialize(ctx, config)
-			if err != nil {
-				return fmt.Errorf("couldn't reinitialize calendar after expired refresh token: %w", err)
-			}
-			return nil
-		}
-		return err
-	}
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("status code %d", resp.StatusCode)
-	}
 	c.outlookClient = &OutlookClient{Client: client, CalendarID: c.calendarID}
 	return nil
 }
