@@ -90,15 +90,57 @@ func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Sto
 		// TODO: in the oauth2 package. I'm not aware of the culprit yet.
 		now := time.Now()
 		if now.After(expiry) {
-			c.logger.Info("saved credentials expired, we need to reauthenticate..")
-			c.authenticated = false
-			err := c.storage.RemoveCalendarAuth(c.calendarID)
+			src := c.oAuthConfig.TokenSource(context.TODO(), &oauth2.Token{
+				AccessToken:  storedAuth.OAuth2.AccessToken,
+				RefreshToken: storedAuth.OAuth2.RefreshToken,
+				Expiry:       expiry,
+				TokenType:    storedAuth.OAuth2.TokenType,
+			})
+
+			// refresh tokens as the access token is expired
+			// there is a lot of confusion here and i still didn't understood all of the implications, but it works
+			// for more info: https://github.com/golang/oauth2/issues/84
+			newToken, err := src.Token()
 			if err != nil {
-				return fmt.Errorf("failed to remove authentication for calendar %s: %w", c.calendarID, err)
+				// most probably the refresh token is now also expired
+				c.logger.Info("saved credentials expired, we need to reauthenticate..")
+				c.authenticated = false
+				err := c.storage.RemoveCalendarAuth(c.calendarID)
+				if err != nil {
+					return fmt.Errorf("failed to remove authentication for calendar %s: %w", c.calendarID, err)
+				}
+				return nil
 			}
+			// give our CalendarAPI the new token
+			c.oAuthToken = &oauth2.Token{
+				AccessToken:  newToken.AccessToken,
+				RefreshToken: newToken.RefreshToken,
+				Expiry:       newToken.Expiry,
+				TokenType:    newToken.TokenType,
+			}
+
+			c.authenticated = true
+			c.logger.Debug("Refreshed oauth credentials using the refresh token")
+
+			// save the updated token to disk for the next use
+			_, err = c.storage.WriteCalendarAuth(auth.CalendarAuth{
+				CalendarID: c.calendarID,
+				OAuth2: auth.OAuth2Object{
+					AccessToken:  c.oAuthToken.AccessToken,
+					RefreshToken: c.oAuthToken.RefreshToken,
+					Expiry:       c.oAuthToken.Expiry.Format(time.RFC3339),
+					TokenType:    c.oAuthToken.TokenType,
+				},
+			})
+			if err != nil {
+				return err
+			}
+
+			c.logger.Debug("saved new token to disk")
 			return nil
 		}
 
+		// if the token isn't expired, load from disk and use it
 		c.oAuthToken = &oauth2.Token{
 			AccessToken:  storedAuth.OAuth2.AccessToken,
 			RefreshToken: storedAuth.OAuth2.RefreshToken,
