@@ -101,7 +101,7 @@ func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credenti
 			newToken, err := src.Token()
 			if err != nil {
 				// most probably the refresh token is now also expired
-				c.logger.Infof("saved credentials expired, we need to reauthenticate..")
+				c.logger.Info("saved credentials expired, we need to reauthenticate..", "error", err)
 				c.authenticated = false
 				err := c.storage.RemoveCalendarAuth(c.calendarID)
 				if err != nil {
