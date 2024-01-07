@@ -8,7 +8,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/charmbracelet/log"
@@ -26,8 +25,7 @@ type YamlStorage struct {
 func (y *YamlStorage) Setup(config config.AuthStorage, encryptionPassphrase string) error {
 	y.StorageEncryptionKey = encryptionPassphrase
 	y.StoragePath = config.Config["path"].(string)
-	if strings.HasPrefix(y.StoragePath, "~/") && (runtime.GOOS == "linux" || runtime.GOOS == "darwin") ||
-		strings.HasPrefix(y.StoragePath, "%userprofile%") && runtime.GOOS == "windows" {
+	if strings.HasPrefix(y.StoragePath, "~/") {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
 			return err
