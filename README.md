@@ -54,12 +54,12 @@ Should be self-explanatory. Configures the timeframe where to sync events. The
 currently only implemented identifiers are `MonthStart` and `MonthEnd`.
 
 ```yaml
-sync: 
-  start: 
-    identifier: MonthStart # 1st of the current month 
-    offset: -1 # MonthStart -1 month (beginning of last month) 
-  end: 
-    identifier: MonthEnd # last day of the current month 
+sync:
+  start:
+    identifier: MonthStart # 1st of the current month
+    offset: -1 # MonthStart -1 month (beginning of last month)
+  end:
+    identifier: MonthEnd # last day of the current month
     offset: +1 # MonthEnd +1 month (end of next month)
 ```
 
@@ -68,13 +68,13 @@ sync:
 Example:
 
 ```yaml
-source: 
-  adapter: 
-    type: "outlook_http" 
-    calendar: "[base64-formatstring here]" 
-    oAuth: 
-      clientId: "[UUID-format string here]" 
-      tenantId: "[UUID-format string here]" 
+source:
+  adapter:
+    type: "outlook_http"
+    calendar: "[base64-formatstring here]"
+    oAuth:
+      clientId: "[UUID-format string here]"
+      tenantId: "[UUID-format string here]"
 ```
 
 Configures the Source Adapter, for the adapter configuration, check the
@@ -92,12 +92,12 @@ Example:
 
 ```yaml
 sink:
-  adapter: 
-    type: google 
-    calendar: "target-calendar@group.calendar.google.com" 
-    oAuth: 
+  adapter:
+    type: google
+    calendar: "target-calendar@group.calendar.google.com"
+    oAuth:
       clientId: "[google-oAuth-client-id]"
-      clientKey: "[google-oAuth-client-key]" 
+      clientKey: "[google-oAuth-client-key]"
 ```
 
 Configures the Sink Adapter, for the adapter configuration, check the
@@ -122,15 +122,15 @@ transformations:
   - name: KeepReminders
   - name: KeepTitle
   - name: PrefixTitle
-    config: 
+    config:
       Prefix: "[Sync] "
-  - name: ReplaceTitle 
-    config: 
+  - name: ReplaceTitle
+    config:
       NewTitle: "[synchronized appointment]"
   # Do not use KeepAttendees when the Outlook Adapter is used as a sink. There is no way to suppress mail invitations
-  - name: KeepAttendees 
-    config: 
-      UseEmailAsDisplayName: true 
+  - name: KeepAttendees
+    config:
+      UseEmailAsDisplayName: true
 ```
 
 The transformers are applied in a specific order. The order is defined here:
@@ -149,6 +149,10 @@ filters:
   - name: DeclinedEvents
   # Events which cover the full day aren't synced
   - name: AllDayEvents
+  # Events where the title matches the ExcludeRegexp (RE2 Regex) aren't synced
+  - name: RegexTitle
+    config:
+      ExcludeRegexp: ".*test"
 ```
 
 # Cleaning Up
