@@ -2,7 +2,7 @@
 
 ## ZEP Adapter Setup
 
-The ZEP Adapter just takes the Username and Password as configuration parameters:
+The ZEP Adapter just the Username and Password as well as the ZEP Endpoint as configuration parameters:
 
 ```yaml
 source:
@@ -12,12 +12,13 @@ source:
     config:
       username: testymctestface@inovex.de
       password: superSuperSecret1337
+      endpoint: "https://zep.company.com/zep/sync/dav.php/calendars"
 ```
 
 The ZEP adapter is only supported as a source.
 
 ## Outlook Adapter Setup
-The Outlook calendar is synchronized via Microsoft Graph API. You will need to 
+The Outlook calendar is synchronized via Microsoft Graph API. You will need to
 [register an application on Azure](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app).
 The application needs the following permissions:
 

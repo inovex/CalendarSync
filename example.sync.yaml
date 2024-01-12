@@ -32,6 +32,7 @@ source:
 #    config:
 #      username: "testymctestface@inovex.de"
 #      password: "[password here]"
+#      endpoint: "https://zep.company.com/zep/sync/dav.php/calendars""
 
 sink:
   adapter:
