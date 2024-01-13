@@ -14,7 +14,6 @@ type Type string
 const (
 	GoogleCalendarType      Type = "google"
 	ZepCalendarType         Type = "zep"
-	OutlookCalendarType     Type = "outlook"
 	OutlookHttpCalendarType Type = "outlook_http"
 )
 
