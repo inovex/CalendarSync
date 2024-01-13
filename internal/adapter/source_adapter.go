@@ -10,6 +10,7 @@ import (
 	"github.com/inovex/CalendarSync/internal/models"
 
 	outlook "github.com/inovex/CalendarSync/internal/adapter/outlook_http"
+	"github.com/inovex/CalendarSync/internal/adapter/port"
 
 	"github.com/inovex/CalendarSync/internal/adapter/google"
 	"github.com/inovex/CalendarSync/internal/adapter/zep"
@@ -44,11 +45,11 @@ func NewSourceAdapterFromConfig(ctx context.Context, bindPort uint, config Confi
 		return nil, err
 	}
 
-	if c, ok := client.(LogSetter); ok {
+	if c, ok := client.(port.LogSetter); ok {
 		c.SetLogger(logger)
 	}
 
-	if c, ok := client.(OAuth2Adapter); ok {
+	if c, ok := client.(port.OAuth2Adapter); ok {
 		if err := c.SetupOauth2(ctx,
 			auth.Credentials{
 				Client: auth.Client{
@@ -68,7 +69,7 @@ func NewSourceAdapterFromConfig(ctx context.Context, bindPort uint, config Confi
 	}
 
 	// configure adapter client if possible
-	if c, ok := client.(Configurable); ok {
+	if c, ok := client.(port.Configurable); ok {
 		if err := c.Initialize(ctx, config.Adapter().Config); err != nil {
 			return nil, fmt.Errorf("unable to initialize adapter %s: %w", config.Adapter().Type, err)
 		}

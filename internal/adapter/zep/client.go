@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/inovex/CalendarSync/internal/adapter/port"
 	"github.com/inovex/CalendarSync/internal/models"
 
 	"github.com/charmbracelet/log"
@@ -35,6 +36,9 @@ type CalendarAPI struct {
 	principal string
 	homeSet   string
 }
+
+// Assert that the expected interfaces are implemented
+var _ port.Configurable = &CalendarAPI{}
 
 func (zep *CalendarAPI) GetCalendarID() string {
 	return zep.generateCalendarID()
