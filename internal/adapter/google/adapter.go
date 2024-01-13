@@ -46,7 +46,7 @@ type CalendarAPI struct {
 	storage auth.Storage
 }
 
-func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Storage, bindPort uint) error {
+func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credentials, storage auth.Storage, bindPort uint) error {
 	// Google Adapter does not need the tenantId
 	switch {
 	case credentials.Client.Id == "":
@@ -132,7 +132,6 @@ func (c *CalendarAPI) Initialize(ctx context.Context, config map[string]interfac
 	}
 
 	c.pageMaxResults = defaultPageMaxResults
-	// TODO: this does not seem right
 	c.gcalClient = &GCalClient{oauthClient: c.oAuthHandler.Configuration().Client(ctx, c.oAuthToken)}
 	err := c.gcalClient.InitGoogleCalendarClient(c.calendarID, c.logger)
 	if err != nil {

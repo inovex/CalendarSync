@@ -3,8 +3,6 @@ package outlook_http
 import (
 	"context"
 	"fmt"
-	"net/http"
-	"strings"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -43,7 +41,7 @@ type CalendarAPI struct {
 	storage auth.Storage
 }
 
-func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Storage, bindPort uint) error {
+func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credentials, storage auth.Storage, bindPort uint) error {
 	// Outlook Adapter does not need the clientKey
 	switch {
 	case credentials.Client.Id == "":
@@ -62,17 +60,20 @@ func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Sto
 		AuthStyle: oauth2.AuthStyleInParams,
 	}
 
-	oAuthListener, err := auth.NewOAuthHandler(oauth2.Config{
+	oAuthConfig := oauth2.Config{
 		ClientID: credentials.Client.Id,
 		Endpoint: endpoint,
 		Scopes:   []string{"Calendars.ReadWrite", "offline_access"}, // You need to request offline_access in order to retrieve a refresh token
-	}, bindPort)
+	}
+
+	oAuthListener, err := auth.NewOAuthHandler(oAuthConfig, bindPort)
 	if err != nil {
 		return err
 	}
 
 	c.oAuthHandler = oAuthListener
 	c.storage = storage
+	c.oAuthConfig = &oAuthConfig
 
 	storedAuth, err := c.storage.ReadCalendarAuth(credentials.CalendarId)
 	if err != nil {
@@ -84,21 +85,61 @@ func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Sto
 			return err
 		}
 
-		// this only checks the expiry field, which is the expiration time of the access token which was granted
-		// even if the refresh token is still valid
-		// TODO: unfortunately, without this part - the token will get assigned below and this triggers a panic
-		// TODO: in the oauth2 package. I'm not aware of the culprit yet.
 		now := time.Now()
 		if now.After(expiry) {
-			c.logger.Info("saved credentials expired, we need to reauthenticate..")
-			c.authenticated = false
-			err := c.storage.RemoveCalendarAuth(c.calendarID)
+			c.logger.Debugf("expiry time of stored token: %s", expiry.String())
+			src := c.oAuthConfig.TokenSource(ctx, &oauth2.Token{
+				AccessToken:  storedAuth.OAuth2.AccessToken,
+				RefreshToken: storedAuth.OAuth2.RefreshToken,
+				Expiry:       expiry,
+				TokenType:    storedAuth.OAuth2.TokenType,
+			})
+
+			// refresh tokens as the access token is expired
+			// there is a lot of confusion here and i still didn't understood all of the implications, but it works
+			// for more info: https://github.com/golang/oauth2/issues/84
+			newToken, err := src.Token()
 			if err != nil {
-				return fmt.Errorf("failed to remove authentication for calendar %s: %w", c.calendarID, err)
+				// most probably the refresh token is now also expired
+				c.logger.Info("saved credentials expired, we need to reauthenticate..", "error", err)
+				c.authenticated = false
+				err := c.storage.RemoveCalendarAuth(c.calendarID)
+				if err != nil {
+					return fmt.Errorf("failed to remove authentication for calendar %s: %w", c.calendarID, err)
+				}
+				return nil
 			}
+			// give our CalendarAPI the new token
+			c.oAuthToken = &oauth2.Token{
+				AccessToken:  newToken.AccessToken,
+				RefreshToken: newToken.RefreshToken,
+				Expiry:       newToken.Expiry,
+				TokenType:    newToken.TokenType,
+			}
+
+			c.authenticated = true
+			c.logger.Debug("Refreshed oauth credentials using the refresh token")
+			c.logger.Debugf("expiry time of new token: %s", newToken.Expiry.String())
+
+			// save the updated token to disk for the next use
+			_, err = c.storage.WriteCalendarAuth(auth.CalendarAuth{
+				CalendarID: c.calendarID,
+				OAuth2: auth.OAuth2Object{
+					AccessToken:  c.oAuthToken.AccessToken,
+					RefreshToken: c.oAuthToken.RefreshToken,
+					Expiry:       c.oAuthToken.Expiry.Format(time.RFC3339),
+					TokenType:    c.oAuthToken.TokenType,
+				},
+			})
+			if err != nil {
+				return err
+			}
+
+			c.logger.Debug("saved new token to disk")
 			return nil
 		}
 
+		// if the token isn't expired, load from disk and use it
 		c.oAuthToken = &oauth2.Token{
 			AccessToken:  storedAuth.OAuth2.AccessToken,
 			RefreshToken: storedAuth.OAuth2.RefreshToken,
@@ -108,6 +149,7 @@ func (c *CalendarAPI) SetupOauth2(credentials auth.Credentials, storage auth.Sto
 
 		c.authenticated = true
 		c.logger.Info("using stored credentials")
+		c.logger.Debugf("expiry time of stored token: %s", expiry.String())
 	}
 
 	return nil
@@ -144,26 +186,6 @@ func (c *CalendarAPI) Initialize(ctx context.Context, config map[string]interfac
 
 	client := c.oAuthConfig.Client(ctx, c.oAuthToken)
 
-	resp, err := client.Get(baseUrl + "/me/calendars/" + c.calendarID)
-	if err != nil {
-		if strings.Contains(err.Error(), "token_expired") {
-			c.logger.Info("the refresh token expired, initiating reauthentication...")
-			err := c.storage.RemoveCalendarAuth(c.calendarID)
-			if err != nil {
-				return fmt.Errorf("failed to remove authentication for calendar %s: %w", c.calendarID, err)
-			}
-			c.authenticated = false
-			err = c.Initialize(ctx, config)
-			if err != nil {
-				return fmt.Errorf("couldn't reinitialize calendar after expired refresh token: %w", err)
-			}
-			return nil
-		}
-		return err
-	}
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("status code %d", resp.StatusCode)
-	}
 	c.outlookClient = &OutlookClient{Client: client, CalendarID: c.calendarID}
 	return nil
 }
