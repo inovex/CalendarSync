@@ -15,7 +15,7 @@ require (
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
 	github.com/stretchr/testify v1.8.4
 	github.com/thlib/go-timezone-local v0.0.0-20210907160436-ef149e42d28e
-	github.com/urfave/cli/v2 v2.26.0
+	github.com/urfave/cli/v2 v2.27.1
 	go.uber.org/ratelimit v0.3.0
 	golang.org/x/oauth2 v0.15.0
 	google.golang.org/api v0.155.0
