@@ -44,6 +44,7 @@ asdf plugin add calendarsync https://github.com/FeryET/asdf-calendarsync.git
 ## finally
 asdf install calendarsync
 ```
+Note: The `asdf` plugin is not managed by inovex, but is provided by a CalendarSync user. inovex assumes no responsibility for proper provisioning. 
 
 ## First Time Execution
 
