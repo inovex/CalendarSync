@@ -76,13 +76,13 @@ func (zep *CalendarAPI) Initialize(ctx context.Context, config map[string]interf
 	}
 
 	// finds the principal path of the user
-	zep.principal, err = zep.client.FindCurrentUserPrincipal()
+	zep.principal, err = zep.client.FindCurrentUserPrincipal(context.Background())
 	if err != nil {
 		return fmt.Errorf("unable to find user principal: %w", err)
 	}
 
 	// finds the base path to the users calendars
-	zep.homeSet, err = zep.client.FindCalendarHomeSet(zep.principal)
+	zep.homeSet, err = zep.client.FindCalendarHomeSet(context.Background(), zep.principal)
 	if err != nil {
 		return fmt.Errorf("unable to find calendar homeSet: %w", err)
 	}
@@ -113,7 +113,7 @@ func (zep *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, 
 
 // ListEvents returns all events of the given calendar of a user (if it exists).
 func (zep *CalendarAPI) ListEvents(from, to time.Time) ([]Event, error) {
-	calendars, err := zep.client.FindCalendars(zep.homeSet)
+	calendars, err := zep.client.FindCalendars(context.Background(), zep.homeSet)
 	if err != nil {
 		return nil, fmt.Errorf("cannot find calendars: %w", err)
 	}
@@ -126,7 +126,7 @@ func (zep *CalendarAPI) ListEvents(from, to time.Time) ([]Event, error) {
 	}
 
 	// query all events inside the given time range (inclusive)
-	ret, err := zep.client.QueryCalendar(eventCalendar.Path, &caldav.CalendarQuery{
+	ret, err := zep.client.QueryCalendar(context.Background(), eventCalendar.Path, &caldav.CalendarQuery{
 		CompRequest: caldav.CalendarCompRequest{
 			Name:     "VCALENDAR",
 			AllProps: true,
