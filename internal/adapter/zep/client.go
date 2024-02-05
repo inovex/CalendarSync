@@ -104,6 +104,7 @@ func (zep *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, 
 				Description: v.Description,
 				StartTime:   v.Start,
 				EndTime:     v.End,
+				Accepted:    true,
 				Metadata:    models.NewEventMetadata(v.ID, "", zep.GetCalendarID()),
 			})
 	}
