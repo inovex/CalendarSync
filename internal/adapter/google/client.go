@@ -53,6 +53,8 @@ func (g *GCalClient) ListEvents(ctx context.Context, starttime time.Time, endtim
 	listCall := g.Client.Events.List(g.CalendarId).
 		ShowDeleted(false).
 		SingleEvents(true).
+		// see: https://developers.google.com/calendar/api/v3/reference/events/list
+		EventTypes("default", "focusTime", "outOfOffice").
 		TimeMin(starttime.Format(time.RFC3339)).
 		TimeMax(endtime.Format(time.RFC3339)).
 		MaxResults(defaultPageMaxResults).
