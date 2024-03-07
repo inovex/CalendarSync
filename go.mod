@@ -13,7 +13,7 @@ require (
 	github.com/emersion/go-webdav v0.5.0
 	github.com/microcosm-cc/bluemonday v1.0.26
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	github.com/thlib/go-timezone-local v0.0.0-20210907160436-ef149e42d28e
 	github.com/urfave/cli/v2 v2.27.1
 	go.uber.org/ratelimit v0.3.0
@@ -50,7 +50,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	github.com/stretchr/objx v0.5.0 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/teambition/rrule-go v1.8.2 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	go.opencensus.io v0.24.0 // indirect
