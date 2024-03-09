@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/inovex/CalendarSync/internal/adapter/port"
 	"github.com/inovex/CalendarSync/internal/models"
 	"github.com/pkg/browser"
 
@@ -45,6 +46,11 @@ type CalendarAPI struct {
 
 	storage auth.Storage
 }
+
+// Assert that the expected interfaces are implemented
+var _ port.Configurable = &CalendarAPI{}
+var _ port.LogSetter = &CalendarAPI{}
+var _ port.OAuth2Adapter = &CalendarAPI{}
 
 func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credentials, storage auth.Storage, bindPort uint) error {
 	// Google Adapter does not need the tenantId

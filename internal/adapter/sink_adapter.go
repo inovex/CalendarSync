@@ -12,6 +12,7 @@ import (
 
 	"github.com/inovex/CalendarSync/internal/adapter/google"
 	outlook "github.com/inovex/CalendarSync/internal/adapter/outlook_http"
+	"github.com/inovex/CalendarSync/internal/adapter/port"
 	"github.com/inovex/CalendarSync/internal/sync"
 )
 
@@ -40,11 +41,11 @@ func NewSinkAdapterFromConfig(ctx context.Context, bindPort uint, config ConfigR
 		return nil, err
 	}
 
-	if c, ok := client.(LogSetter); ok {
+	if c, ok := client.(port.LogSetter); ok {
 		c.SetLogger(logger)
 	}
 
-	if c, ok := client.(OAuth2Adapter); ok {
+	if c, ok := client.(port.OAuth2Adapter); ok {
 		if err := c.SetupOauth2(ctx,
 			auth.Credentials{
 				Client: auth.Client{
@@ -64,7 +65,7 @@ func NewSinkAdapterFromConfig(ctx context.Context, bindPort uint, config ConfigR
 	}
 
 	// configure adapter client if possible
-	if c, ok := client.(Configurable); ok {
+	if c, ok := client.(port.Configurable); ok {
 		if err := c.Initialize(ctx, config.Adapter().Config); err != nil {
 			return nil, fmt.Errorf("unable to Initialize adapter %s: %w", config.Adapter().Type, err)
 		}
