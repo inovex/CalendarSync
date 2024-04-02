@@ -16,7 +16,7 @@ require (
 	github.com/stretchr/testify v1.9.0
 	github.com/thlib/go-timezone-local v0.0.0-20210907160436-ef149e42d28e
 	github.com/urfave/cli/v2 v2.27.1
-	go.uber.org/ratelimit v0.3.0
+	go.uber.org/ratelimit v0.3.1
 	golang.org/x/oauth2 v0.17.0
 	google.golang.org/api v0.167.0
 	gopkg.in/yaml.v3 v3.0.1
