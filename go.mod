@@ -8,7 +8,7 @@ require (
 	filippo.io/age v1.1.1
 	github.com/aquilax/truncate v1.0.0
 	github.com/cenkalti/backoff/v4 v4.2.1
-	github.com/charmbracelet/log v0.3.1
+	github.com/charmbracelet/log v0.4.0
 	github.com/emersion/go-ical v0.0.0-20220601085725-0864dccc089f
 	github.com/emersion/go-webdav v0.5.0
 	github.com/microcosm-cc/bluemonday v1.0.26
@@ -28,7 +28,7 @@ require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/benbjohnson/clock v1.3.0 // indirect
-	github.com/charmbracelet/lipgloss v0.9.1 // indirect
+	github.com/charmbracelet/lipgloss v0.10.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
@@ -48,7 +48,7 @@ require (
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/teambition/rrule-go v1.8.2 // indirect
