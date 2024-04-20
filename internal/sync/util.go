@@ -20,7 +20,7 @@ func autoConfigure(object any, config config.CustomMap) {
 					reflect.Int16,
 					reflect.Int32,
 					reflect.Int64:
-					field.SetInt(value.(int64))
+					field.SetInt(int64(value.(int)))
 				case reflect.Bool:
 					field.SetBool(value.(bool))
 				case reflect.String:
