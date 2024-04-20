@@ -5,8 +5,8 @@ import (
 )
 
 type TimeFrameEvents struct {
-	HourStart int64
-	HourEnd   int64
+	HourStart int
+	HourEnd   int
 }
 
 func (a TimeFrameEvents) Name() string {
@@ -14,7 +14,7 @@ func (a TimeFrameEvents) Name() string {
 }
 
 func (a TimeFrameEvents) Filter(event models.Event) bool {
-	if int64(event.StartTime.Hour()) >= a.HourStart && int64(event.StartTime.Hour()) <= a.HourEnd {
+	if event.StartTime.Hour() >= a.HourStart && event.StartTime.Hour() <= a.HourEnd {
 		return true
 	}
 	return false
