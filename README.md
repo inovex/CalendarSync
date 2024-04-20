@@ -44,7 +44,7 @@ asdf plugin add calendarsync https://github.com/FeryET/asdf-calendarsync.git
 ## finally
 asdf install calendarsync
 ```
-Note: The `asdf` plugin is not managed by inovex, but is provided by a CalendarSync user. inovex assumes no responsibility for proper provisioning. 
+Note: The `asdf` plugin is not managed by inovex, but is provided by a CalendarSync user. inovex assumes no responsibility for proper provisioning.
 
 ## First Time Execution
 
@@ -167,6 +167,12 @@ filters:
   - name: DeclinedEvents
   # Events which cover the full day aren't synced
   - name: AllDayEvents
+  # Events within the specified timeframe will be retained, while all others will be filtered out.
+  # hours are represented in the 24h time format
+  - name: TimeFrame
+    config:
+      HourStart: 8
+      HourEnd: 17
   # Events where the title matches the ExcludeRegexp (RE2 Regex) aren't synced
   - name: RegexTitle
     config:
