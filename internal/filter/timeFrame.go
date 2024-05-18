@@ -14,9 +14,27 @@ func (a TimeFrameEvents) Name() string {
 }
 
 func (a TimeFrameEvents) Filter(event models.Event) bool {
-	// If the user enters invalid hours, such as numbers higher than 24 or lower than 0, all events will be synchronized up to that point in time. For example, if the start hour is -1 and the end hour is 17, all events until 17 o'clock will be synchronized.
+
+	// if start time is inside the timeframe
+	// example: event from 10-12, timeframe is 8-18
+	// starttime and endtime are inside the timeframe
 	if event.StartTime.Hour() >= a.HourStart && event.StartTime.Hour() <= a.HourEnd {
 		return true
 	}
+
+	// if the endtime is inside the timeframe
+	// example: event from 7-9, timeframe is 8-18
+	// then the endtime of the event is inside the timeframe and therefore should be kept
+	if event.EndTime.Hour() <= a.HourEnd && event.EndTime.Hour() >= a.HourStart {
+		return true
+	}
+
+	// if the starttime is inside the timeframe
+	// example: event from 17-19 timeframe is 8-18
+	// then the starttime of the event is inside the timeframe and therefore should be kept
+	if event.StartTime.Hour() >= a.HourStart && event.StartTime.Hour() <= a.HourEnd {
+		return true
+	}
+
 	return false
 }
