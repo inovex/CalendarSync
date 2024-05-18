@@ -17,7 +17,7 @@ require (
 	github.com/thlib/go-timezone-local v0.0.0-20210907160436-ef149e42d28e
 	github.com/urfave/cli/v2 v2.27.1
 	go.uber.org/ratelimit v0.3.1
-	golang.org/x/oauth2 v0.19.0
+	golang.org/x/oauth2 v0.20.0
 	google.golang.org/api v0.175.0
 	gopkg.in/yaml.v3 v3.0.1
 )
