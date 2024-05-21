@@ -25,7 +25,7 @@ type YamlStorage struct {
 func (y *YamlStorage) Setup(config config.AuthStorage, encryptionPassphrase string) error {
 	y.StorageEncryptionKey = encryptionPassphrase
 	y.StoragePath = config.Config["path"].(string)
-	if strings.HasPrefix(y.StoragePath, "~/") {
+	if strings.HasPrefix(y.StoragePath, "~" + string(filepath.Separator)) {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
 			return err
