@@ -38,7 +38,7 @@ this file the OAuth2 Credentials will be saved encrypted by your
 
 # Configuration
 
-The CalendarSync config file consists of `four` building blocks:
+The CalendarSync config file consists of `five` building blocks:
 
 - `sync` - Controls the timeframe to be synced
 - `source` - Controls the source calendar to be synced from
@@ -46,6 +46,7 @@ The CalendarSync config file consists of `four` building blocks:
   calendar are written to
 - `transformations` - Controls the transformers applied to the events before
   syncing
+- `auth` - Controls settings regarding the encrypted auth storage file
 
 ## Sync
 
@@ -134,6 +135,19 @@ transformations:
 
 The transformers are applied in a specific order. The order is defined here:
 [`internal/sync/transformer.go`](./internal/sync/transformer.go)
+
+## Auth
+
+In this section you can configure settings regarding the encrypted local auth storage
+
+```yaml
+auth:
+  storage_mode: yaml # Currently, only yaml is supported
+  config:
+    # Here you can use the standard unix abbreviation for home directory (~).
+    # This works also for Windows systems e.g. ~\calendar-sync\auth-storage.yaml
+    path: "./auth-storage.yaml"
+```
 
 # Cleaning Up
 
