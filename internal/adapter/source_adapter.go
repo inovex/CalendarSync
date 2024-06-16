@@ -38,7 +38,7 @@ type SourceAdapter struct {
 	logger     *log.Logger
 }
 
-func NewSourceAdapterFromConfig(ctx context.Context, bindPort uint, config ConfigReader, storage auth.Storage, logger *log.Logger) (*SourceAdapter, error) {
+func NewSourceAdapterFromConfig(ctx context.Context, bindPort uint, openBrowser bool, config ConfigReader, storage auth.Storage, logger *log.Logger) (*SourceAdapter, error) {
 	var client sync.Source
 	client, err := SourceClientFactory(Type(config.Adapter().Type))
 	if err != nil {
@@ -70,7 +70,7 @@ func NewSourceAdapterFromConfig(ctx context.Context, bindPort uint, config Confi
 
 	// configure adapter client if possible
 	if c, ok := client.(port.Configurable); ok {
-		if err := c.Initialize(ctx, config.Adapter().Config); err != nil {
+		if err := c.Initialize(ctx, openBrowser, config.Adapter().Config); err != nil {
 			return nil, fmt.Errorf("unable to initialize adapter %s: %w", config.Adapter().Type, err)
 		}
 	}

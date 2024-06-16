@@ -161,7 +161,7 @@ func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credenti
 	return nil
 }
 
-func (c *CalendarAPI) Initialize(ctx context.Context, config map[string]interface{}) error {
+func (c *CalendarAPI) Initialize(ctx context.Context, openBrowser bool, config map[string]interface{}) error {
 	if !c.authenticated {
 		c.oAuthUrl = c.oAuthHandler.Configuration().AuthCodeURL("state", oauth2.AccessTypeOffline)
 		c.logger.Infof("opening browser window for authentication of %s\n", c.Name())

@@ -197,7 +197,6 @@ func (g *GCalClient) DeleteEvent(ctx context.Context, event models.Event) error 
 		return err
 	}
 	return nil
-
 }
 
 // loadPages recursively loads all pages starting with the given nextPageToken.

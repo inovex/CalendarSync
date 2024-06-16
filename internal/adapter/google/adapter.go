@@ -29,8 +29,6 @@ type GoogleCalendarClient interface {
 	InitGoogleCalendarClient(calId string, log *log.Logger) error
 }
 
-// TODO: add filter mechanism to clients for selective sync
-
 // CalendarAPI is our Google Calendar client wrapper which adapts the base api to the needs of CalendarSync.
 type CalendarAPI struct {
 	gcalClient     GoogleCalendarClient
@@ -106,7 +104,7 @@ func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credenti
 // The given config is presumably unknown and is validated and loaded in order to construct a valid
 // CalendarAPI struct.
 // If anything fails, an error is returned and the CalendarAPI should be considered non-functional.
-func (c *CalendarAPI) Initialize(ctx context.Context, config map[string]interface{}) error {
+func (c *CalendarAPI) Initialize(ctx context.Context, openBrowser bool, config map[string]interface{}) error {
 	if !c.authenticated {
 		c.oAuthUrl = c.oAuthHandler.Configuration().AuthCodeURL("state", oauth2.AccessTypeOffline)
 		c.logger.Infof("opening browser window for authentication of %s\n", c.Name())
@@ -158,7 +156,7 @@ func (c *CalendarAPI) Initialize(ctx context.Context, config map[string]interfac
 				return fmt.Errorf("failed to remove authentication for calendar %s: %w", c.calendarID, err)
 			}
 			c.authenticated = false
-			err = c.Initialize(ctx, config)
+			err = c.Initialize(ctx, openBrowser, config)
 			if err != nil {
 				return fmt.Errorf("couldn't reinitialize calendar after expired refresh token: %w", err)
 			}

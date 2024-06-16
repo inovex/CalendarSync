@@ -35,7 +35,7 @@ func SinkClientFactory(typ Type) (sync.Sink, error) {
 	}
 }
 
-func NewSinkAdapterFromConfig(ctx context.Context, bindPort uint, config ConfigReader, storage auth.Storage, logger *log.Logger) (*SinkAdapter, error) {
+func NewSinkAdapterFromConfig(ctx context.Context, bindPort uint, openBrowser bool, config ConfigReader, storage auth.Storage, logger *log.Logger) (*SinkAdapter, error) {
 	client, err := SinkClientFactory(Type(config.Adapter().Type))
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func NewSinkAdapterFromConfig(ctx context.Context, bindPort uint, config ConfigR
 
 	// configure adapter client if possible
 	if c, ok := client.(port.Configurable); ok {
-		if err := c.Initialize(ctx, config.Adapter().Config); err != nil {
+		if err := c.Initialize(ctx, openBrowser, config.Adapter().Config); err != nil {
 			return nil, fmt.Errorf("unable to Initialize adapter %s: %w", config.Adapter().Type, err)
 		}
 	}
