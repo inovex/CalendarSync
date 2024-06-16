@@ -17,13 +17,14 @@ import (
 )
 
 const (
-	flagLogLevel             = "log-level"
-	flagConfigFilePath       = "config"
-	flagStorageEncryptionKey = "storage-encryption-key"
-	flagClean                = "clean"
-	flagDryRun               = "dry-run"
-	flagPort                 = "port"
-	flagVersion              = "version"
+	flagLogLevel                 = "log-level"
+	flagConfigFilePath           = "config"
+	flagStorageEncryptionKey     = "storage-encryption-key"
+	flagClean                    = "clean"
+	flagDryRun                   = "dry-run"
+	flagPort                     = "port"
+	flagOpenBrowserAutomatically = "open-browser"
+	flagVersion                  = "version"
 )
 
 var (
@@ -50,6 +51,11 @@ func main() {
 			&cli.StringFlag{
 				Name:  flagStorageEncryptionKey,
 				Usage: "encryption string to be used for encrypting the local auth-storage file. NOTE: This option is deprecated. Please use the CALENDARSYNC_ENCRYPTION_KEY env variable. The flag will be removed in later versions",
+			},
+			&cli.BoolFlag{
+				Name:  flagOpenBrowserAutomatically,
+				Usage: "opens the browser automatically for the authentication process",
+				Value: true,
 			},
 			&cli.BoolFlag{
 				Name:  flagClean,
@@ -149,6 +155,7 @@ func Run(c *cli.Context) error {
 	sourceAdapter, err := adapter.NewSourceAdapterFromConfig(
 		c.Context,
 		sourceBindAuthPort,
+		c.Bool(flagOpenBrowserAutomatically),
 		config.NewAdapterConfig(cfg.Source.Adapter),
 		storage,
 		sourceLogger,
@@ -163,6 +170,7 @@ func Run(c *cli.Context) error {
 	sinkAdapter, err := adapter.NewSinkAdapterFromConfig(
 		c.Context,
 		sinkBindAuthPort,
+		c.Bool(flagOpenBrowserAutomatically),
 		config.NewAdapterConfig(cfg.Sink.Adapter),
 		storage,
 		sinkLogger,
