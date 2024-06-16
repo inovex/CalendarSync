@@ -16,7 +16,7 @@ type LogSetter interface {
 // Configurable is an interface which defines how arbitrary configuration data can be passed
 // to a struct which implements this interface. Clients should be configurable.
 type Configurable interface {
-	Initialize(ctx context.Context, config map[string]interface{}) error
+	Initialize(ctx context.Context, openBrowser bool, config map[string]interface{}) error
 }
 
 type OAuth2Adapter interface {
