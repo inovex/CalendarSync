@@ -14,7 +14,7 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.26
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
 	github.com/stretchr/testify v1.9.0
-	github.com/thlib/go-timezone-local v0.0.0-20210907160436-ef149e42d28e
+	github.com/thlib/go-timezone-local v0.0.2
 	github.com/urfave/cli/v2 v2.27.2
 	go.uber.org/ratelimit v0.3.1
 	golang.org/x/oauth2 v0.20.0
