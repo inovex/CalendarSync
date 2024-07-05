@@ -7,6 +7,8 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/charmbracelet/log"
 	"github.com/inovex/CalendarSync/internal/config"
@@ -23,6 +25,13 @@ type YamlStorage struct {
 func (y *YamlStorage) Setup(config config.AuthStorage, encryptionPassphrase string) error {
 	y.StorageEncryptionKey = encryptionPassphrase
 	y.StoragePath = config.Config["path"].(string)
+	if strings.HasPrefix(y.StoragePath, "~" + string(filepath.Separator)) {
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			return err
+		}
+		y.StoragePath = filepath.Join(homeDir, y.StoragePath[2:])
+	}
 	return nil
 }
 

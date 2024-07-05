@@ -56,7 +56,7 @@ The app will create a file in the execution folder called `auth-storage.yaml`. I
 
 # Configuration
 
-The CalendarSync config file consists of `four` building blocks:
+The CalendarSync config file consists of several building blocks:
 
 - `sync` - Controls the timeframe to be synced
 - `source` - Controls the source calendar to be synced from
@@ -65,6 +65,7 @@ The CalendarSync config file consists of `four` building blocks:
 - `transformations` - Controls the transformers applied to the events before
   syncing
 - `filters` - Controls filters, which allow events to be excluded from syncing
+- `auth` - Controls settings regarding the encrypted auth storage file
 
 ## Sync
 
@@ -177,6 +178,19 @@ filters:
   - name: RegexTitle
     config:
       ExcludeRegexp: ".*test"
+```
+
+## Auth
+
+In this section you can configure settings regarding the encrypted local auth storage
+
+```yaml
+auth:
+  storage_mode: yaml # Currently, only yaml is supported
+  config:
+    # Here you can use the standard unix abbreviation for home directory (~).
+    # This works also for Windows systems e.g. ~\calendar-sync\auth-storage.yaml
+    path: "./auth-storage.yaml"
 ```
 
 # Cleaning Up

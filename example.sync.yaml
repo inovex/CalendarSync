@@ -8,8 +8,10 @@ sync:
     offset: +1 # MonthEnd +1 month (end of next month)
 
 auth:
-  storage_mode: yaml
+  storage_mode: yaml # Currently, only yaml is supported
   config:
+    # Here you can use the standard unix abbreviation for home directory (~).
+    # This works also for Windows systems e.g. ~\calendar-sync\auth-storage.yaml
     path: "./auth-storage.yaml"
 
 # Unfortunately, at this point, we only support one source adapter.
