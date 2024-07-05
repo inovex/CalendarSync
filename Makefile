@@ -37,7 +37,7 @@ build: ## Build CalendarSync
 		-o bin/$(BINARY_NAME) cmd/calendarsync/main.go
 
 build_goreleaser:
-	goreleaser build --snapshot --rm-dist
+	goreleaser build --snapshot --clean
 
 clean: ## Clean build assets
 	rm -rf ./bin

@@ -72,4 +72,4 @@ release:
     # DOCKER_USERNAME: $CI_REGISTRY_USER
     # DOCKER_PASSWORD: $CI_REGISTRY_PASSWORD
   script:
-    - goreleaser release --rm-dist
+    - goreleaser release --clean
