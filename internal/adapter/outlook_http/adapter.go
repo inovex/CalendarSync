@@ -161,20 +161,25 @@ func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credenti
 	return nil
 }
 
-func (c *CalendarAPI) Initialize(ctx context.Context, config map[string]interface{}) error {
+func (c *CalendarAPI) Initialize(ctx context.Context, openBrowser bool, config map[string]interface{}) error {
 	if !c.authenticated {
 		c.oAuthUrl = c.oAuthHandler.Configuration().AuthCodeURL("state", oauth2.AccessTypeOffline)
-		c.logger.Infof("opening browser window for authentication of %s\n", c.Name())
-		err := browser.OpenURL(c.oAuthUrl)
-		if err != nil {
-			c.logger.Infof("browser did not open, please authenticate adapter %s:\n\n %s\n\n\n", c.Name(), c.oAuthUrl)
+
+		if openBrowser {
+			c.logger.Infof("opening browser window for authentication of %s\n", c.Name())
+			err := browser.OpenURL(c.oAuthUrl)
+			if err != nil {
+				c.logger.Infof("browser did not open, please authenticate adapter %s:\n\n %s\n\n\n", c.Name(), c.oAuthUrl)
+			}
+		} else {
+			c.logger.Infof("Please authenticate adapter %s:\n\n %s\n\n\n", c.Name(), c.oAuthUrl)
 		}
 		if err := c.oAuthHandler.Listen(ctx); err != nil {
 			return err
 		}
 
 		c.oAuthToken = c.oAuthHandler.Token()
-		_, err = c.storage.WriteCalendarAuth(auth.CalendarAuth{
+		_, err := c.storage.WriteCalendarAuth(auth.CalendarAuth{
 			CalendarID: c.calendarID,
 			OAuth2: auth.OAuth2Object{
 				AccessToken:  c.oAuthToken.AccessToken,

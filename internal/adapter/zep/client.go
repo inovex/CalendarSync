@@ -58,7 +58,7 @@ func (zep *CalendarAPI) Name() string {
 	return "ZEP CalDav API"
 }
 
-func (zep *CalendarAPI) Initialize(ctx context.Context, config map[string]interface{}) error {
+func (zep *CalendarAPI) Initialize(ctx context.Context, openBrowser bool, config map[string]interface{}) error {
 	if _, ok := config[usernameKey]; !ok {
 		return fmt.Errorf("missing config key: %s", usernameKey)
 	}
