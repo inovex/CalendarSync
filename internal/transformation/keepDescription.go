@@ -4,8 +4,8 @@ import (
 	"strings"
 
 	"github.com/aquilax/truncate"
-	"github.com/microcosm-cc/bluemonday"
 	"github.com/inovex/CalendarSync/internal/models"
+	"github.com/microcosm-cc/bluemonday"
 )
 
 // KeepDescription allows to keep the description of an event.
@@ -16,8 +16,8 @@ func (t *KeepDescription) Name() string {
 }
 
 func (t *KeepDescription) Transform(source models.Event, sink models.Event) (models.Event, error) {
-	// need to remove microsoft html overhead
-	p := bluemonday.StrictPolicy()
+	// need to remove microsoft html overhead (the description in outlook contains a lot of '\r\n's)
+	p := bluemonday.UGCPolicy()
 	description := strings.ReplaceAll(source.Description, "\r\n", "")
 	sanitizedDescription := p.Sanitize(description)
 	sanitizedDescription2 := strings.TrimSpace(sanitizedDescription)
