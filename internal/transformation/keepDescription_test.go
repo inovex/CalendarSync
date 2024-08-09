@@ -46,6 +46,12 @@ func TestKeepDescription_Transform(t *testing.T) {
 			expectedDescription: "Headline<h1>Headline2</h1>",
 		},
 		{
+			name:                "keep html-linebreaks from description",
+			sourceDescription:   "<h1>Headline2</h1><br><br/>ohai\r\n",
+			sinkDescription:     "bar",
+			expectedDescription: "<h1>Headline2</h1><br><br/>ohai",
+		},
+		{
 			name:                "truncates description after 4000 chars",
 			sourceDescription:   strings.Repeat("a", 4000),
 			sinkDescription:     "bar",
