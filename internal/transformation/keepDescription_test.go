@@ -1,10 +1,11 @@
 package transformation
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/inovex/CalendarSync/internal/models"
 	"strings"
 	"testing"
+
+	"github.com/inovex/CalendarSync/internal/models"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestKeepDescription_Transform(t *testing.T) {
@@ -40,9 +41,9 @@ func TestKeepDescription_Transform(t *testing.T) {
 		},
 		{
 			name:                "removes html from description",
-			sourceDescription:   "<h1>Headline</h1>",
+			sourceDescription:   "<test>Headline</test><h1>Headline2</h1>",
 			sinkDescription:     "bar",
-			expectedDescription: "Headline",
+			expectedDescription: "Headline<h1>Headline2</h1>",
 		},
 		{
 			name:                "truncates description after 4000 chars",
