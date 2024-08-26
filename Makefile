@@ -63,7 +63,7 @@ endif
 lint: lint-go lint-yaml lint-dockerfile ## Run all linters
 
 lint-go: ## Lint all GO files
-	$(DOCKER) run --rm -it -v $(PWD):/app -w /app $(GOLANGCI_LINT_IMAGE) golangci-lint run --deadline=66s --go "1.20"
+	$(DOCKER) run --rm -it -v $(PWD):/app -w /app $(GOLANGCI_LINT_IMAGE) golangci-lint run --go "1.23"
 
 lint-yaml: ## Lint all YAML files
 	$(DOCKER) run --rm -it -v $(PWD):/data $(YAMLLINT_IMAGE) -f parsable $(YAMLFILES)
