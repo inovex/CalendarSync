@@ -36,7 +36,16 @@ func (o *OutlookClient) ListEvents(ctx context.Context, start time.Time, end tim
 	// Otherwise this always ends in a 500 return code, see also https://stackoverflow.com/a/62770941
 	query := "?startDateTime=" + startDate + "&endDateTime=" + endDate + "&$expand=extensions($filter=Id%20eq%20'inovex.calendarsync.meta')"
 
-	resp, err := o.Client.Get(baseUrl + "/me/calendars/" + o.CalendarID + "/CalendarView" + query)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, baseUrl+"/me/calendars/"+o.CalendarID+"/CalendarView"+query, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get all the events in UTC timezone
+	// when we retrieve them from other adapters they will also be in UTC
+	req.Header.Add("Prefer", "outlook.timezone=\"UTC\"")
+
+	resp, err := o.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
