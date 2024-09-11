@@ -215,7 +215,7 @@ func (o OutlookClient) eventToOutlookEvent(e models.Event) (oe Event) {
 
 	for _, att := range e.Attendees {
 		outlookEvent.Attendees = append(outlookEvent.Attendees, Attendee{
-			EmailAdress: EmailAddress{
+			EmailAddress: EmailAddress{
 				Address: att.Email,
 				Name:    att.DisplayName,
 			},
@@ -252,8 +252,8 @@ func (o OutlookClient) outlookEventToEvent(oe Event, adapterSourceID string) (e 
 
 	for _, eventAttendee := range oe.Attendees {
 		attendees = append(attendees, models.Attendee{
-			Email:       eventAttendee.EmailAdress.Address,
-			DisplayName: eventAttendee.EmailAdress.Name,
+			Email:       eventAttendee.EmailAddress.Address,
+			DisplayName: eventAttendee.EmailAddress.Name,
 		})
 	}
 

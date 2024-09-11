@@ -54,7 +54,7 @@ type Time struct {
 }
 
 type Attendee struct {
-	EmailAdress EmailAddress `json:"emailAddress,omitempty"`
+	EmailAddress EmailAddress `json:"emailAddress,omitempty"`
 }
 
 type EmailAddress struct {
