@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/thlib/go-timezone-local/tzlocal"
 
 	"github.com/inovex/CalendarSync/internal/models"
 )
@@ -190,16 +189,10 @@ func (o OutlookClient) eventToOutlookEvent(e models.Event) (oe Event) {
 	outlookEvent := Event{}
 	outlookEvent.Location.Name = e.Location
 
-	// microsoft expects iana time zone codes, but the go standard library returns abbreviations like "CET"
-	// NOTE: This may not work when events get imported from other time zones, i would expect golang to properly format the time strings correctly using the local runtime timezone
-	tzname, err := tzlocal.RuntimeTZ()
-	if err != nil {
-		tzname = "UTC"
-	}
-	outlookEvent.Start.DateTime = e.StartTime.Format(timeFormat)
-	outlookEvent.Start.TimeZone = tzname
-	outlookEvent.End.DateTime = e.EndTime.Format(timeFormat)
-	outlookEvent.End.TimeZone = tzname
+	outlookEvent.Start.DateTime = e.StartTime.UTC().Format(timeFormat)
+	outlookEvent.Start.TimeZone = "UTC"
+	outlookEvent.End.DateTime = e.EndTime.UTC().Format(timeFormat)
+	outlookEvent.End.TimeZone = "UTC"
 
 	outlookEvent.Subject = e.Title
 	outlookEvent.ID = e.ID
