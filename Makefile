@@ -29,7 +29,7 @@ all: help
 ## Build
 build: ## Build CalendarSync
 	@mkdir -p bin
-	$(GO) build -race -ldflags \
+	$(GO) build -ldflags \
 		"-X 'main.Version=$(BUILD_VERSION)' \
 		-X 'main.BuildTime=$(shell date)' \
 		-X 'main.GoogleClientID=${CS_GOOGLE_CLIENT_ID}' \
