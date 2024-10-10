@@ -46,7 +46,7 @@ func (o *OutlookClient) ListEvents(ctx context.Context, start time.Time, end tim
 	}
 
 	body, _ := io.ReadAll(resp.Body)
-	defer resp.Body.Close()
+	resp.Body.Close()
 
 	var eventList EventList
 	err = json.Unmarshal(body, &eventList)
@@ -62,7 +62,7 @@ func (o *OutlookClient) ListEvents(ctx context.Context, start time.Time, end tim
 		}
 
 		body, _ := io.ReadAll(resp.Body)
-		defer resp.Body.Close()
+		resp.Body.Close()
 
 		var nextList EventList
 		err = json.Unmarshal(body, &nextList)
