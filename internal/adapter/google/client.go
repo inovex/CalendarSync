@@ -58,6 +58,7 @@ func (g *GCalClient) ListEvents(ctx context.Context, starttime time.Time, endtim
 		TimeMin(starttime.Format(time.RFC3339)).
 		TimeMax(endtime.Format(time.RFC3339)).
 		MaxResults(defaultPageMaxResults).
+		TimeZone("UTC").
 		OrderBy("startTime").
 		Context(ctx)
 
