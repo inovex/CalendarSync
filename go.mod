@@ -6,7 +6,7 @@ toolchain go1.21.3
 
 require (
 	filippo.io/age v1.2.0
-	github.com/aquilax/truncate v1.0.0
+	github.com/aquilax/truncate v1.0.1
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/charmbracelet/log v0.4.0
 	github.com/emersion/go-ical v0.0.0-20220601085725-0864dccc089f
