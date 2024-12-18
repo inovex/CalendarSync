@@ -49,6 +49,12 @@ func NewSourceAdapterFromConfig(ctx context.Context, bindPort uint, openBrowser 
 		c.SetLogger(logger)
 	}
 
+	if c, ok := client.(port.CalendarIDSetter); ok {
+		if err := c.SetCalendarID(config.Adapter().Calendar); err != nil {
+			return nil, err
+		}
+	}
+
 	if c, ok := client.(port.OAuth2Adapter); ok {
 		if err := c.SetupOauth2(ctx,
 			auth.Credentials{
@@ -59,7 +65,6 @@ func NewSourceAdapterFromConfig(ctx context.Context, bindPort uint, openBrowser 
 				Tenant: auth.Tenant{
 					Id: config.Adapter().OAuth.TenantID,
 				},
-				CalendarId: config.Adapter().Calendar,
 			},
 			storage,
 			bindPort,
