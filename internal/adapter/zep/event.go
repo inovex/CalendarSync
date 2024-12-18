@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	DateFormat = "02.01.2006"
+	DateFormat = "02.01.2006 15:04"
 )
 
 // Event is a simplified representation for an event which has been entered in ZEP.
@@ -14,6 +14,7 @@ type Event struct {
 	ID          string
 	Start       time.Time
 	End         time.Time
+	AllDay      bool
 	Summary     string
 	Description string
 	Category    string

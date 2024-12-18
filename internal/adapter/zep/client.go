@@ -117,6 +117,7 @@ func (zep *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, 
 				Description: v.Description,
 				StartTime:   v.Start,
 				EndTime:     v.End,
+				AllDay:      v.AllDay,
 				Accepted:    true,
 				Metadata:    models.NewEventMetadata(v.ID, "", zep.GetCalendarHash()),
 			})
@@ -200,10 +201,15 @@ func eventFromCalDavEvent(event ical.Event, etag string) (Event, error) {
 		return Event{}, fmt.Errorf("unable to decode dtend: %w", err)
 	}
 
+	// if it is an all-day event, all the times are zero
+	allDay := (start.Hour() == 0 && start.Minute() == 0 && start.Second() == 0 &&
+		end.Hour() == 0 && end.Minute() == 0 && end.Second() == 0)
+
 	return Event{
 		ID:          event.Props.Get("uid").Value,
 		Start:       start,
 		End:         end,
+		AllDay:      allDay,
 		Summary:     safeGetComponentPropValueString(event, "summary"),
 		Category:    safeGetComponentPropValueString(event, "categories"),
 		Description: safeGetComponentPropValueString(event, "description"),
