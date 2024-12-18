@@ -217,7 +217,7 @@ func (p Controller) diffEvents(sourceEvents []models.Event, sinkEvents []models.
 			updateEvents = append(updateEvents, sinkEvent.Overwrite(event))
 
 		default:
-			p.logger.Info("event in sync", logFields(event)...)
+			p.logger.Debug("event in sync", logFields(event)...)
 		}
 	}
 
@@ -238,7 +238,7 @@ func (p Controller) diffEvents(sourceEvents []models.Event, sinkEvents []models.
 		default:
 			// Do not delete events which were not loaded by the current sourceEvents-adapter.
 			// This enables the synchronization of multiple sources without them interfering.
-			p.logger.Info("event is not in sourceEvents but was not synced with this source adapter, skipping", logFields(event)...)
+			p.logger.Debug("event is not in sourceEvents but was not synced with this source adapter, skipping", logFields(event)...)
 		}
 	}
 
