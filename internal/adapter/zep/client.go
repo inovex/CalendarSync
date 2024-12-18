@@ -32,6 +32,7 @@ type CalendarAPI struct {
 	client *caldav.Client
 
 	calendarID string
+	logger     *log.Logger
 
 	principal string
 	homeSet   string
@@ -39,6 +40,7 @@ type CalendarAPI struct {
 
 // Assert that the expected interfaces are implemented
 var _ port.Configurable = &CalendarAPI{}
+var _ port.LogSetter = &CalendarAPI{}
 var _ port.CalendarIDSetter = &CalendarAPI{}
 
 func (zep *CalendarAPI) SetCalendarID(calendarID string) error {
@@ -104,6 +106,9 @@ func (zep *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, 
 	}
 
 	var syncEvents []models.Event
+
+	zep.logger.Infof("loaded %d events between %s and %s.", len(events), start.Format(time.DateOnly), end.Format(time.DateOnly))
+
 	for _, v := range events {
 		syncEvents = append(syncEvents,
 			models.Event{
@@ -213,4 +218,8 @@ func safeGetComponentPropValueString(event ical.Event, key string) string {
 		return ""
 	}
 	return prop.Value
+}
+
+func (zep *CalendarAPI) SetLogger(logger *log.Logger) {
+	zep.logger = logger
 }

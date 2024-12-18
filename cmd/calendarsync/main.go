@@ -102,6 +102,8 @@ func main() {
 }
 
 func Run(c *cli.Context) error {
+	log.Info("started calendarsync")
+
 	if c.Bool(flagVersion) {
 		fmt.Println("Version:", Version)
 		os.Exit(0)
@@ -111,7 +113,7 @@ func Run(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	log.Info("loaded config file", "path", cfg.Path)
+	log.Debug("loaded config file", "path", cfg.Path)
 
 	if len(c.String(flagStorageEncryptionKey)) > 0 {
 		log.Warn("Parsing the encryption key using the flag is deprecated. Please use the environment variable $CALENDARSYNC_ENCRYPTION_KEY instead.")
@@ -163,7 +165,7 @@ func Run(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	log.Info("loaded source adapter", "adapter", cfg.Source.Adapter.Type, "calendar", cfg.Source.Adapter.Calendar)
+	log.Debug("loaded source adapter", "adapter", cfg.Source.Adapter.Type, "calendar", cfg.Source.Adapter.Calendar)
 
 	sinkLogger := log.With("adapter", cfg.Sink.Adapter.Type, "type", "sink")
 
@@ -178,7 +180,7 @@ func Run(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	log.Info("loaded sink adapter", "adapter", cfg.Sink.Adapter.Type, "calendar", cfg.Sink.Adapter.Calendar)
+	log.Debug("loaded sink adapter", "adapter", cfg.Sink.Adapter.Type, "calendar", cfg.Sink.Adapter.Calendar)
 
 	if log.GetLevel() == log.DebugLevel {
 		for _, transformation := range cfg.Transformations {
@@ -190,7 +192,7 @@ func Run(c *cli.Context) error {
 	if cfg.UpdateConcurrency != 0 {
 		controller.SetConcurrency(cfg.UpdateConcurrency)
 	}
-	log.Info("loaded sync controller")
+	log.Debug("loaded sync controller")
 
 	if c.Bool("clean") {
 		err = controller.CleanUp(c.Context, startTime, endTime)
@@ -204,5 +206,6 @@ func Run(c *cli.Context) error {
 			log.Fatalf("we had some errors during synchronization:\n%v", err)
 		}
 	}
+	log.Info("sync complete")
 	return nil
 }
