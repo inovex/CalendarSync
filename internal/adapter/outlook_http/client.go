@@ -287,6 +287,7 @@ func (o OutlookClient) outlookEventToEvent(oe Event, adapterSourceID string) (e 
 		Reminders:   reminders,
 		MeetingLink: oe.OnlineMeetingUrl,
 		Accepted:    hasEventAccepted,
+		HTMLLink:    oe.HtmlLink,
 	}
 
 	if oe.IsAllDay {
