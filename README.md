@@ -48,7 +48,9 @@ Note: The `asdf` plugin is not managed by inovex, but is provided by a CalendarS
 
 ## First Time Execution
 
-Create a modified `sync.yaml` file based on the content of the `./example.sync.yaml` file. Finally, start the app using `CALENDARSYNC_ENCRYPTION_KEY=<YourSecretPassword> ./calendarsync --config sync.yaml` and follow the instructions in the output.
+Create a modified `sync.yaml` file based on the content of the `./example.sync.yaml` file.
+For the setup of the adapters, take a look at [the docs](docs/adapters.md).
+Then, start the app using `CALENDARSYNC_ENCRYPTION_KEY=<YourSecretPassword> ./calendarsync --config sync.yaml` and follow the instructions in the output.
 
 The app will create a file in the execution folder called `auth-storage.yaml`. In this file the OAuth2 Credentials will be saved encrypted by your `$CALENDARSYNC_ENCRYPTION_KEY`.
 
