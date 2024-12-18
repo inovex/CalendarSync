@@ -112,6 +112,7 @@ func (zep *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, 
 				Description: v.Description,
 				StartTime:   v.Start,
 				EndTime:     v.End,
+				AllDay:      isAllDayEvent(v),
 				Accepted:    true,
 				Metadata:    models.NewEventMetadata(v.ID, "", zep.GetCalendarHash()),
 			})
