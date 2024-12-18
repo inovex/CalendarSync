@@ -48,7 +48,16 @@ type CalendarAPI struct {
 // Assert that the expected interfaces are implemented
 var _ port.Configurable = &CalendarAPI{}
 var _ port.LogSetter = &CalendarAPI{}
+var _ port.CalendarIDSetter = &CalendarAPI{}
 var _ port.OAuth2Adapter = &CalendarAPI{}
+
+func (c *CalendarAPI) SetCalendarID(calendarID string) error {
+	if calendarID == "" {
+		return fmt.Errorf("adapter (%s) 'calendar' cannot be empty", c.Name())
+	}
+	c.calendarID = calendarID
+	return nil
+}
 
 func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credentials, storage auth.Storage, bindPort uint) error {
 	// Google Adapter does not need the tenantId
@@ -57,8 +66,6 @@ func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credenti
 		return fmt.Errorf("%s adapter oAuth2 'clientID' cannot be empty", c.Name())
 	case credentials.Client.Secret == "":
 		return fmt.Errorf("oAuth2 adapter (%s) 'clientSecret' cannot be empty", c.Name())
-	case credentials.CalendarId == "":
-		return fmt.Errorf("oAuth2 adapter (%s) 'calendar' cannot be empty", c.Name())
 	}
 
 	oauthListener, err := auth.NewOAuthHandler(oauth2.Config{
@@ -72,10 +79,9 @@ func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credenti
 	}
 
 	c.oAuthHandler = oauthListener
-	c.calendarID = credentials.CalendarId
 	c.storage = storage
 
-	storedAuth, err := c.storage.ReadCalendarAuth(credentials.CalendarId)
+	storedAuth, err := c.storage.ReadCalendarAuth(c.calendarID)
 	if err != nil {
 		return err
 	}
