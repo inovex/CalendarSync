@@ -31,7 +31,8 @@ data to a third party.
 
 ## Installation
 
-Download the newest [release](https://github.com/inovex/CalendarSync/releases) for your platform or install from [the AUR](https://aur.archlinux.org/packages/calendarsync-bin).
+Download the newest [release](https://github.com/inovex/CalendarSync/releases) for your platform or install
+from [the AUR](https://aur.archlinux.org/packages/calendarsync-bin).
 
 **Using [asdf-vm](https://github.com/asdf-vm/asdf)**
 
@@ -44,15 +45,19 @@ asdf plugin add calendarsync https://github.com/FeryET/asdf-calendarsync.git
 ## finally
 asdf install calendarsync
 ```
-Note: The `asdf` plugin is not managed by inovex, but is provided by a CalendarSync user. inovex assumes no responsibility for proper provisioning.
+
+Note: The `asdf` plugin is not managed by inovex, but is provided by a CalendarSync user. inovex assumes no
+responsibility for proper provisioning.
 
 ## First Time Execution
 
 Create a modified `sync.yaml` file based on the content of the `./example.sync.yaml` file.
 For the setup of the adapters, take a look at [the docs](docs/adapters.md).
-Then, start the app using `CALENDARSYNC_ENCRYPTION_KEY=<YourSecretPassword> ./calendarsync --config sync.yaml` and follow the instructions in the output.
+Then, start the app using `CALENDARSYNC_ENCRYPTION_KEY=<YourSecretPassword> ./calendarsync --config sync.yaml` and
+follow the instructions in the output.
 
-The app will create a file in the execution folder called `auth-storage.yaml`. In this file the OAuth2 Credentials will be saved encrypted by your `$CALENDARSYNC_ENCRYPTION_KEY`.
+The app will create a file in the execution folder called `auth-storage.yaml`. In this file the OAuth2 Credentials will
+be saved encrypted by your `$CALENDARSYNC_ENCRYPTION_KEY`.
 
 ----
 
