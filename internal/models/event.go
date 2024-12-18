@@ -133,14 +133,30 @@ func IsSameEvent(a, b Event) bool {
 		return false
 	}
 
-	if !a.StartTime.Equal(b.StartTime) {
-		log.Debugf("StartTime of Source Event %s changed, sourceTime: %s, sinkTime: %s ", a.Title, a.StartTime, b.StartTime)
+	if a.AllDay != b.AllDay {
+		log.Debugf("AllDay of Source Event %s at %s changed", a.Title, a.StartTime)
 		return false
 	}
 
-	if !a.EndTime.Equal(b.EndTime) {
-		log.Debugf("EndTime of Source Event %s changed, sourceTime: %s, sinkTime: %s ", a.Title, a.StartTime, b.StartTime)
-		return false
+	if a.AllDay && b.AllDay {
+		// only compare dates
+		if a.StartTime.Year() != b.StartTime.Year() || a.StartTime.YearDay() != b.StartTime.YearDay() {
+			log.Debugf("StartTime of all-day event %s changed, sourceTime: %s, sinkTime: %s", a.Title, a.StartTime.Format(time.DateOnly), b.StartTime.Format(time.DateOnly))
+			return false
+		}
+		if a.EndTime.Year() != b.EndTime.Year() || a.EndTime.YearDay() != b.EndTime.YearDay() {
+			log.Debugf("EndTime of all-day event %s changed, sourceTime: %s, sinkTime: %s", a.Title, a.EndTime.Format(time.DateOnly), b.EndTime.Format(time.DateOnly))
+			return false
+		}
+	} else {
+		if !a.StartTime.Equal(b.StartTime) {
+			log.Debugf("StartTime of Source Event %s changed, sourceTime: %s, sinkTime: %s ", a.Title, a.StartTime, b.StartTime)
+			return false
+		}
+		if !a.EndTime.Equal(b.EndTime) {
+			log.Debugf("EndTime of Source Event %s changed, sourceTime: %s, sinkTime: %s ", a.Title, a.StartTime, b.StartTime)
+			return false
+		}
 	}
 
 	if a.AllDay != b.AllDay {
