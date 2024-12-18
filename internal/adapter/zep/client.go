@@ -41,6 +41,15 @@ type CalendarAPI struct {
 // Assert that the expected interfaces are implemented
 var _ port.Configurable = &CalendarAPI{}
 var _ port.LogSetter = &CalendarAPI{}
+var _ port.CalendarIDSetter = &CalendarAPI{}
+
+func (zep *CalendarAPI) SetCalendarID(calendarID string) error {
+	if calendarID == "" {
+		return fmt.Errorf("%s adapter 'calendar' cannot be empty", zep.Name())
+	}
+	zep.calendarID = calendarID
+	return nil
+}
 
 func (zep *CalendarAPI) GetCalendarHash() string {
 	var id []byte
