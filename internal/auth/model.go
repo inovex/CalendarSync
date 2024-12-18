@@ -1,9 +1,8 @@
 package auth
 
 type Credentials struct {
-	Client     Client
-	Tenant     Tenant
-	CalendarId string
+	Client Client
+	Tenant Tenant
 }
 
 type Client struct {
