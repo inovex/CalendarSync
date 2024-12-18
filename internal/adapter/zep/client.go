@@ -40,18 +40,13 @@ type CalendarAPI struct {
 // Assert that the expected interfaces are implemented
 var _ port.Configurable = &CalendarAPI{}
 
-func (zep *CalendarAPI) GetCalendarID() string {
-	return zep.generateCalendarID()
-}
-
-func (zep *CalendarAPI) generateCalendarID() string {
+func (zep *CalendarAPI) GetCalendarHash() string {
 	var id []byte
 	components := []string{zep.username, zep.homeSet, zep.calendarID}
 
 	sum := sha1.Sum([]byte(strings.Join(components, "")))
 	id = append(id, sum[:]...)
 	return base64.URLEncoding.EncodeToString(id)
-
 }
 
 func (zep *CalendarAPI) Name() string {
@@ -109,7 +104,7 @@ func (zep *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, 
 				StartTime:   v.Start,
 				EndTime:     v.End,
 				Accepted:    true,
-				Metadata:    models.NewEventMetadata(v.ID, "", zep.GetCalendarID()),
+				Metadata:    models.NewEventMetadata(v.ID, "", zep.GetCalendarHash()),
 			})
 	}
 

@@ -84,7 +84,7 @@ func (o *OutlookClient) ListEvents(ctx context.Context, start time.Time, end tim
 
 	var events []models.Event
 	for _, evt := range eventList.Events {
-		evt, err := o.outlookEventToEvent(evt, o.GetCalendarID())
+		evt, err := o.outlookEventToEvent(evt, o.GetCalendarHash())
 		if err != nil {
 			return nil, err
 		}
@@ -176,7 +176,7 @@ func (o *OutlookClient) DeleteEvent(ctx context.Context, event models.Event) err
 	return nil
 }
 
-func (o OutlookClient) GetCalendarID() string {
+func (o OutlookClient) GetCalendarHash() string {
 	var id []byte
 	sum := sha1.Sum([]byte(o.CalendarID))
 	id = append(id, sum[:]...)

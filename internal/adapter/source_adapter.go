@@ -91,8 +91,8 @@ func (a SourceAdapter) Name() string {
 func (a SourceAdapter) CalendarID() string {
 	return a.calendarID
 }
-func (a SourceAdapter) GetCalendarID() string {
-	return a.client.GetCalendarID()
+func (a SourceAdapter) GetCalendarHash() string {
+	return a.client.GetCalendarHash()
 }
 
 func (a SourceAdapter) EventsInTimeframe(ctx context.Context, start time.Time, end time.Time) ([]models.Event, error) {

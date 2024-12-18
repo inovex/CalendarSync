@@ -12,7 +12,7 @@ type Metadata struct {
 	SyncID string `json:"SyncID"`
 	// OriginalEventUri is an URI which points to the original event which was synced. This is usually an URL.
 	OriginalEventUri string `json:"OriginalEventUri"`
-	// SourceID contains the ID of the source which this event was imported from
+	// SourceID contains the unique hash of the source which this event was imported from
 	SourceID string `json:"SourceID"`
 }
 
