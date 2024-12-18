@@ -100,16 +100,16 @@ func (zep *CalendarAPI) Initialize(ctx context.Context, openBrowser bool, config
 }
 
 func (zep *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, end time.Time) ([]models.Event, error) {
-	absences, err := zep.ListEvents(start, end)
+	events, err := zep.ListEvents(start, end)
 	if err != nil {
-		return nil, fmt.Errorf("could not get absences %w", err)
+		return nil, fmt.Errorf("could not get zep events %w", err)
 	}
 
 	var syncEvents []models.Event
 
-	zep.logger.Infof("loaded %d events between %s and %s.", len(absences), start.Format(time.DateOnly), end.Format(time.DateOnly))
+	zep.logger.Infof("loaded %d events between %s and %s.", len(events), start.Format(time.DateOnly), end.Format(time.DateOnly))
 
-	for _, v := range absences {
+	for _, v := range events {
 		syncEvents = append(syncEvents,
 			models.Event{
 				ICalUID:     v.ID,
