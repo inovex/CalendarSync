@@ -10,6 +10,7 @@ const (
 	GoogleCalendarType      Type = "google"
 	ZepCalendarType         Type = "zep"
 	OutlookHttpCalendarType Type = "outlook_http"
+	ICalendarType           Type = "ics"
 )
 
 // ConfigReader provides an interface for adapters to load their own configuration map.
