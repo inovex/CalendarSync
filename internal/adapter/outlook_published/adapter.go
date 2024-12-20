@@ -1,4 +1,4 @@
-package ics
+package outlook_published
 
 import (
 	"context"
@@ -7,18 +7,19 @@ import (
 	"time"
 )
 
-type ICalendarClient interface {
+type OutlookPublishedClient interface {
 	ListEvents(ctx context.Context, starttime time.Time, enddtime time.Time) ([]models.Event, error)
 }
 
 type CalendarAPI struct {
-	icalendarClient ICalendarClient
-	calendarUrl     string
-	logger          *log.Logger
+	opb         OutlookPublishedClient
+	calendarUrl string
+	urlPostData string
+	logger      *log.Logger
 }
 
 func (c *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, end time.Time) ([]models.Event, error) {
-	events, err := c.icalendarClient.ListEvents(ctx, start, end)
+	events, err := c.opb.ListEvents(ctx, start, end)
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +30,7 @@ func (c *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, en
 }
 
 func (c *CalendarAPI) Name() string {
-	return "iCalendar"
+	return "outlook_published"
 }
 
 func (c *CalendarAPI) GetCalendarID() string {
@@ -38,8 +39,9 @@ func (c *CalendarAPI) GetCalendarID() string {
 
 func (c *CalendarAPI) Initialize(ctx context.Context, openBrowser bool, config map[string]interface{}) error {
 	c.calendarUrl = config["url"].(string)
+	c.urlPostData = config["postData"].(string)
 
-	c.icalendarClient = &ICalClient{url: c.calendarUrl}
+	c.opb = &OutlookPubClient{url: c.calendarUrl, urlPostData: c.urlPostData}
 	return nil
 }
 
