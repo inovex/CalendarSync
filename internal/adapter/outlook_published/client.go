@@ -53,11 +53,6 @@ func (opb *OutlookPubClient) ListEvents(ctx context.Context, starttime time.Time
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
-
-	// Convert the body to a string.
-	bodyStr := string(body)
-	fmt.Println(bodyStr)
-
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
@@ -79,7 +74,6 @@ func (opb *OutlookPubClient) ListEvents(ctx context.Context, starttime time.Time
 			filteredEvents = append(filteredEvents, loadedEvent)
 		}
 	}
-	fmt.Println(loadedEvents)
 
 	return filteredEvents, nil
 }
