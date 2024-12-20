@@ -16,7 +16,14 @@ type CalendarAPI struct {
 }
 
 func (c *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, end time.Time) ([]models.Event, error) {
-	panic("implement me")
+	events, err := c.icalendarClient.ListEvents(ctx, start, end)
+	if err != nil {
+		return nil, err
+	}
+
+	//c.logger.Infof("loaded %d events between %s and %s.", len(events), start.Format(time.RFC1123), end.Format(time.RFC1123))
+
+	return events, nil
 }
 
 func (c *CalendarAPI) Name() string {
@@ -29,5 +36,7 @@ func (c *CalendarAPI) GetCalendarID() string {
 
 func (c *CalendarAPI) Initialize(ctx context.Context, openBrowser bool, config map[string]interface{}) error {
 	c.calendarUrl = config["url"].(string)
+
+	c.icalendarClient = &ICalClient{url: c.calendarUrl}
 	return nil
 }
