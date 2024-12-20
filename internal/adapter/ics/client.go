@@ -17,6 +17,7 @@ type ICalClient struct {
 
 func (ic *ICalClient) ListEvents(ctx context.Context, starttime time.Time, enddtime time.Time) ([]models.Event, error) {
 	var loadedEvents []models.Event
+	var filteredEvents []models.Event
 
 	req, err := http.NewRequestWithContext(ctx, "GET", ic.url, nil)
 	if err != nil {
@@ -45,16 +46,22 @@ func (ic *ICalClient) ListEvents(ctx context.Context, starttime time.Time, enddt
 		return nil, err
 	}
 
-	//TODO: Implement starttime and endttime filtering
 	eventList := cal.Events()
 	for _, event := range eventList {
 		loadedEvents = append(loadedEvents, calendarEventToEvent(event))
 	}
 
-	return loadedEvents, nil
+	for _, loadedEvent := range loadedEvents {
+		if loadedEvent.StartTime.After(starttime) && loadedEvent.EndTime.Before(enddtime) {
+			filteredEvents = append(filteredEvents, loadedEvent)
+		}
+	}
+
+	return filteredEvents, nil
 }
 
 func calendarEventToEvent(e *ical.VEvent) models.Event {
+
 	var summary string
 	var location string
 	var timeZone string
@@ -76,7 +83,6 @@ func calendarEventToEvent(e *ical.VEvent) models.Event {
 	}
 
 	summary = e.GetProperty(ical.ComponentPropertySummary).Value
-	fmt.Println(summary)
 
 	location = e.GetProperty(ical.ComponentPropertyLocation).Value
 

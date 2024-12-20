@@ -2,6 +2,7 @@ package ics
 
 import (
 	"context"
+	"github.com/charmbracelet/log"
 	"github.com/inovex/CalendarSync/internal/models"
 	"time"
 )
@@ -13,6 +14,7 @@ type ICalendarClient interface {
 type CalendarAPI struct {
 	icalendarClient ICalendarClient
 	calendarUrl     string
+	logger          *log.Logger
 }
 
 func (c *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, end time.Time) ([]models.Event, error) {
@@ -21,7 +23,7 @@ func (c *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, en
 		return nil, err
 	}
 
-	//c.logger.Infof("loaded %d events between %s and %s.", len(events), start.Format(time.RFC1123), end.Format(time.RFC1123))
+	c.logger.Infof("loaded %d events between %s and %s.", len(events), start.Format(time.RFC1123), end.Format(time.RFC1123))
 
 	return events, nil
 }
@@ -39,4 +41,8 @@ func (c *CalendarAPI) Initialize(ctx context.Context, openBrowser bool, config m
 
 	c.icalendarClient = &ICalClient{url: c.calendarUrl}
 	return nil
+}
+
+func (c *CalendarAPI) SetLogger(logger *log.Logger) {
+	c.logger = logger
 }
