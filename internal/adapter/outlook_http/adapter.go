@@ -166,7 +166,7 @@ func (c *CalendarAPI) Initialize(ctx context.Context, openBrowser bool, config m
 		c.oAuthUrl = c.oAuthHandler.Configuration().AuthCodeURL("state", oauth2.AccessTypeOffline)
 
 		if openBrowser {
-			c.logger.Infof("opening browser window for authentication of %s\n", c.Name())
+			c.logger.Infof("opening browser window for authentication of %s - %s\n", c.Name(), c.calendarID)
 			err := browser.OpenURL(c.oAuthUrl)
 			if err != nil {
 				c.logger.Infof("browser did not open, please authenticate adapter %s:\n\n %s\n\n\n", c.Name(), c.oAuthUrl)
