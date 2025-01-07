@@ -9,8 +9,8 @@ require (
 	github.com/aquilax/truncate v1.0.1
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/charmbracelet/log v0.4.0
-	github.com/emersion/go-ical v0.0.0-20220601085725-0864dccc089f
-	github.com/emersion/go-webdav v0.5.0
+	github.com/emersion/go-ical v0.0.0-20240127095438-fc1c9d8fb2b6
+	github.com/emersion/go-webdav v0.6.0
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
 	github.com/stretchr/testify v1.10.0
