@@ -50,9 +50,13 @@ To get your calendar ID, use the [Microsoft Graph Explorer](https://developer.mi
 
 ## Google Adapter Setup
 
-+ Open the [Google Cloud Console](https://console.cloud.google.com/home/dashboard) and login.
+For the setup of the Google adapter, an OAuth client has to be created. The client configuration is saved to `sync.yaml`
+and on the first run, CalendarSync will open a browser window where you can authorize the application to use your calendar.
+The setup of the OAuth client is done in the Google Cloud Console. Follow these steps:
+
++ Open the [Google Cloud Console](https://console.cloud.google.com/home/dashboard) and log in.
 + Now you can either select *New Project* at the top left of the screen or just [click here](https://console.cloud.google.com/projectcreate)
-+ Create a new project, name it as you like but make sure that the Billing Account is set correctly.
++ Create a new project, name it as you like and select a billing account. But don't worry – the Google Calendar API is free.
 
 ![new-project](../assets/gcloud-new-project.png)
 
@@ -61,12 +65,15 @@ To get your calendar ID, use the [Microsoft Graph Explorer](https://developer.mi
     + In the search bar, look for `google calendar` and select the **Google Calendar API**
     + You'll be redirected to the API description. Hit the *Enable* button.
 + Once the API is enabled, you'll be redirected again to the API management overview.
++ Before you are allowed to create the client, you will have to configure the *OAuth consent screen*
+  + Click on *OAuth consent screen* on the left side (under *APIs & Services*)
+  + Enter an app name, e.g. *CalendarSync* and your email address. As the user type, select *Internal*.
 + Click on *Credentials* in the sidebar and then on *Create Credentials*
 + We will need to create an *OAuth client ID*
-    + Select *Desktop app* as application type and give it a name of your liking (*calendarsync-dev* maybe?)
+  + Select *Desktop app* as application type and give it a name of your liking (*calendarsync-dev* maybe?)
 + Once The client ID is created you will see it in the overview.
 + Click on the download icon of the created client
-    + You'll see a popup open. Here you can simply **Download JSON**. This will download the `credentials.json` file required.
+    + You'll see a popup open. Copy the *Client ID* and *Client secret* into your `sync.yaml` as shown below.
 
 ![client-id-popup](../assets/gcloud-oauth-client.png)
 
@@ -79,9 +86,5 @@ sink:
       clientId: "<clientID>"
       clientKey: "<clientSecret>"
 ```
-
-Important: When retrieving the credentials from Google, you'll get a `clientId`
-and a `clientSecret`. Make sure to add the `clientSecret` to the `clientKey`
-setting in your CalendarSync configuration.
 
 If you want to use the created OAuth Application also with accounts outside of your Google Workspace, make sure to set the Usertype to `external` in the `OAuth Consent Screen` Menu.

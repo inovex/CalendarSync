@@ -48,7 +48,9 @@ Note: The `asdf` plugin is not managed by inovex, but is provided by a CalendarS
 
 ## First Time Execution
 
-Create a modified `sync.yaml` file based on the content of the `./example.sync.yaml` file. Finally, start the app using `CALENDARSYNC_ENCRYPTION_KEY=<YourSecretPassword> ./calendarsync --config sync.yaml` and follow the instructions in the output.
+Create a modified `sync.yaml` file based on the content of the `./example.sync.yaml` file.
+For the setup of the adapters, take a look at [the docs](docs/adapters.md).
+Then, start the app using `CALENDARSYNC_ENCRYPTION_KEY=<YourSecretPassword> ./calendarsync --config sync.yaml` and follow the instructions in the output.
 
 The app will create a file in the execution folder called `auth-storage.yaml`. In this file the OAuth2 Credentials will be saved encrypted by your `$CALENDARSYNC_ENCRYPTION_KEY`.
 
@@ -132,7 +134,33 @@ documentation [here](./docs/adapters.md).
 Basically, only the time is synced. By means of transformers one can sync
 individual further data. Some transformers allow for further configuration using
 an additional `config` block, such as the `ReplaceTitle` transformer. Below is a
-list of all transformers available:
+list of all transformers available. They are applied from top to bottom.
+
+transformerOrder = []string{
+"KeepAttendees",
+"KeepLocation",
+"KeepReminders",
+"KeepDescription",
+"KeepMeetingLink",
+"AddOriginalLink",
+"KeepTitle",
+"PrefixTitle",
+"ReplaceTitle",
+}
+
+| **Name**          | **Description**                                                                                                                                                                                                                 | **Configuration**                                 |
+|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------|
+| `KeepAttendees`   | Synchronizes the list of attendees. If `UseEmailAsDisplayName` is set to `true`, the email is used in the attendee list. Do not use when the Outlook Adapter is used as a sink as there is no way to suppress mail invitations. | `config.UseEmailAsDisplayName`, default `false`   |
+| `KeepLocation`    | Synchronizes the location of the event.                                                                                                                                                                                         | –                                                 |
+| `KeepReminders`   | Synchronizes event reminders.                                                                                                                                                                                                   | –                                                 |
+| `KeepDescription` | Synchronizes the description of the event.                                                                                                                                                                                      | –                                                 |
+| `KeepMeetingLink` | Adds the meeting link of the original meeting to the description of the event.                                                                                                                                                  | –                                                 |
+| `AddOriginalLink` | Adds the link to the original calendar event to the description of the event.                                                                                                                                                   | –                                                 |
+| `KeepTitle`       | Synchronizes the event's title. Without this transformer, the title is set to `CalendarSync Event`                                                                                                                              | –                                                 |
+| `PrefixTitle`     | Adds the configured prefix to the title.                                                                                                                                                                                        | `config.Prefix`, default `""`                     |
+| `ReplaceTitle`    | Replaces the title with the configured string. Does not make sense to be used with `KeepTitle` or `PrefixTitle`                                                                                                                 | `config.NewTitle`, default `"CalendarSync Event"` |
+
+Example configuration:
 
 ```yaml
 transformations:
@@ -143,17 +171,12 @@ transformations:
   - name: PrefixTitle
     config:
       Prefix: "[Sync] "
-  - name: ReplaceTitle
-    config:
-      NewTitle: "[synchronized appointment]"
-  # Do not use KeepAttendees when the Outlook Adapter is used as a sink. There is no way to suppress mail invitations
+  - name: KeepMeetingLink
+  - name: AddOriginalLink
   - name: KeepAttendees
     config:
       UseEmailAsDisplayName: true
 ```
-
-The transformers are applied in a specific order. The order is defined here:
-[`internal/sync/transformer.go`](./internal/sync/transformer.go)
 
 ## Filters
 
