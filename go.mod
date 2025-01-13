@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.21.3
 
 require (
-	filippo.io/age v1.2.0
+	filippo.io/age v1.2.1
 	github.com/aquilax/truncate v1.0.1
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/charmbracelet/log v0.4.0
