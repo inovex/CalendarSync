@@ -80,7 +80,7 @@ func (p Controller) SynchroniseTimeframe(ctx context.Context, start time.Time, e
 	filteredEventsInSource := []models.Event{}
 
 	for _, filter := range p.filters {
-		p.logger.Info("loaded filter", "name", filter.Name())
+		p.logger.Debug("loaded filter", "name", filter.Name())
 	}
 
 	for _, event := range eventsInSource {
@@ -96,7 +96,7 @@ func (p Controller) SynchroniseTimeframe(ctx context.Context, start time.Time, e
 
 	// Output which transformers were loaded
 	for _, trans := range p.transformers {
-		p.logger.Info("loaded transformer", "name", trans.Name())
+		p.logger.Debug("loaded transformer", "name", trans.Name())
 	}
 
 	for _, event := range filteredEventsInSource {
@@ -104,6 +104,7 @@ func (p Controller) SynchroniseTimeframe(ctx context.Context, start time.Time, e
 	}
 
 	toCreate, toUpdate, toDelete := p.diffEvents(transformedEventsInSource, eventsInSink)
+	log.Infof("found %d new, %d changed, and %d deleted events", len(toCreate), len(toUpdate), len(toDelete))
 	if dryRun {
 		p.logger.Warn("we're running in dry run mode, no changes will be executed")
 		return nil
@@ -200,7 +201,7 @@ func (p Controller) diffEvents(sourceEvents []models.Event, sinkEvents []models.
 			// - Delete event (in calendar A)
 			// - Run sync from calendar B to calendar A. This will copy (and thereby resurrect) the event.
 			//
-			// Solution: Ignore events the originate from the sink, but no longer exist there.
+			// Solution: Ignore events that originate from the sink, but no longer exist there.
 			if event.Metadata.SourceID == p.sink.GetCalendarHash() {
 				p.logger.Info("skipping event as it originates from the sink, but no longer exists there", logFields(event)...)
 				continue
@@ -217,7 +218,7 @@ func (p Controller) diffEvents(sourceEvents []models.Event, sinkEvents []models.
 			updateEvents = append(updateEvents, sinkEvent.Overwrite(event))
 
 		default:
-			p.logger.Info("event in sync", logFields(event)...)
+			p.logger.Debug("event in sync", logFields(event)...)
 		}
 	}
 
@@ -238,7 +239,7 @@ func (p Controller) diffEvents(sourceEvents []models.Event, sinkEvents []models.
 		default:
 			// Do not delete events which were not loaded by the current sourceEvents-adapter.
 			// This enables the synchronization of multiple sources without them interfering.
-			p.logger.Info("event is not in sourceEvents but was not synced with this source adapter, skipping", logFields(event)...)
+			p.logger.Debug("event is not in sourceEvents but was not synced with this source adapter, skipping", logFields(event)...)
 		}
 	}
 
