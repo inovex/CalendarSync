@@ -85,3 +85,35 @@ and a `clientSecret`. Make sure to add the `clientSecret` to the `clientKey`
 setting in your CalendarSync configuration.
 
 If you want to use the created OAuth Application also with accounts outside of your Google Workspace, make sure to set the Usertype to `external` in the `OAuth Consent Screen` Menu.
+
+
+## Outlook Published Calendar Adapter Setup
+The Outlook Published Calendar adapter allows you to sync with publicly shared Outlook calendars without OAuth authentication.
+
+### Configuration
+```yaml
+source:
+  adapter:
+    type: "outlook_published"
+    config:
+      url: "<url>"
+      postData: "<url-post-data>"
+ ```
+
+### How to Get Configuration Values
+
+3. Get the URL and postData:
+   - Open the calendar.html URL in your browser with Developer Tools open (F12)
+   - In the Network tab, look for a request to `service.svc` with parameters `action=FindItem&app=PublishedCalendar`
+   - From this request:
+     - For `url`: Copy the full request URL (example format: `https://outlook.office365.com/owa/published/<calendar-id>@<domain>/<unique-identifier>/service.svc?action=FindItem&app=PublishedCalendar&n=2`)
+     - For `postData`: In the request headers, find and copy the value of the `x-owa-urlpostdata` header
+
+![](../assets/outlook_published_devtools.png)
+
+Note: The postData value contains time range information that the adapter will automatically update during synchronization.
+
+### Limitations
+- Read-only access (cannot create, update, or delete events)
+- Requires the calendar to be publicly accessible
+- Some event details might be limited compared to the OAuth-based adapter
