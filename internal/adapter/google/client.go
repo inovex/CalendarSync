@@ -70,7 +70,7 @@ func (g *GCalClient) ListEvents(ctx context.Context, starttime time.Time, endtim
 
 	var loadedEvents []models.Event
 	for _, event := range eventList.Items {
-		loadedEvents = append(loadedEvents, calendarEventToEvent(event, g.GetCalendarID()))
+		loadedEvents = append(loadedEvents, calendarEventToEvent(event, g.GetCalendarHash()))
 	}
 
 	// if the responses 'nextPageToken' is set, the result is paginated and more data to be loaded recursively
@@ -80,7 +80,7 @@ func (g *GCalClient) ListEvents(ctx context.Context, starttime time.Time, endtim
 			return nil, err
 		}
 		for _, pageEvent := range eventList.Items {
-			loadedEvents = append(loadedEvents, calendarEventToEvent(pageEvent, g.GetCalendarID()))
+			loadedEvents = append(loadedEvents, calendarEventToEvent(pageEvent, g.GetCalendarHash()))
 		}
 	}
 	return loadedEvents, nil
@@ -216,11 +216,11 @@ func (g *GCalClient) loadPages(listCall *calendar.EventsListCall, events *[]*cal
 	return g.loadPages(listCall, events, pageEvents.NextPageToken)
 }
 
-// GetCalendarID calculates a unique ID for this adapter based on the current calendar.
+// GetCalendarHash calculates a unique ID for this adapter based on the current calendar.
 // This is used to distinguish between adapters in order to not overwrite or delete events
 // which are maintained by different adapters.
 // A simple use-case for this is if you have multiple google calendars as source adapters configured.
-func (g *GCalClient) GetCalendarID() string {
+func (g *GCalClient) GetCalendarHash() string {
 	var id []byte
 
 	sum := sha1.Sum([]byte(g.CalendarId))

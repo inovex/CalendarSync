@@ -104,6 +104,6 @@ func (a SinkAdapter) EventsInTimeframe(ctx context.Context, start time.Time, end
 	return a.client.EventsInTimeframe(ctx, start, end)
 }
 
-func (a SinkAdapter) GetCalendarID() string {
-	return a.client.GetCalendarID()
+func (a SinkAdapter) GetCalendarHash() string {
+	return a.client.GetCalendarHash()
 }

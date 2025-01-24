@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/inovex/CalendarSync/internal/auth"
@@ -179,6 +180,12 @@ func Run(c *cli.Context) error {
 		return err
 	}
 	log.Info("loaded sink adapter", "adapter", cfg.Sink.Adapter.Type, "calendar", cfg.Sink.Adapter.Calendar)
+
+	// By default go runs a garbage collection once the memory usage doubles compared to the last GC run.
+	// Decrypting the storage in NewSourceAdapterFromConfig/NewSinkAdapterFromConfig requires a lot of memory,
+	// such that the next GC only trigger once the memory usage double compared to that peak. Explicitly trigger
+	// a GC to reset the memory usage reference level.
+	runtime.GC()
 
 	if log.GetLevel() == log.DebugLevel {
 		for _, transformation := range cfg.Transformations {

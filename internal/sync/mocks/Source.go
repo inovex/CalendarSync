@@ -84,12 +84,12 @@ func (_c *Source_EventsInTimeframe_Call) RunAndReturn(run func(context.Context, 
 	return _c
 }
 
-// GetCalendarID provides a mock function with given fields:
-func (_m *Source) GetCalendarID() string {
+// GetCalendarHash provides a mock function with given fields:
+func (_m *Source) GetCalendarHash() string {
 	ret := _m.Called()
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetCalendarID")
+		panic("no return value specified for GetCalendarHash")
 	}
 
 	var r0 string
@@ -102,29 +102,29 @@ func (_m *Source) GetCalendarID() string {
 	return r0
 }
 
-// Source_GetCalendarID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetCalendarID'
-type Source_GetCalendarID_Call struct {
+// Source_GetCalendarHash_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetCalendarHash'
+type Source_GetCalendarHash_Call struct {
 	*mock.Call
 }
 
-// GetCalendarID is a helper method to define mock.On call
-func (_e *Source_Expecter) GetCalendarID() *Source_GetCalendarID_Call {
-	return &Source_GetCalendarID_Call{Call: _e.mock.On("GetCalendarID")}
+// GetCalendarHash is a helper method to define mock.On call
+func (_e *Source_Expecter) GetCalendarHash() *Source_GetCalendarHash_Call {
+	return &Source_GetCalendarHash_Call{Call: _e.mock.On("GetCalendarHash")}
 }
 
-func (_c *Source_GetCalendarID_Call) Run(run func()) *Source_GetCalendarID_Call {
+func (_c *Source_GetCalendarHash_Call) Run(run func()) *Source_GetCalendarHash_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run()
 	})
 	return _c
 }
 
-func (_c *Source_GetCalendarID_Call) Return(_a0 string) *Source_GetCalendarID_Call {
+func (_c *Source_GetCalendarHash_Call) Return(_a0 string) *Source_GetCalendarHash_Call {
 	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *Source_GetCalendarID_Call) RunAndReturn(run func() string) *Source_GetCalendarID_Call {
+func (_c *Source_GetCalendarHash_Call) RunAndReturn(run func() string) *Source_GetCalendarHash_Call {
 	_c.Call.Return(run)
 	return _c
 }

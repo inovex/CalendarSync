@@ -24,7 +24,7 @@ type OutlookCalendarClient interface {
 	CreateEvent(ctx context.Context, event models.Event) error
 	UpdateEvent(ctx context.Context, event models.Event) error
 	DeleteEvent(ctx context.Context, event models.Event) error
-	GetCalendarID() string
+	GetCalendarHash() string
 }
 
 type CalendarAPI struct {
@@ -245,8 +245,8 @@ func (c *CalendarAPI) DeleteEvent(ctx context.Context, e models.Event) error {
 	return nil
 }
 
-func (c *CalendarAPI) GetCalendarID() string {
-	return c.outlookClient.GetCalendarID()
+func (c *CalendarAPI) GetCalendarHash() string {
+	return c.outlookClient.GetCalendarHash()
 }
 
 func (c *CalendarAPI) Name() string {
