@@ -3,6 +3,7 @@ package adapter
 import (
 	"context"
 	"fmt"
+	"github.com/inovex/CalendarSync/internal/adapter/outlook_published"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -22,6 +23,8 @@ func SourceClientFactory(typ Type) (sync.Source, error) {
 	switch typ {
 	case GoogleCalendarType:
 		return new(google.CalendarAPI), nil
+	case OutlookPublishedCalendarType:
+		return new(outlook_published.CalendarAPI), nil
 	case ZepCalendarType:
 		return new(zep.CalendarAPI), nil
 	case OutlookHttpCalendarType:
