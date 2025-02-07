@@ -7,9 +7,10 @@ import (
 type Type string
 
 const (
-	GoogleCalendarType      Type = "google"
-	ZepCalendarType         Type = "zep"
-	OutlookHttpCalendarType Type = "outlook_http"
+	GoogleCalendarType       Type = "google"
+	ZepCalendarType          Type = "zep"
+	OutlookHttpCalendarType  Type = "outlook_http"
+	OutlookTokenCalendarType Type = "outlook_token"
 )
 
 // ConfigReader provides an interface for adapters to load their own configuration map.

@@ -9,6 +9,7 @@ require (
 	github.com/charmbracelet/log v0.4.2
 	github.com/emersion/go-ical v0.0.0-20250609112844-439c63cef608
 	github.com/emersion/go-webdav v0.7.0
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/stretchr/testify v1.11.1

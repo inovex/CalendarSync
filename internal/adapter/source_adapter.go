@@ -10,6 +10,7 @@ import (
 	"github.com/inovex/CalendarSync/internal/models"
 
 	outlook "github.com/inovex/CalendarSync/internal/adapter/outlook_http"
+	outlook_token "github.com/inovex/CalendarSync/internal/adapter/outlook_token"
 	"github.com/inovex/CalendarSync/internal/adapter/port"
 
 	"github.com/inovex/CalendarSync/internal/adapter/google"
@@ -26,6 +27,8 @@ func SourceClientFactory(typ Type) (sync.Source, error) {
 		return new(zep.CalendarAPI), nil
 	case OutlookHttpCalendarType:
 		return new(outlook.CalendarAPI), nil
+	case OutlookTokenCalendarType:
+		return new(outlook_token.ROCalendarAPI), nil
 	default:
 		return nil, fmt.Errorf("unknown source adapter client type %s", typ)
 	}
