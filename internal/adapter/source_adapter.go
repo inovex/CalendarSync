@@ -58,6 +58,10 @@ func NewSourceAdapterFromConfig(ctx context.Context, bindPort uint, openBrowser 
 		}
 	}
 
+	if c, ok := client.(port.StorageSetter); ok {
+		c.SetStorage(storage)
+	}
+
 	if c, ok := client.(port.OAuth2Adapter); ok {
 		if err := c.SetupOauth2(ctx,
 			auth.Credentials{
