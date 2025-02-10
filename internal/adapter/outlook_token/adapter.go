@@ -31,8 +31,6 @@ type ROCalendarAPI struct {
 	outlookClient ROOutlookCalendarClient
 	calendarID    string
 
-	accessToken string
-
 	logger *log.Logger
 
 	storage auth.Storage
@@ -42,6 +40,7 @@ type ROCalendarAPI struct {
 var _ port.Configurable = &ROCalendarAPI{}
 var _ port.LogSetter = &ROCalendarAPI{}
 var _ port.CalendarIDSetter = &ROCalendarAPI{}
+var _ port.StorageSetter = &ROCalendarAPI{}
 
 func (c *ROCalendarAPI) SetCalendarID(calendarID string) error {
 	if calendarID == "" {
@@ -52,7 +51,15 @@ func (c *ROCalendarAPI) SetCalendarID(calendarID string) error {
 }
 
 func (c *ROCalendarAPI) Initialize(ctx context.Context, openBrowser bool, config map[string]interface{}) error {
-	if c.accessToken == "" {
+	storedAuth, err := c.storage.ReadCalendarAuth(c.calendarID)
+	if err != nil {
+		return err
+	}
+	accessToken := ""
+	if storedAuth != nil && storedAuth.AccessToken.Expiry.After(time.Now()) {
+		c.logger.Debug("adapter is already authenticated, loading access token")
+		accessToken = storedAuth.AccessToken.AccessToken
+	} else {
 		if openBrowser {
 			c.logger.Infof("opening browser window for authentication of %s\n", c.Name())
 			err := browser.OpenURL(graphUrl)
@@ -81,13 +88,24 @@ func (c *ROCalendarAPI) Initialize(ctx context.Context, openBrowser bool, config
 			return errors.New("Access token expired")
 		}
 
-		c.accessToken = tokenString
-	} else {
-		c.logger.Debug("adapter is already authenticated, loading access token")
+		c.logger.Infof("access token valid until %v", expirationTime.Time.Format(time.RFC1123))
+
+		accessToken = tokenString
+		_, err = c.storage.WriteCalendarAuth(auth.CalendarAuth{
+			CalendarID: c.calendarID,
+			AccessToken: auth.AccessTokenObject{
+				AccessToken: accessToken,
+				Expiry:      expirationTime.Time,
+			},
+		})
+		if err != nil {
+			return err
+		}
+		c.logger.Debugf("access token stored successfully")
 	}
 
 	client := &http.Client{}
-	c.outlookClient = &ROOutlookClient{Client: client, AccessToken: c.accessToken, CalendarID: c.calendarID}
+	c.outlookClient = &ROOutlookClient{Client: client, AccessToken: accessToken, CalendarID: c.calendarID}
 	return nil
 }
 
@@ -112,4 +130,8 @@ func (c *ROCalendarAPI) Name() string {
 
 func (c *ROCalendarAPI) SetLogger(logger *log.Logger) {
 	c.logger = logger
+}
+
+func (c *ROCalendarAPI) SetStorage(storage auth.Storage) {
+	c.storage = storage
 }
