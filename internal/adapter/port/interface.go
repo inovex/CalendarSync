@@ -18,6 +18,11 @@ type CalendarIDSetter interface {
 	SetCalendarID(calendarID string) error
 }
 
+// StorageSetter can be implemented by a struct to use persistent storage
+type StorageSetter interface {
+	SetStorage(storage auth.Storage)
+}
+
 // Configurable is an interface which defines how arbitrary configuration data can be passed
 // to a struct which implements this interface. Clients should be configurable.
 type Configurable interface {

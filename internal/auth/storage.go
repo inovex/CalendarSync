@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/inovex/CalendarSync/internal/config"
 )
@@ -15,8 +16,9 @@ type Storage interface {
 }
 
 type CalendarAuth struct {
-	CalendarID string
-	OAuth2     OAuth2Object
+	CalendarID  string
+	OAuth2      OAuth2Object
+	AccessToken AccessTokenObject
 }
 
 type OAuth2Object struct {
@@ -24,6 +26,11 @@ type OAuth2Object struct {
 	RefreshToken string
 	Expiry       string
 	TokenType    string
+}
+
+type AccessTokenObject struct {
+	AccessToken string
+	Expiry      time.Time
 }
 
 func StorageFactory(typ string) (Storage, error) {
