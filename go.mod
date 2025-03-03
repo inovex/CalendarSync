@@ -1,8 +1,7 @@
 module github.com/inovex/CalendarSync
 
 go 1.21
-
-toolchain go1.21.3
+toolchain go1.23.6
 
 require (
 	filippo.io/age v1.2.0
@@ -16,7 +15,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.5
 	go.uber.org/ratelimit v0.3.1
-	golang.org/x/oauth2 v0.25.0
+	golang.org/x/oauth2 v0.27.0
 	google.golang.org/api v0.215.0
 	gopkg.in/yaml.v3 v3.0.1
 )
