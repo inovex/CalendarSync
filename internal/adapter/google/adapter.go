@@ -94,7 +94,7 @@ func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credenti
 		}
 
 		c.authenticated = true
-		c.logger.Info("using stored credentials")
+		c.logger.Debug("using stored credentials")
 	}
 
 	return nil
@@ -178,7 +178,7 @@ func (c *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, en
 		return nil, err
 	}
 
-	c.logger.Infof("loaded %d events between %s and %s.", len(events), start.Format(time.RFC1123), end.Format(time.RFC1123))
+	c.logger.Infof("loaded %d events between %s and %s.", len(events), start.Format(time.DateOnly), end.Format(time.DateOnly))
 
 	return events, nil
 }

@@ -103,6 +103,8 @@ func main() {
 }
 
 func Run(c *cli.Context) error {
+	log.Infof("started calendarsync version %v", Version)
+
 	if c.Bool(flagVersion) {
 		fmt.Println("Version:", Version)
 		os.Exit(0)
@@ -197,7 +199,7 @@ func Run(c *cli.Context) error {
 	if cfg.UpdateConcurrency != 0 {
 		controller.SetConcurrency(cfg.UpdateConcurrency)
 	}
-	log.Info("loaded sync controller")
+	log.Debug("loaded sync controller")
 
 	if c.Bool("clean") {
 		err = controller.CleanUp(c.Context, startTime, endTime)
@@ -211,5 +213,6 @@ func Run(c *cli.Context) error {
 			log.Fatalf("we had some errors during synchronization:\n%v", err)
 		}
 	}
+	log.Info("sync complete")
 	return nil
 }
