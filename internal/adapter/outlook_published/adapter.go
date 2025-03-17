@@ -2,9 +2,10 @@ package outlook_published
 
 import (
 	"context"
+	"time"
+
 	"github.com/charmbracelet/log"
 	"github.com/inovex/CalendarSync/internal/models"
-	"time"
 )
 
 type OutlookPublishedClient interface {
@@ -16,6 +17,10 @@ type CalendarAPI struct {
 	calendarUrl string
 	urlPostData string
 	logger      *log.Logger
+}
+
+func (c *CalendarAPI) GetCalendarHash() string {
+	return c.calendarUrl
 }
 
 func (c *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, end time.Time) ([]models.Event, error) {
