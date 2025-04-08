@@ -100,13 +100,15 @@ func (g *GCalClient) CreateEvent(ctx context.Context, event models.Event) error 
 	}
 
 	var calendarReminders calendar.EventReminders
+	calendarReminders.ForceSendFields = []string{"UseDefault", "Overrides"}
 	for _, reminder := range event.Reminders {
 		if reminder.Actions == models.ReminderActionDisplay {
-			calendarReminders.ForceSendFields = []string{"UseDefault"}
-			calendarReminders.Overrides = append(calendarReminders.Overrides, &calendar.EventReminder{
-				Method:  "popup",
-				Minutes: int64(event.StartTime.Sub(reminder.Trigger.PointInTime).Minutes()),
-			})
+			var calendarOverride = &calendar.EventReminder{
+				Method:          "popup",
+				Minutes:         int64(event.StartTime.Sub(reminder.Trigger.PointInTime).Minutes()),
+				ForceSendFields: []string{"Method", "Minutes"}, // Google API requires e.g `Minutes` to be send even if 0 - https://pkg.go.dev/google.golang.org/api/calendar/v3?utm_source=godoc#EventReminder
+			}
+			calendarReminders.Overrides = append(calendarReminders.Overrides, calendarOverride)
 		}
 	}
 
