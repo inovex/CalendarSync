@@ -4,7 +4,7 @@ on: [ push ]
 
 env:
   GO_VERSION: '1.23'
-  GOLANGCI_VERSION: 'v1.60'
+  GOLANGCI_VERSION: 'v2.1.6'
   STATICCHECK_VERSION: '2024.1.1'
 
 permissions:
