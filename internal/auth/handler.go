@@ -62,7 +62,12 @@ func (l *OAuthHandler) Token() *oauth2.Token {
 
 func (l *OAuthHandler) createAuthorizationExchange(ctx context.Context) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, req *http.Request) {
-		defer l.listener.Close()
+		defer func() {
+			err := l.listener.Close()
+			if err != nil {
+				log.Fatal(err)
+			}
+		}()
 
 		authorizationCode := req.URL.Query().Get("code")
 		var err error

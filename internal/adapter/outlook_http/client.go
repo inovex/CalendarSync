@@ -54,7 +54,10 @@ func (o *OutlookClient) ListEvents(ctx context.Context, start time.Time, end tim
 	}
 
 	body, _ := io.ReadAll(resp.Body)
-	resp.Body.Close()
+	err = resp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
 
 	var eventList EventList
 	err = json.Unmarshal(body, &eventList)
@@ -70,7 +73,10 @@ func (o *OutlookClient) ListEvents(ctx context.Context, start time.Time, end tim
 		}
 
 		body, _ := io.ReadAll(resp.Body)
-		resp.Body.Close()
+		err = resp.Body.Close()
+		if err != nil {
+			return nil, err
+		}
 
 		var nextList EventList
 		err = json.Unmarshal(body, &nextList)
@@ -114,7 +120,12 @@ func (o *OutlookClient) CreateEvent(ctx context.Context, event models.Event) err
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		err = resp.Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	// TODO: we can maybe do this better
 	// the error messages are maybe standardized
@@ -149,7 +160,12 @@ func (o *OutlookClient) UpdateEvent(ctx context.Context, event models.Event) err
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		err = resp.Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -269,7 +285,7 @@ func (o OutlookClient) outlookEventToEvent(oe Event, adapterSourceID string) (e 
 			},
 		})
 	}
-	var hasEventAccepted bool = true
+	var hasEventAccepted = true
 	if oe.ResponseStatus.Response == "declined" {
 		hasEventAccepted = false
 	}

@@ -15,7 +15,7 @@ func calendarEventToEvent(e *calendar.Event, adapterSourceID string) models.Even
 	metadata := ensureMetadata(e, adapterSourceID)
 
 	var attendees []models.Attendee
-	var hasEventAccepted bool = true
+	var hasEventAccepted = true
 	for _, eventAttendee := range e.Attendees {
 		if eventAttendee.Self && eventAttendee.ResponseStatus == "declined" {
 			hasEventAccepted = false
