@@ -181,18 +181,18 @@ func (zep *CalendarAPI) ListEvents(from, to time.Time) ([]Event, error) {
 
 // todo: read timezone from event, not just assume time.Local
 func eventFromCalDavEvent(event ical.Event, etag string) (Event, error) {
-	start, err := event.Component.Props.Get("dtstart").DateTime(time.Local)
+	start, err := event.Props.Get("dtstart").DateTime(time.Local)
 	if err != nil {
 		return Event{}, fmt.Errorf("unable to decode dtstart: %w", err)
 	}
 
-	end, err := event.Component.Props.Get("dtend").DateTime(time.Local)
+	end, err := event.Props.Get("dtend").DateTime(time.Local)
 	if err != nil {
 		return Event{}, fmt.Errorf("unable to decode dtend: %w", err)
 	}
 
 	return Event{
-		ID:          event.Component.Props.Get("uid").Value,
+		ID:          event.Props.Get("uid").Value,
 		Start:       start,
 		End:         end,
 		Summary:     safeGetComponentPropValueString(event, "summary"),
@@ -203,7 +203,7 @@ func eventFromCalDavEvent(event ical.Event, etag string) (Event, error) {
 }
 
 func safeGetComponentPropValueString(event ical.Event, key string) string {
-	prop := event.Component.Props.Get(key)
+	prop := event.Props.Get(key)
 	if prop == nil {
 		return ""
 	}

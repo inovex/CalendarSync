@@ -25,7 +25,7 @@ type YamlStorage struct {
 func (y *YamlStorage) Setup(config config.AuthStorage, encryptionPassphrase string) error {
 	y.StorageEncryptionKey = encryptionPassphrase
 	y.StoragePath = config.Config["path"].(string)
-	if strings.HasPrefix(y.StoragePath, "~" + string(filepath.Separator)) {
+	if strings.HasPrefix(y.StoragePath, "~"+string(filepath.Separator)) {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
 			return err
@@ -126,14 +126,24 @@ func (y *YamlStorage) writeFile(cals []CalendarAuth) error {
 	if err != nil {
 		return fmt.Errorf("failed to open storage file: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		err = file.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	writer = file
 
 	// if encryption is enabled encrypt data
 	if y.StorageEncryptionKey != "" {
 		eFile := NewEncryptedFile(file, y.StorageEncryptionKey)
-		defer eFile.Close()
+		defer func() {
+			err = eFile.Close()
+			if err != nil {
+				log.Fatal(err)
+			}
+		}()
 		writer = eFile
 	}
 
@@ -150,7 +160,12 @@ func (y *YamlStorage) readAndParseFile() (*storageFile, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to open storage path: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		err = file.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	var reader io.Reader
 	reader = file
