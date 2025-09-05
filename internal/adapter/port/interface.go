@@ -19,6 +19,10 @@ type Configurable interface {
 	Initialize(ctx context.Context, openBrowser bool, config map[string]interface{}) error
 }
 
+type AuthAdapter interface {
+	SetupAuth(ctx context.Context, credentials auth.Credentials, storage auth.Storage, bindPort uint) error
+}
+
 type OAuth2Adapter interface {
 	SetupOauth2(ctx context.Context, credentials auth.Credentials, storage auth.Storage, bindPort uint) error
 }
