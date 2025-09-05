@@ -7,7 +7,7 @@ require (
 	github.com/aquilax/truncate v1.0.1
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/charmbracelet/log v0.4.2
-	github.com/emersion/go-ical v0.0.0-20240127095438-fc1c9d8fb2b6
+	github.com/emersion/go-ical v0.0.0-20250609112844-439c63cef608
 	github.com/emersion/go-webdav v0.6.0
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8
