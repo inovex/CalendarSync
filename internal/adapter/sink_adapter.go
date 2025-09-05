@@ -10,8 +10,10 @@ import (
 
 	"github.com/charmbracelet/log"
 
+	"github.com/inovex/CalendarSync/internal/adapter/apple"
 	"github.com/inovex/CalendarSync/internal/adapter/google"
 	outlook "github.com/inovex/CalendarSync/internal/adapter/outlook_http"
+
 	"github.com/inovex/CalendarSync/internal/adapter/port"
 	"github.com/inovex/CalendarSync/internal/sync"
 )
@@ -30,6 +32,8 @@ func SinkClientFactory(typ Type) (sync.Sink, error) {
 		return new(google.CalendarAPI), nil
 	case OutlookHttpCalendarType:
 		return new(outlook.CalendarAPI), nil
+	case AppleCalendarType:
+		return new(apple.CalendarAPI), nil
 	default:
 		return nil, fmt.Errorf("unknown sink adapter client type %s", typ)
 	}
@@ -45,21 +49,23 @@ func NewSinkAdapterFromConfig(ctx context.Context, bindPort uint, openBrowser bo
 		c.SetLogger(logger)
 	}
 
-	if c, ok := client.(port.OAuth2Adapter); ok {
-		if err := c.SetupOauth2(ctx,
-			auth.Credentials{
-				Client: auth.Client{
-					Id:     config.Adapter().OAuth.ClientID,
-					Secret: config.Adapter().OAuth.ClientKey,
-				},
-				Tenant: auth.Tenant{
-					Id: config.Adapter().OAuth.TenantID,
-				},
-				CalendarId: config.Adapter().Calendar,
-			},
-			storage,
-			bindPort,
-		); err != nil {
+	credentials := auth.Credentials{
+		Client: auth.Client{
+			Id:     config.Adapter().OAuth.ClientID,
+			Secret: config.Adapter().OAuth.ClientKey,
+		},
+		Tenant: auth.Tenant{
+			Id: config.Adapter().OAuth.TenantID,
+		},
+		CalendarId: config.Adapter().Calendar,
+	}
+
+	if c, ok := client.(port.AuthAdapter); ok {
+		if err := c.SetupAuth(ctx, credentials, storage, bindPort); err != nil {
+			return nil, err
+		}
+	} else if c, ok := client.(port.OAuth2Adapter); ok {
+		if err := c.SetupOauth2(ctx, credentials, storage, bindPort); err != nil {
 			return nil, err
 		}
 	}

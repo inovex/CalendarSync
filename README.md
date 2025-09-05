@@ -106,6 +106,7 @@ documentation [here](./docs/adapters.md).
 - Google
 - Outlook
 - [ZEP](https://www.zep.de/en/)
+- Apple
 
 ## Sink
 
@@ -128,6 +129,7 @@ documentation [here](./docs/adapters.md).
 
 - Google
 - Outlook
+- Apple
 
 ## Transformers
 
@@ -228,7 +230,7 @@ events which weren't synced with CalendarSync alone! :) )
 # Trademarks
 
 GOOGLE is a trademark of GOOGLE INC. OUTLOOK is a trademark of Microsoft
-Corporation
+Corporation. APPLE is a trademark of Apple Inc.
 
 # Relevant RFCs and Links
 
