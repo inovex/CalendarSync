@@ -112,7 +112,7 @@ func (c *CalendarAPI) Initialize(ctx context.Context, openBrowser bool, config m
 	} else {
 		log.Infof("Discovered calendars: %v", calendars)
 
-		principalID, resolvedID, err := c.appleClient.ResolveCalendarID(ctx, c.calendarID)
+		principalID, resolvedID, err := c.appleClient.(*ACalClient).getResolvedCalendarInfo(ctx)
 		if err != nil {
 			return fmt.Errorf("failed to resolve calendar '%s': %w", c.calendarID, err)
 		}
