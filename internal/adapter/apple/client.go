@@ -10,6 +10,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -24,6 +25,11 @@ type ACalClient struct {
 	AppPassword string
 	CalendarID  string
 	httpClient  *http.Client
+
+	resolveOnce       sync.Once
+	cachedPrincipalID string
+	cachedCalendarID  string
+	resolutionError   error
 }
 
 type CalDAVPropfind struct {
@@ -418,30 +424,51 @@ func (c *ACalClient) convertVEventToEvent(vevent *ical.Component, href string) *
 	return event
 }
 
-func (c *ACalClient) CreateEvent(ctx context.Context, event models.Event) error {
+func (c *ACalClient) createOrUpdateEvent(ctx context.Context, event models.Event, isUpdate bool) error {
+	principalID, resolvedCalendarID, err := c.getResolvedCalendarInfo(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to resolve calendar '%s': %w", c.CalendarID, err)
+	}
+
 	icalData := c.eventToICalendar(event)
 
-	// Generate unique filename
-	filename := fmt.Sprintf("%s.ics", event.Metadata.SyncID)
-	eventPath := fmt.Sprintf("/%s/calendars/%s/%s/%s", c.Username, c.Username, c.CalendarID, filename)
+	uid := strings.ReplaceAll(event.ICalUID, "@", "-")
+	filename := fmt.Sprintf("%s.ics", uid)
+	eventPath := fmt.Sprintf("/%s/calendars/%s/%s", principalID, resolvedCalendarID, filename)
 
-	_, err := c.makeRequest(ctx, "PUT", eventPath, []byte(icalData), map[string]string{
+	// Set headers based on operation type
+	headers := map[string]string{
 		"Content-Type": "text/calendar; charset=utf-8",
-	})
+	}
 
+	// Only add If-None-Match for new resource creation
+	if !isUpdate {
+		headers["If-None-Match"] = "*"
+	}
+
+	_, err = c.makeRequest(ctx, "PUT", eventPath, []byte(icalData), headers)
 	return err
 }
 
+func (c *ACalClient) CreateEvent(ctx context.Context, event models.Event) error {
+	return c.createOrUpdateEvent(ctx, event, false)
+}
+
 func (c *ACalClient) UpdateEvent(ctx context.Context, event models.Event) error {
-	// For updates, we use the same PUT method with the existing resource path
-	return c.CreateEvent(ctx, event)
+	return c.createOrUpdateEvent(ctx, event, true)
 }
 
 func (c *ACalClient) DeleteEvent(ctx context.Context, event models.Event) error {
-	filename := fmt.Sprintf("%s.ics", event.Metadata.SyncID)
-	eventPath := fmt.Sprintf("/%s/calendars/%s/%s/%s", c.Username, c.Username, c.CalendarID, filename)
+	principalID, resolvedCalendarID, err := c.getResolvedCalendarInfo(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to resolve calendar '%s': %w", c.CalendarID, err)
+	}
 
-	_, err := c.makeRequest(ctx, "DELETE", eventPath, nil, nil)
+	uid := strings.ReplaceAll(event.ICalUID, "@", "-")
+	filename := fmt.Sprintf("%s.ics", uid)
+	eventPath := fmt.Sprintf("/%s/calendars/%s/%s", principalID, resolvedCalendarID, filename)
+
+	_, err = c.makeRequest(ctx, "DELETE", eventPath, nil, nil)
 	return err
 }
 
@@ -584,4 +611,19 @@ func (c *ACalClient) GetCalendarHash() string {
 	sum := sha1.Sum([]byte(strings.Join(components, "")))
 	id = append(id, sum[:]...)
 	return base64.URLEncoding.EncodeToString(id)
+}
+
+func (c *ACalClient) getResolvedCalendarInfo(ctx context.Context) (string, string, error) {
+	c.resolveOnce.Do(func() {
+		c.cachedPrincipalID, c.cachedCalendarID, c.resolutionError = c.ResolveCalendarID(ctx, c.CalendarID)
+	})
+
+	return c.cachedPrincipalID, c.cachedCalendarID, c.resolutionError
+}
+
+func (c *ACalClient) resetCache() {
+	c.resolveOnce = sync.Once{}
+	c.cachedPrincipalID = ""
+	c.cachedCalendarID = ""
+	c.resolutionError = nil
 }
