@@ -1,7 +1,6 @@
 package transformation
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -42,11 +41,11 @@ func TestKeepAttendeesWithAnonymousEmail(t *testing.T) {
 		Attendees: []models.Attendee{
 			{
 				DisplayName: "Foo",
-				Email:       fmt.Sprintf("%s@localhost", fmt.Sprint(models.Hash("foo@example.com"))),
+				Email:       "foo_example.com@localhost",
 			},
 			{
 				DisplayName: "Bar",
-				Email:       fmt.Sprintf("%s@localhost", fmt.Sprint(models.Hash("bar@example.com"))),
+				Email:       "bar_example.com@localhost",
 			},
 		},
 	}
@@ -88,11 +87,11 @@ func TestKeepAttendeesWithEmailAsDisplayName(t *testing.T) {
 		Attendees: []models.Attendee{
 			{
 				DisplayName: "foo@example.com",
-				Email:       fmt.Sprintf("%s@localhost", fmt.Sprint(models.Hash("foo@example.com"))),
+				Email:       "foo_example.com@localhost",
 			},
 			{
 				DisplayName: "bar@example.com",
-				Email:       fmt.Sprintf("%s@localhost", fmt.Sprint(models.Hash("bar@example.com"))),
+				Email:       "bar_example.com@localhost",
 			},
 		},
 	}
