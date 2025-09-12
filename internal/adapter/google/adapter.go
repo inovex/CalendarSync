@@ -153,8 +153,8 @@ func (c *CalendarAPI) Initialize(ctx context.Context, openBrowser bool, config m
 	// }
 	_, err = c.gcalClient.ListEvents(ctx, time.Now().Add(-3*time.Hour), time.Now().Add(3*time.Hour))
 	if err != nil {
-		if strings.Contains(err.Error(), "Token has been expired") {
-			c.logger.Info("the refresh token expired, initiating reauthentication...")
+		if strings.Contains(err.Error(), "invalid_grant") {
+			c.logger.Info("the refresh token expired or was revoked, initiating reauthentication...")
 			err := c.storage.RemoveCalendarAuth(c.calendarID)
 			if err != nil {
 				return fmt.Errorf("failed to remove authentication for calendar %s: %w", c.calendarID, err)
