@@ -404,6 +404,7 @@ func (c *ACalClient) convertVEventToEvent(vevent *ical.Component, href string) *
 	if uid, _ := vevent.Props.Text(ical.PropUID); uid != "" {
 		event.ICalUID = uid
 		event.ID = uid
+		event.Metadata.SyncID = models.NewEventID(uid)
 	}
 
 	// Extract datetime properties
@@ -451,7 +452,15 @@ func (c *ACalClient) createOrUpdateEvent(ctx context.Context, event models.Event
 }
 
 func (c *ACalClient) CreateEvent(ctx context.Context, event models.Event) error {
-	return c.createOrUpdateEvent(ctx, event, false)
+	err := c.createOrUpdateEvent(ctx, event, false)
+	if err != nil {
+		if strings.Contains(err.Error(), "status 412") {
+			log.Debugf("Event already exists, updating instead: %s", event.ShortTitle())
+			return c.createOrUpdateEvent(ctx, event, true)
+		}
+		return err
+	}
+	return nil
 }
 
 func (c *ACalClient) UpdateEvent(ctx context.Context, event models.Event) error {
