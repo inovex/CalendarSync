@@ -11,7 +11,7 @@ import (
 	"github.com/charmbracelet/log"
 
 	"github.com/inovex/CalendarSync/internal/adapter/google"
-	outlook "github.com/inovex/CalendarSync/internal/adapter/outlook_http"
+	"github.com/inovex/CalendarSync/internal/adapter/outlook"
 	"github.com/inovex/CalendarSync/internal/adapter/port"
 	"github.com/inovex/CalendarSync/internal/sync"
 )
@@ -29,7 +29,9 @@ func SinkClientFactory(typ Type) (sync.Sink, error) {
 	case GoogleCalendarType:
 		return new(google.CalendarAPI), nil
 	case OutlookHttpCalendarType:
-		return new(outlook.CalendarAPI), nil
+		return new(outlook.HttpCalendarAPI), nil
+	case OutlookTokenCalendarType:
+		return new(outlook.TokenCalendarAPI), nil
 	default:
 		return nil, fmt.Errorf("unknown sink adapter client type %s", typ)
 	}
@@ -49,6 +51,10 @@ func NewSinkAdapterFromConfig(ctx context.Context, bindPort uint, openBrowser bo
 		if err := c.SetCalendarID(config.Adapter().Calendar); err != nil {
 			return nil, err
 		}
+	}
+
+	if c, ok := client.(port.StorageSetter); ok {
+		c.SetStorage(storage)
 	}
 
 	if c, ok := client.(port.OAuth2Adapter); ok {

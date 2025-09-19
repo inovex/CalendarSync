@@ -1,4 +1,4 @@
-package outlook_http
+package outlook
 
 import (
 	"github.com/inovex/CalendarSync/internal/models"

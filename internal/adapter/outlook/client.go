@@ -1,4 +1,4 @@
-package outlook_http
+package outlook
 
 import (
 	"bytes"
@@ -19,7 +19,18 @@ import (
 const (
 	ExtensionOdataType = "microsoft.graph.openTypeExtension"
 	ExtensionName      = "inovex.calendarsync.meta"
+	graphUrl           = "https://developer.microsoft.com/en-us/graph/graph-explorer"
+	baseUrl            = "https://graph.microsoft.com/v1.0"
+	timeFormat         = "2006-01-02T15:04:05.0000000"
 )
+
+type OutlookCalendarClient interface {
+	ListEvents(ctx context.Context, starttime time.Time, endtime time.Time) ([]models.Event, error)
+	CreateEvent(ctx context.Context, event models.Event) error
+	UpdateEvent(ctx context.Context, event models.Event) error
+	DeleteEvent(ctx context.Context, event models.Event) error
+	GetCalendarHash() string
+}
 
 // OutlookClient implements the OutlookCalendarClient interface
 type OutlookClient struct {
