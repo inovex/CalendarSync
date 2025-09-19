@@ -31,6 +31,7 @@ func FilterEvent(event models.Event, filters ...Filter) (result bool) {
 var (
 	filterConfigMapping = map[string]Filter{
 		"TimeFrame":      &filter.TimeFrameEvents{},
+		"TimeExclude":    &filter.TimeExcludeEvents{},
 		"DeclinedEvents": &filter.DeclinedEvents{},
 		"AllDayEvents":   &filter.AllDayEvents{},
 		"RegexTitle":     &filter.RegexTitle{},
@@ -38,6 +39,7 @@ var (
 
 	filterOrder = []string{
 		"TimeFrame",
+		"TimeExclude",
 		"DeclinedEvents",
 		"AllDayEvents",
 		"RegexTitle",
