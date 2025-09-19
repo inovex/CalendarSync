@@ -3,8 +3,8 @@ name: Build
 on: [ push ]
 
 env:
-  GO_VERSION: '1.24'
-  GOLANGCI_VERSION: 'v2.4.0'
+  GO_VERSION: '1.25'
+  GOLANGCI_VERSION: 'v2.5.0'
   STATICCHECK_VERSION: '2025.1.1'
 
 permissions:

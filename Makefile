@@ -48,7 +48,7 @@ vendor: ## Vendor dependencies
 ## Test
 
 test: ## Run all tests
-	$(GO) run github.com/vektra/mockery/v2@v2.42.0
+	$(GO) run github.com/vektra/mockery/v2@v2.53.3
 	$(GOTEST) -race $(GOLIST)
 
 coverage: ## Run tests with coverage and export it into 'profile.cov'. If 'COVERAGE_EXPORT' is true, 'COVERAGE_FILE' is written
@@ -63,7 +63,7 @@ endif
 lint: lint-go lint-yaml lint-dockerfile ## Run all linters
 
 lint-go: ## Lint all GO files
-	$(DOCKER) run --rm -it -v $(PWD):/app -w /app $(GOLANGCI_LINT_IMAGE) golangci-lint run --go "1.23"
+	$(DOCKER) run --rm -it -v $(PWD):/app -w /app $(GOLANGCI_LINT_IMAGE) golangci-lint run --go "1.25"
 
 lint-yaml: ## Lint all YAML files
 	$(DOCKER) run --rm -it -v $(PWD):/data $(YAMLLINT_IMAGE) -f parsable $(YAMLFILES)
