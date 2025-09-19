@@ -1,4 +1,4 @@
-package outlook_token
+package outlook
 
 import (
 	"context"
@@ -16,19 +16,8 @@ import (
 	"github.com/inovex/CalendarSync/internal/models"
 )
 
-const (
-	graphUrl   = "https://developer.microsoft.com/en-us/graph/graph-explorer"
-	baseUrl    = "https://graph.microsoft.com/v1.0"
-	timeFormat = "2006-01-02T15:04:05.0000000"
-)
-
-type ROOutlookCalendarClient interface {
-	ListEvents(ctx context.Context, starttime time.Time, endtime time.Time) ([]models.Event, error)
-	GetCalendarHash() string
-}
-
-type ROCalendarAPI struct {
-	outlookClient ROOutlookCalendarClient
+type TokenCalendarAPI struct {
+	outlookClient OutlookCalendarClient
 	calendarID    string
 
 	logger *log.Logger
@@ -37,12 +26,12 @@ type ROCalendarAPI struct {
 }
 
 // Assert that the expected interfaces are implemented
-var _ port.Configurable = &ROCalendarAPI{}
-var _ port.LogSetter = &ROCalendarAPI{}
-var _ port.CalendarIDSetter = &ROCalendarAPI{}
-var _ port.StorageSetter = &ROCalendarAPI{}
+var _ port.Configurable = &TokenCalendarAPI{}
+var _ port.LogSetter = &TokenCalendarAPI{}
+var _ port.CalendarIDSetter = &TokenCalendarAPI{}
+var _ port.StorageSetter = &TokenCalendarAPI{}
 
-func (c *ROCalendarAPI) SetCalendarID(calendarID string) error {
+func (c *TokenCalendarAPI) SetCalendarID(calendarID string) error {
 	if calendarID == "" {
 		return fmt.Errorf("%s adapter 'calendar' cannot be empty", c.Name())
 	}
@@ -50,7 +39,17 @@ func (c *ROCalendarAPI) SetCalendarID(calendarID string) error {
 	return nil
 }
 
-func (c *ROCalendarAPI) Initialize(ctx context.Context, openBrowser bool, config map[string]interface{}) error {
+type AddHeaderTransport struct {
+	AccessToken string
+	T           http.RoundTripper
+}
+
+func (adt *AddHeaderTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Add("Authorization", "Bearer "+adt.AccessToken)
+	return adt.T.RoundTrip(req)
+}
+
+func (c *TokenCalendarAPI) Initialize(ctx context.Context, openBrowser bool, config map[string]interface{}) error {
 	storedAuth, err := c.storage.ReadCalendarAuth(c.calendarID)
 	if err != nil {
 		return err
@@ -104,12 +103,12 @@ func (c *ROCalendarAPI) Initialize(ctx context.Context, openBrowser bool, config
 		c.logger.Debugf("access token stored successfully")
 	}
 
-	client := &http.Client{}
-	c.outlookClient = &ROOutlookClient{Client: client, AccessToken: accessToken, CalendarID: c.calendarID}
+	client := &http.Client{Transport: &AddHeaderTransport{accessToken, http.DefaultTransport}}
+	c.outlookClient = &OutlookClient{Client: client, CalendarID: c.calendarID}
 	return nil
 }
 
-func (c *ROCalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, end time.Time) ([]models.Event, error) {
+func (c *TokenCalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, end time.Time) ([]models.Event, error) {
 	events, err := c.outlookClient.ListEvents(ctx, start, end)
 	if err != nil {
 		return nil, err
@@ -120,18 +119,51 @@ func (c *ROCalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, 
 	return events, nil
 }
 
-func (c *ROCalendarAPI) GetCalendarHash() string {
+func (c *TokenCalendarAPI) CreateEvent(ctx context.Context, e models.Event) error {
+	err := c.outlookClient.CreateEvent(ctx, e)
+	if err != nil {
+		return err
+	}
+
+	c.logger.Info("Event created", "title", e.ShortTitle(), "time", e.StartTime.String())
+
+	return nil
+}
+
+func (c *TokenCalendarAPI) UpdateEvent(ctx context.Context, e models.Event) error {
+	err := c.outlookClient.UpdateEvent(ctx, e)
+	if err != nil {
+		return err
+	}
+
+	c.logger.Info("Event updated", "title", e.ShortTitle(), "time", e.StartTime.String())
+
+	return nil
+}
+
+func (c *TokenCalendarAPI) DeleteEvent(ctx context.Context, e models.Event) error {
+	err := c.outlookClient.DeleteEvent(ctx, e)
+	if err != nil {
+		return err
+	}
+
+	c.logger.Info("Event deleted", "title", e.ShortTitle(), "time", e.StartTime.String())
+
+	return nil
+}
+
+func (c *TokenCalendarAPI) GetCalendarHash() string {
 	return c.outlookClient.GetCalendarHash()
 }
 
-func (c *ROCalendarAPI) Name() string {
+func (c *TokenCalendarAPI) Name() string {
 	return "Outlook"
 }
 
-func (c *ROCalendarAPI) SetLogger(logger *log.Logger) {
+func (c *TokenCalendarAPI) SetLogger(logger *log.Logger) {
 	c.logger = logger
 }
 
-func (c *ROCalendarAPI) SetStorage(storage auth.Storage) {
+func (c *TokenCalendarAPI) SetStorage(storage auth.Storage) {
 	c.storage = storage
 }
