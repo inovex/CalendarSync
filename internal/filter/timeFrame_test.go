@@ -8,10 +8,10 @@ import (
 	"github.com/inovex/CalendarSync/internal/models"
 )
 
-const timeFormat string = "2006-01-02T15:04"
-
 // Events which match the start and end hour should be kept
 func TestTimeFrameEventsFilter(t *testing.T) {
+	const timeFormat string = "2006-01-02T15:04"
+
 	t1, err := time.Parse(timeFormat, "2024-01-01T13:00")
 	if err != nil {
 		t.Error(err)
