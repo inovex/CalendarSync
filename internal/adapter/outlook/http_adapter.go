@@ -1,4 +1,4 @@
-package outlook_http
+package outlook
 
 import (
 	"context"
@@ -14,20 +14,7 @@ import (
 	"github.com/inovex/CalendarSync/internal/models"
 )
 
-const (
-	baseUrl    = "https://graph.microsoft.com/v1.0"
-	timeFormat = "2006-01-02T15:04:05.0000000"
-)
-
-type OutlookCalendarClient interface {
-	ListEvents(ctx context.Context, starttime time.Time, endtime time.Time) ([]models.Event, error)
-	CreateEvent(ctx context.Context, event models.Event) error
-	UpdateEvent(ctx context.Context, event models.Event) error
-	DeleteEvent(ctx context.Context, event models.Event) error
-	GetCalendarHash() string
-}
-
-type CalendarAPI struct {
+type HttpCalendarAPI struct {
 	outlookClient OutlookCalendarClient
 	calendarID    string
 
@@ -43,12 +30,12 @@ type CalendarAPI struct {
 }
 
 // Assert that the expected interfaces are implemented
-var _ port.Configurable = &CalendarAPI{}
-var _ port.LogSetter = &CalendarAPI{}
-var _ port.CalendarIDSetter = &CalendarAPI{}
-var _ port.OAuth2Adapter = &CalendarAPI{}
+var _ port.Configurable = &HttpCalendarAPI{}
+var _ port.LogSetter = &HttpCalendarAPI{}
+var _ port.CalendarIDSetter = &HttpCalendarAPI{}
+var _ port.OAuth2Adapter = &HttpCalendarAPI{}
 
-func (c *CalendarAPI) SetCalendarID(calendarID string) error {
+func (c *HttpCalendarAPI) SetCalendarID(calendarID string) error {
 	if calendarID == "" {
 		return fmt.Errorf("%s adapter 'calendar' cannot be empty", c.Name())
 	}
@@ -56,7 +43,7 @@ func (c *CalendarAPI) SetCalendarID(calendarID string) error {
 	return nil
 }
 
-func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credentials, storage auth.Storage, bindPort uint) error {
+func (c *HttpCalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credentials, storage auth.Storage, bindPort uint) error {
 	// Outlook Adapter does not need the clientKey
 	switch {
 	case credentials.Client.Id == "":
@@ -166,7 +153,7 @@ func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credenti
 	return nil
 }
 
-func (c *CalendarAPI) Initialize(ctx context.Context, openBrowser bool, config map[string]interface{}) error {
+func (c *HttpCalendarAPI) Initialize(ctx context.Context, openBrowser bool, config map[string]interface{}) error {
 	if !c.authenticated {
 		c.oAuthUrl = c.oAuthHandler.Configuration().AuthCodeURL("state", oauth2.AccessTypeOffline)
 
@@ -206,7 +193,7 @@ func (c *CalendarAPI) Initialize(ctx context.Context, openBrowser bool, config m
 	return nil
 }
 
-func (c *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, end time.Time) ([]models.Event, error) {
+func (c *HttpCalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, end time.Time) ([]models.Event, error) {
 	events, err := c.outlookClient.ListEvents(ctx, start, end)
 	if err != nil {
 		return nil, err
@@ -217,7 +204,7 @@ func (c *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, en
 	return events, nil
 }
 
-func (c *CalendarAPI) CreateEvent(ctx context.Context, e models.Event) error {
+func (c *HttpCalendarAPI) CreateEvent(ctx context.Context, e models.Event) error {
 	err := c.outlookClient.CreateEvent(ctx, e)
 	if err != nil {
 		return err
@@ -228,7 +215,7 @@ func (c *CalendarAPI) CreateEvent(ctx context.Context, e models.Event) error {
 	return nil
 }
 
-func (c *CalendarAPI) UpdateEvent(ctx context.Context, e models.Event) error {
+func (c *HttpCalendarAPI) UpdateEvent(ctx context.Context, e models.Event) error {
 	err := c.outlookClient.UpdateEvent(ctx, e)
 	if err != nil {
 		return err
@@ -239,7 +226,7 @@ func (c *CalendarAPI) UpdateEvent(ctx context.Context, e models.Event) error {
 	return nil
 }
 
-func (c *CalendarAPI) DeleteEvent(ctx context.Context, e models.Event) error {
+func (c *HttpCalendarAPI) DeleteEvent(ctx context.Context, e models.Event) error {
 	err := c.outlookClient.DeleteEvent(ctx, e)
 	if err != nil {
 		return err
@@ -250,14 +237,14 @@ func (c *CalendarAPI) DeleteEvent(ctx context.Context, e models.Event) error {
 	return nil
 }
 
-func (c *CalendarAPI) GetCalendarHash() string {
+func (c *HttpCalendarAPI) GetCalendarHash() string {
 	return c.outlookClient.GetCalendarHash()
 }
 
-func (c *CalendarAPI) Name() string {
+func (c *HttpCalendarAPI) Name() string {
 	return "Outlook"
 }
 
-func (c *CalendarAPI) SetLogger(logger *log.Logger) {
+func (c *HttpCalendarAPI) SetLogger(logger *log.Logger) {
 	c.logger = logger
 }
