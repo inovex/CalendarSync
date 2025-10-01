@@ -88,3 +88,53 @@ sink:
 ```
 
 If you want to use the created OAuth Application also with accounts outside of your Google Workspace, make sure to set the Usertype to `external` in the `OAuth Consent Screen` Menu.
+
+## Apple CalDAV Adapter Setup
+
+The Apple CalDAV adapter allows synchronization with iCloud calendars using the industry-standard CalDAV protocol. This adapter works with any Apple ID that has iCloud calendar access enabled.
+
+### Prerequisites
+
+Before setting up the adapter, you need:
+- An Apple ID with iCloud enabled
+- Access to Apple ID account settings (appleid.apple.com)
+- The calendar identifier from your Calendar.app
+
+### Setting up App-Specific Password
+
+Since Apple requires two-factor authentication for iCloud access, you cannot use your regular Apple ID password. Instead, you must generate an app-specific password:
+
+1. Sign in to [appleid.apple.com](https://appleid.apple.com)
+2. Navigate to "Sign-In and Security"
+3. Select "App-Specific Passwords"
+4. Click "Generate an app-specific password"
+5. Enter a label like "CalendarSync"
+6. Copy the generated password (format: `xxxx-xxxx-xxxx-xxxx`)
+
+**Important**: Save this password immediately — Apple will only show it once.
+
+### Finding Your Calendar ID
+
+The calendar ID is needed to specify which iCloud calendar to sync:
+
+1. Open Calendar.app on macOS
+2. Right-click on the desired calendar in the sidebar
+3. Select "Get Info"
+4. The calendar ID is typically the calendar name in lowercase with special characters removed
+5. Common examples: `home`, `work`, `personal`
+
+Alternatively, you can use CalDAV discovery tools or inspect the CalDAV URLs in Calendar.app's account settings.
+
+### Configuration
+
+```yaml
+source:
+  adapter:
+    type: "apple"
+    calendar: "personal"  # Your calendar identifier
+    config: {}
+    oAuth:
+      clientId: "your-apple-id@icloud.com"    # Your Apple ID email
+      clientKey: "xxxx-xxxx-xxxx-xxxx"        # App-specific password
+      tenantId: ""                            # Leave empty for Apple CalDAV
+```
