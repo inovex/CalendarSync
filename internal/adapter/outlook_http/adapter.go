@@ -45,7 +45,16 @@ type CalendarAPI struct {
 // Assert that the expected interfaces are implemented
 var _ port.Configurable = &CalendarAPI{}
 var _ port.LogSetter = &CalendarAPI{}
+var _ port.CalendarIDSetter = &CalendarAPI{}
 var _ port.OAuth2Adapter = &CalendarAPI{}
+
+func (c *CalendarAPI) SetCalendarID(calendarID string) error {
+	if calendarID == "" {
+		return fmt.Errorf("%s adapter 'calendar' cannot be empty", c.Name())
+	}
+	c.calendarID = calendarID
+	return nil
+}
 
 func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credentials, storage auth.Storage, bindPort uint) error {
 	// Outlook Adapter does not need the clientKey
@@ -54,11 +63,7 @@ func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credenti
 		return fmt.Errorf("%s adapter oAuth2 'clientId' cannot be empty", c.Name())
 	case credentials.Tenant.Id == "":
 		return fmt.Errorf("%s adapter oAuth2 'tenantId' cannot be empty", c.Name())
-	case credentials.CalendarId == "":
-		return fmt.Errorf("%s adapter oAuth2 'calendar' cannot be empty", c.Name())
 	}
-
-	c.calendarID = credentials.CalendarId
 
 	endpoint := oauth2.Endpoint{
 		AuthURL:   fmt.Sprintf("https://login.microsoftonline.com/%s/oauth2/v2.0/authorize", credentials.Tenant.Id),
@@ -81,7 +86,7 @@ func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credenti
 	c.storage = storage
 	c.oAuthConfig = &oAuthConfig
 
-	storedAuth, err := c.storage.ReadCalendarAuth(credentials.CalendarId)
+	storedAuth, err := c.storage.ReadCalendarAuth(c.calendarID)
 	if err != nil {
 		return err
 	}

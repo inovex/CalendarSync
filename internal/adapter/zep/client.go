@@ -41,6 +41,15 @@ type CalendarAPI struct {
 // Assert that the expected interfaces are implemented
 var _ port.Configurable = &CalendarAPI{}
 var _ port.LogSetter = &CalendarAPI{}
+var _ port.CalendarIDSetter = &CalendarAPI{}
+
+func (zep *CalendarAPI) SetCalendarID(calendarID string) error {
+	if calendarID == "" {
+		return fmt.Errorf("%s adapter 'calendar' cannot be empty", zep.Name())
+	}
+	zep.calendarID = calendarID
+	return nil
+}
 
 func (zep *CalendarAPI) GetCalendarHash() string {
 	var id []byte
@@ -91,16 +100,16 @@ func (zep *CalendarAPI) Initialize(ctx context.Context, openBrowser bool, config
 }
 
 func (zep *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, end time.Time) ([]models.Event, error) {
-	absences, err := zep.ListEvents(start, end)
+	events, err := zep.ListEvents(start, end)
 	if err != nil {
-		return nil, fmt.Errorf("could not get absences %w", err)
+		return nil, fmt.Errorf("could not get zep events %w", err)
 	}
 
 	var syncEvents []models.Event
 
-	zep.logger.Infof("loaded %d events between %s and %s.", len(absences), start.Format(time.DateOnly), end.Format(time.DateOnly))
+	zep.logger.Infof("loaded %d events between %s and %s.", len(events), start.Format(time.DateOnly), end.Format(time.DateOnly))
 
-	for _, v := range absences {
+	for _, v := range events {
 		syncEvents = append(syncEvents,
 			models.Event{
 				ICalUID:     v.ID,
@@ -108,6 +117,7 @@ func (zep *CalendarAPI) EventsInTimeframe(ctx context.Context, start time.Time, 
 				Description: v.Description,
 				StartTime:   v.Start,
 				EndTime:     v.End,
+				AllDay:      v.AllDay,
 				Accepted:    true,
 				Metadata:    models.NewEventMetadata(v.ID, "", zep.GetCalendarHash()),
 			})
@@ -191,10 +201,15 @@ func eventFromCalDavEvent(event ical.Event, etag string) (Event, error) {
 		return Event{}, fmt.Errorf("unable to decode dtend: %w", err)
 	}
 
+	// if it is an all-day event, all the times are zero
+	allDay := (start.Hour() == 0 && start.Minute() == 0 && start.Second() == 0 &&
+		end.Hour() == 0 && end.Minute() == 0 && end.Second() == 0)
+
 	return Event{
 		ID:          event.Props.Get("uid").Value,
 		Start:       start,
 		End:         end,
+		AllDay:      allDay,
 		Summary:     safeGetComponentPropValueString(event, "summary"),
 		Category:    safeGetComponentPropValueString(event, "categories"),
 		Description: safeGetComponentPropValueString(event, "description"),
