@@ -9,8 +9,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/charmbracelet/log"
 
 	"github.com/inovex/CalendarSync/internal/models"
@@ -301,11 +303,27 @@ func (o OutlookClient) outlookEventToEvent(oe Event, adapterSourceID string) (e 
 		hasEventAccepted = false
 	}
 
+	// get plain text of description from html, if possible
+	description := oe.Body.Content
+	if oe.Body.ContentType == "html" {
+		doc, err := goquery.NewDocumentFromReader(strings.NewReader(description))
+		if err == nil {
+			htmlText := doc.Find(".PlainText")
+			if htmlText.Length() == 1 {
+				description = htmlText.Text()
+				// special case: empty string is encoded as non-breaking space
+				if description == "\u00A0" {
+					description = ""
+				}
+			}
+		}
+	}
+
 	bufEvent = models.Event{
 		ICalUID:     oe.UID,
 		ID:          oe.ID,
 		Title:       oe.Subject,
-		Description: oe.Body.Content,
+		Description: description,
 		Location:    oe.Location.Name,
 		StartTime:   startTime,
 		EndTime:     endTime,
