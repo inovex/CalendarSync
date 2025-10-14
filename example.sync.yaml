@@ -56,6 +56,10 @@ transformations:
   - name: KeepAttendees
     config:
       UseEmailAsDisplayName: true
+  # Set event visibility: "default", "public", "private", or "confidential"
+  # - name: SetVisibility
+  #   config:
+  #     Visibility: "private"
 
 # Filters remove events from being synced due to different criteria
 filters:
