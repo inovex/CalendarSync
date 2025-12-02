@@ -39,6 +39,7 @@ var (
 		"KeepLocation":    &transformation.KeepLocation{},
 		"KeepAttendees":   &transformation.KeepAttendees{UseEmailAsDisplayName: false},
 		"KeepReminders":   &transformation.KeepReminders{},
+		"SetVisibility":   &transformation.SetVisibility{Visibility: "default"},
 	}
 
 	// this is the order of the transformers in which they get evaluated
@@ -52,6 +53,7 @@ var (
 		"KeepTitle",
 		"PrefixTitle",
 		"ReplaceTitle",
+		"SetVisibility",
 	}
 )
 
