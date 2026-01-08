@@ -21,6 +21,36 @@ const (
 	ExtensionName      = "inovex.calendarsync.meta"
 )
 
+// visibilityToSensitivity maps CalendarSync visibility values to Outlook sensitivity values
+// Visibility: "default", "public", "private", "confidential" (iCalendar CLASS)
+// Sensitivity: "normal", "personal", "private", "confidential" (Outlook/Graph API)
+func visibilityToSensitivity(visibility string) string {
+	switch visibility {
+	case "public", "default", "":
+		return "normal"
+	case "private":
+		return "private"
+	case "confidential":
+		return "confidential"
+	default:
+		return "normal"
+	}
+}
+
+// sensitivityToVisibility maps Outlook sensitivity values to CalendarSync visibility values
+func sensitivityToVisibility(sensitivity string) string {
+	switch sensitivity {
+	case "normal", "personal", "":
+		return "default"
+	case "private":
+		return "private"
+	case "confidential":
+		return "confidential"
+	default:
+		return "default"
+	}
+}
+
 // OutlookClient implements the OutlookCalendarClient interface
 type OutlookClient struct {
 	Client     *http.Client
@@ -249,6 +279,10 @@ func (o OutlookClient) eventToOutlookEvent(e models.Event) (oe Event) {
 		// we currently use the first reminder in the list, this may result in data loss
 		outlookEvent.ReminderMinutesBeforeStart = int(e.StartTime.Sub(e.Reminders[0].Trigger.PointInTime).Minutes())
 	}
+
+	// Map visibility to Outlook sensitivity
+	outlookEvent.Sensitivity = visibilityToSensitivity(e.Visibility)
+
 	return outlookEvent
 }
 
@@ -303,6 +337,7 @@ func (o OutlookClient) outlookEventToEvent(oe Event, adapterSourceID string) (e 
 		Reminders:   reminders,
 		MeetingLink: oe.OnlineMeetingUrl,
 		Accepted:    hasEventAccepted,
+		Visibility:  sensitivityToVisibility(oe.Sensitivity),
 	}
 
 	if oe.IsAllDay {
