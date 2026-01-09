@@ -192,11 +192,16 @@ filters:
   # Events which cover the full day aren't synced
   - name: AllDayEvents
   # Events within the specified timeframe will be retained, while all others will be filtered out.
-  # hours are represented in the 24h time format
+  # hours are represented in the 24h time format (time is always UTC)
   - name: TimeFrame
     config:
       HourStart: 8
       HourEnd: 17
+  # Events within the specified timeframe will be excluded (time is always UTC)
+  - name: TimeFilter
+    config:
+      HourStart: 12
+      HourEnd: 13
   # Events where the title matches the ExcludeRegexp (RE2 Regex) aren't synced
   - name: RegexTitle
     config:
