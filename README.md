@@ -197,10 +197,13 @@ filters:
     config:
       HourStart: 8
       HourEnd: 17
-  # Events where the title matches the ExcludeRegexp (RE2 Regex) aren't synced
+  # Include / Exclude events based on the title (RE2 Regex)
+  # Events are included by default, ExcludeRegexp defines excluded events, IncludeRegexp defines exception from exclusion
+  # If only inclusion should be defined, use ".*" for ExcludeRegexp
   - name: RegexTitle
     config:
       ExcludeRegexp: ".*test"
+      IncludeRegexp: ".*test-but-included"
 ```
 
 ## Auth
