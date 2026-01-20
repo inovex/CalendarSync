@@ -112,6 +112,12 @@ func (g *GCalClient) CreateEvent(ctx context.Context, event models.Event) error 
 		}
 	}
 
+	// Set visibility, default to "default" if empty
+	visibility := event.Visibility
+	if visibility == "" {
+		visibility = "default"
+	}
+
 	call, err := retry(ctx, func() (*calendar.Event, error) {
 		g.RateLimiter.Take()
 		return g.Client.Events.Insert(g.CalendarId, &calendar.Event{
@@ -123,6 +129,7 @@ func (g *GCalClient) CreateEvent(ctx context.Context, event models.Event) error 
 			ExtendedProperties: extProperties,
 			Attendees:          calendarAttendees,
 			Reminders:          &calendarReminders,
+			Visibility:         visibility,
 		}).Context(ctx).SendUpdates("none").Do()
 	})
 	if err != nil {
@@ -165,6 +172,12 @@ func (g *GCalClient) UpdateEvent(ctx context.Context, event models.Event) error 
 		}
 	}
 
+	// Set visibility, default to "default" if empty
+	visibility := event.Visibility
+	if visibility == "" {
+		visibility = "default"
+	}
+
 	_, err := retry(ctx, func() (*calendar.Event, error) {
 		g.RateLimiter.Take()
 		return g.Client.Events.Update(g.CalendarId, event.ID, &calendar.Event{
@@ -176,6 +189,7 @@ func (g *GCalClient) UpdateEvent(ctx context.Context, event models.Event) error 
 			ExtendedProperties: extProperties,
 			Attendees:          calendarAttendees,
 			Reminders:          calendarReminders,
+			Visibility:         visibility,
 		}).Context(ctx).SendUpdates("none").Do()
 	})
 	if isNotFound(err) {
