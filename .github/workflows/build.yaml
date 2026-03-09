@@ -55,7 +55,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 1
-      - uses: dominikh/staticcheck-action@v1.4.0
+      - uses: dominikh/staticcheck-action@v1.4.1
         with:
           version: ${{ env.STATICCHECK_VERSION }}
           install-go: false
