@@ -6,7 +6,7 @@ require (
 	filippo.io/age v1.3.1
 	github.com/aquilax/truncate v1.0.1
 	github.com/cenkalti/backoff/v4 v4.3.0
-	github.com/charmbracelet/log v0.4.2
+	github.com/charmbracelet/log v1.0.0
 	github.com/emersion/go-ical v0.0.0-20250609112844-439c63cef608
 	github.com/emersion/go-webdav v0.7.0
 	github.com/microcosm-cc/bluemonday v1.0.27
