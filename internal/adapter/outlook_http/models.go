@@ -63,5 +63,14 @@ type EmailAddress struct {
 }
 
 type Location struct {
-	Name string `json:"displayName"`
+	Name    string           `json:"displayName"`
+	Address *PhysicalAddress `json:"address,omitempty"`
+}
+
+type PhysicalAddress struct {
+	Street          string `json:"street,omitempty"`
+	City            string `json:"city,omitempty"`
+	State           string `json:"state,omitempty"`
+	PostalCode      string `json:"postalCode,omitempty"`
+	CountryOrRegion string `json:"countryOrRegion,omitempty"`
 }

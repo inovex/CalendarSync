@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -252,6 +253,27 @@ func (o OutlookClient) eventToOutlookEvent(e models.Event) (oe Event) {
 	return outlookEvent
 }
 
+// flattenLocation renders an Outlook location as the engine's single free-text
+// Location string. Graph keeps the friendly name in displayName and the
+// street/city/state/postcode only in the structured address, so address parts
+// not already present in displayName are appended to survive the string sink.
+func flattenLocation(l Location) string {
+	if l.Address == nil {
+		return l.Name
+	}
+	parts := make([]string, 0, 5)
+	if l.Name != "" {
+		parts = append(parts, l.Name)
+	}
+	for _, p := range []string{l.Address.Street, l.Address.City, l.Address.State, l.Address.PostalCode} {
+		if p == "" || strings.Contains(l.Name, p) {
+			continue
+		}
+		parts = append(parts, p)
+	}
+	return strings.Join(parts, ", ")
+}
+
 // outlookEventToEvent transforms an outlook event to our form of event representation
 // gets called when used as a sink and as a source
 func (o OutlookClient) outlookEventToEvent(oe Event, adapterSourceID string) (e models.Event, err error) {
@@ -295,7 +317,7 @@ func (o OutlookClient) outlookEventToEvent(oe Event, adapterSourceID string) (e 
 		ID:          oe.ID,
 		Title:       oe.Subject,
 		Description: oe.Body.Content,
-		Location:    oe.Location.Name,
+		Location:    flattenLocation(oe.Location),
 		StartTime:   startTime,
 		EndTime:     endTime,
 		Metadata:    ensureMetadata(oe, adapterSourceID),
