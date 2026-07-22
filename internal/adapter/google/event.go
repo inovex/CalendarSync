@@ -52,6 +52,7 @@ func calendarEventToEvent(e *calendar.Event, adapterSourceID string) models.Even
 		Reminders:   reminders,
 		MeetingLink: e.HangoutLink,
 		Accepted:    hasEventAccepted,
+		HTMLLink:    e.HtmlLink,
 	}
 }
 
