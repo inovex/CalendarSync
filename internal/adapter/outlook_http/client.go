@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -25,6 +26,14 @@ const (
 type OutlookClient struct {
 	Client     *http.Client
 	CalendarID string
+	User       string
+}
+
+func (o OutlookClient) calendarPath() string {
+	if o.User == "" {
+		return "/me/calendars/" + o.CalendarID
+	}
+	return "/users/" + url.PathEscape(o.User) + "/calendars/" + o.CalendarID
 }
 
 func (o *OutlookClient) ListEvents(ctx context.Context, start time.Time, end time.Time) ([]models.Event, error) {
@@ -35,7 +44,7 @@ func (o *OutlookClient) ListEvents(ctx context.Context, start time.Time, end tim
 	// Otherwise this always ends in a 500 return code, see also https://stackoverflow.com/a/62770941
 	query := "?startDateTime=" + startDate + "&endDateTime=" + endDate + "&$expand=extensions($filter=Id%20eq%20'inovex.calendarsync.meta')"
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, baseUrl+"/me/calendars/"+o.CalendarID+"/CalendarView"+query, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, baseUrl+o.calendarPath()+"/CalendarView"+query, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +119,7 @@ func (o *OutlookClient) CreateEvent(ctx context.Context, event models.Event) err
 		return err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, baseUrl+"/me/calendars/"+o.CalendarID+"/events", bytes.NewBuffer(by))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, baseUrl+o.calendarPath()+"/events", bytes.NewBuffer(by))
 	if err != nil {
 		return err
 	}
@@ -151,7 +160,7 @@ func (o *OutlookClient) UpdateEvent(ctx context.Context, event models.Event) err
 		return err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, baseUrl+"/me/calendars/"+o.CalendarID+"/events/"+event.ID, bytes.NewBuffer(by))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, baseUrl+o.calendarPath()+"/events/"+event.ID, bytes.NewBuffer(by))
 	if err != nil {
 		return err
 	}
@@ -180,7 +189,7 @@ func (o *OutlookClient) UpdateEvent(ctx context.Context, event models.Event) err
 
 func (o *OutlookClient) DeleteEvent(ctx context.Context, event models.Event) error {
 	// https://learn.microsoft.com/en-us/graph/api/event-delete?view=graph-rest-1.0&tabs=http
-	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, baseUrl+"/me/calendars/"+o.CalendarID+"/events/"+event.ID, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, baseUrl+o.calendarPath()+"/events/"+event.ID, nil)
 	if err != nil {
 		return err
 	}
@@ -194,7 +203,11 @@ func (o *OutlookClient) DeleteEvent(ctx context.Context, event models.Event) err
 
 func (o OutlookClient) GetCalendarHash() string {
 	var id []byte
-	sum := sha1.Sum([]byte(o.CalendarID))
+	identity := o.CalendarID
+	if o.User != "" {
+		identity = o.User + "\x00" + o.CalendarID
+	}
+	sum := sha1.Sum([]byte(identity))
 	id = append(id, sum[:]...)
 	return base64.URLEncoding.EncodeToString(id)
 }
