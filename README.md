@@ -44,6 +44,7 @@ asdf plugin add calendarsync https://github.com/FeryET/asdf-calendarsync.git
 ## finally
 asdf install calendarsync
 ```
+
 Note: The `asdf` plugin is not managed by inovex, but is provided by a CalendarSync user. inovex assumes no responsibility for proper provisioning.
 
 ## First Time Execution
@@ -54,7 +55,7 @@ Then, start the app using `CALENDARSYNC_ENCRYPTION_KEY=<YourSecretPassword> ./ca
 
 The app will create a file in the execution folder called `auth-storage.yaml`. In this file the OAuth2 Credentials will be saved encrypted by your `$CALENDARSYNC_ENCRYPTION_KEY`.
 
-----
+---
 
 # Configuration
 
@@ -146,19 +147,21 @@ transformerOrder = []string{
 "KeepTitle",
 "PrefixTitle",
 "ReplaceTitle",
+"SetVisibility",
 }
 
-| **Name**          | **Description**                                                                                                                                                                                                                 | **Configuration**                                 |
-|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------|
-| `KeepAttendees`   | Synchronizes the list of attendees. If `UseEmailAsDisplayName` is set to `true`, the email is used in the attendee list. Do not use when the Outlook Adapter is used as a sink as there is no way to suppress mail invitations. | `config.UseEmailAsDisplayName`, default `false`   |
-| `KeepLocation`    | Synchronizes the location of the event.                                                                                                                                                                                         | –                                                 |
-| `KeepReminders`   | Synchronizes event reminders.                                                                                                                                                                                                   | –                                                 |
-| `KeepDescription` | Synchronizes the description of the event.                                                                                                                                                                                      | –                                                 |
-| `KeepMeetingLink` | Adds the meeting link of the original meeting to the description of the event.                                                                                                                                                  | –                                                 |
-| `AddOriginalLink` | Adds the link to the original calendar event to the description of the event.                                                                                                                                                   | –                                                 |
-| `KeepTitle`       | Synchronizes the event's title. Without this transformer, the title is set to `CalendarSync Event`                                                                                                                              | –                                                 |
-| `PrefixTitle`     | Adds the configured prefix to the title.                                                                                                                                                                                        | `config.Prefix`, default `""`                     |
-| `ReplaceTitle`    | Replaces the title with the configured string. Does not make sense to be used with `KeepTitle` or `PrefixTitle`                                                                                                                 | `config.NewTitle`, default `"CalendarSync Event"` |
+| **Name**          | **Description**                                                                                                                                                                                                                    | **Configuration**                                 |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `KeepAttendees`   | Synchronizes the list of attendees. If `UseEmailAsDisplayName` is set to `true`, the email is used in the attendee list. Do not use when the Outlook Adapter is used as a sink as there is no way to suppress mail invitations.    | `config.UseEmailAsDisplayName`, default `false`   |
+| `KeepLocation`    | Synchronizes the location of the event.                                                                                                                                                                                            | –                                                 |
+| `KeepReminders`   | Synchronizes event reminders.                                                                                                                                                                                                      | –                                                 |
+| `KeepDescription` | Synchronizes the description of the event.                                                                                                                                                                                         | –                                                 |
+| `KeepMeetingLink` | Adds the meeting link of the original meeting to the description of the event.                                                                                                                                                     | –                                                 |
+| `AddOriginalLink` | Adds the link to the original calendar event to the description of the event.                                                                                                                                                      | –                                                 |
+| `KeepTitle`       | Synchronizes the event's title. Without this transformer, the title is set to `CalendarSync Event`                                                                                                                                 | –                                                 |
+| `PrefixTitle`     | Adds the configured prefix to the title.                                                                                                                                                                                           | `config.Prefix`, default `""`                     |
+| `ReplaceTitle`    | Replaces the title with the configured string. Does not make sense to be used with `KeepTitle` or `PrefixTitle`                                                                                                                    | `config.NewTitle`, default `"CalendarSync Event"` |
+| `SetVisibility`   | Sets the visibility of synced events. Supported values: `default`, `public`, `private`, `confidential`. Maps to iCalendar `CLASS` property. Supported by Google Calendar and Outlook adapters (Outlook maps `public` to `normal`). | `config.Visibility`, default `"default"`          |
 
 Example configuration:
 
@@ -176,6 +179,9 @@ transformations:
   - name: KeepAttendees
     config:
       UseEmailAsDisplayName: true
+  - name: SetVisibility
+    config:
+      Visibility: "private"
 ```
 
 ## Filters
@@ -237,7 +243,7 @@ Corporation
 
 # Relevant RFCs and Links
 
-[RFC 5545](https://datatracker.ietf.org/doc/html/rfc5545)  Internet Calendaring
+[RFC 5545](https://datatracker.ietf.org/doc/html/rfc5545) Internet Calendaring
 and Scheduling Core Object Specification (iCalendar) is used in the Google
 calendar API to denote recurrence patterns. CalDav [RFC
 4791](https://datatracker.ietf.org/doc/html/rfc4791) uses the dateformat
