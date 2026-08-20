@@ -2,6 +2,7 @@ package outlook_http
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"net/http"
 	"strings"
@@ -60,22 +61,29 @@ func TestOutlookClientRequestsUseCalendarPath(t *testing.T) {
 		ID:        "event-id",
 		StartTime: start,
 		EndTime:   end,
-		Metadata:  models.NewEventMetadata("sync-id", "event-uri", "source-id"),
+		Metadata: &models.Metadata{
+			SyncID:           "sync-id",
+			OriginalEventUri: "event-uri",
+			SourceID:         "source-id",
+		},
 	}
 
 	users := []struct {
-		name     string
-		user     string
-		basePath string
+		name           string
+		user           string
+		basePath       string
+		expectedExpand string
 	}{
 		{
-			name:     "current user",
-			basePath: "/v1.0/me/calendars/calendar-id",
+			name:           "current user",
+			basePath:       "/v1.0/me/calendars/calendar-id",
+			expectedExpand: "extensions($filter=Id eq 'inovex.calendarsync.meta')",
 		},
 		{
-			name:     "shared mailbox",
-			user:     "shared-mailbox@example.com",
-			basePath: "/v1.0/users/shared-mailbox@example.com/calendars/calendar-id",
+			name:           "shared mailbox",
+			user:           "shared-mailbox@example.com",
+			basePath:       "/v1.0/users/shared-mailbox@example.com/calendars/calendar-id",
+			expectedExpand: "singleValueExtendedProperties($filter=id eq 'String {23f8dbef-16e9-5e2c-8cc7-e7f020136a50} Name inovex.calendarsync.meta')",
 		},
 	}
 	operations := []struct {
@@ -139,11 +147,43 @@ func TestOutlookClientRequestsUseCalendarPath(t *testing.T) {
 					if operation.name == "list" {
 						assert.Equal(t, start.Format(timeFormat), request.URL.Query().Get("startDateTime"))
 						assert.Equal(t, end.Format(timeFormat), request.URL.Query().Get("endDateTime"))
-						assert.Equal(t, "extensions($filter=Id eq 'inovex.calendarsync.meta')", request.URL.Query().Get("$expand"))
+						assert.Equal(t, user.expectedExpand, request.URL.Query().Get("$expand"))
 						assert.Equal(t, `outlook.timezone="UTC"`, request.Header.Get("Prefer"))
 					}
 					if operation.name == "create" || operation.name == "update" {
 						assert.Equal(t, "application/json", request.Header.Get("Content-Type"))
+
+						body, err := io.ReadAll(request.Body)
+						require.NoError(t, err)
+						var payload map[string]interface{}
+						require.NoError(t, json.Unmarshal(body, &payload))
+
+						if user.user == "" {
+							require.NotContains(t, payload, "singleValueExtendedProperties")
+							require.Contains(t, payload, "extensions")
+							extensions := payload["extensions"].([]interface{})
+							require.Len(t, extensions, 1)
+							extension := extensions[0].(map[string]interface{})
+							assert.Equal(t, "inovex.calendarsync.meta", extension["extensionName"])
+							assert.Equal(t, "sync-id", extension["SyncID"])
+							assert.Equal(t, "event-uri", extension["OriginalEventUri"])
+							assert.Equal(t, "source-id", extension["SourceID"])
+						} else {
+							require.NotContains(t, payload, "extensions")
+							require.Contains(t, payload, "singleValueExtendedProperties")
+							properties := payload["singleValueExtendedProperties"].([]interface{})
+							require.Len(t, properties, 1)
+							property := properties[0].(map[string]interface{})
+							assert.Equal(t, "String {23f8dbef-16e9-5e2c-8cc7-e7f020136a50} Name inovex.calendarsync.meta", property["id"])
+
+							var metadata map[string]string
+							require.NoError(t, json.Unmarshal([]byte(property["value"].(string)), &metadata))
+							assert.Equal(t, map[string]string{
+								"SyncID":           "sync-id",
+								"OriginalEventUri": "event-uri",
+								"SourceID":         "source-id",
+							}, metadata)
+						}
 					}
 
 					return &http.Response{
@@ -170,4 +210,132 @@ func TestOutlookClientCalendarHash(t *testing.T) {
 	assert.NotEqual(t, currentUser.GetCalendarHash(), sharedMailbox.GetCalendarHash())
 	assert.NotEqual(t, sharedMailbox.GetCalendarHash(), otherMailbox.GetCalendarHash())
 	assert.Equal(t, sharedMailbox.GetCalendarHash(), sharedMailbox.GetCalendarHash())
+}
+
+func TestOutlookClientReadsSingleValueMetadata(t *testing.T) {
+	outlookEvent := Event{
+		ID:       "event-id",
+		HtmlLink: "https://example.com/event",
+		Start:    Time{DateTime: "2026-07-20T08:00:00.0000000", TimeZone: "UTC"},
+		End:      Time{DateTime: "2026-07-20T09:00:00.0000000", TimeZone: "UTC"},
+		SingleValueExtendedProperties: []SingleValueExtendedProperty{
+			{
+				ID:    "String {23f8dbef-16e9-5e2c-8cc7-e7f020136a50} Name inovex.calendarsync.meta",
+				Value: `{"SyncID":"sync-id","OriginalEventUri":"event-uri","SourceID":"source-id"}`,
+			},
+		},
+	}
+
+	event, err := (OutlookClient{}).outlookEventToEvent(outlookEvent, "adapter-source-id")
+
+	require.NoError(t, err)
+	assert.Equal(t, &models.Metadata{
+		SyncID:           "sync-id",
+		OriginalEventUri: "event-uri",
+		SourceID:         "source-id",
+	}, event.Metadata)
+}
+
+func TestOutlookClientRejectsInvalidSingleValueMetadata(t *testing.T) {
+	tests := []struct {
+		name  string
+		value string
+	}{
+		{name: "malformed JSON", value: `{not-json}`},
+		{name: "missing source identifier", value: `{"SyncID":"sync-id"}`},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			outlookEvent := Event{
+				ID:    "event-id",
+				Start: Time{DateTime: "2026-07-20T08:00:00.0000000", TimeZone: "UTC"},
+				End:   Time{DateTime: "2026-07-20T09:00:00.0000000", TimeZone: "UTC"},
+				SingleValueExtendedProperties: []SingleValueExtendedProperty{
+					{
+						ID:    "String {23f8dbef-16e9-5e2c-8cc7-e7f020136a50} Name inovex.calendarsync.meta",
+						Value: test.value,
+					},
+				},
+			}
+
+			_, err := (OutlookClient{}).outlookEventToEvent(outlookEvent, "adapter-source-id")
+
+			require.ErrorContains(t, err, "cannot decode Outlook event metadata")
+		})
+	}
+}
+
+func TestOutlookClientReturnsGraphErrors(t *testing.T) {
+	start := time.Date(2026, time.July, 20, 8, 0, 0, 0, time.UTC)
+	event := models.Event{ID: "event-id"}
+	tests := []struct {
+		name   string
+		invoke func(*OutlookClient) error
+	}{
+		{
+			name: "list",
+			invoke: func(client *OutlookClient) error {
+				_, err := client.ListEvents(context.Background(), start, start.Add(time.Hour))
+				return err
+			},
+		},
+		{
+			name: "delete",
+			invoke: func(client *OutlookClient) error {
+				return client.DeleteEvent(context.Background(), event)
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			client := &OutlookClient{
+				CalendarID: "calendar-id",
+				Client: &http.Client{Transport: roundTripFunc(func(*http.Request) (*http.Response, error) {
+					return &http.Response{
+						StatusCode: http.StatusForbidden,
+						Body:       io.NopCloser(strings.NewReader(`{"error":{"code":"ErrorAccessDenied","message":"Access is denied."}}`)),
+						Header:     make(http.Header),
+					}, nil
+				})},
+			}
+
+			err := test.invoke(client)
+
+			require.ErrorContains(t, err, "status code 403")
+			require.ErrorContains(t, err, "ErrorAccessDenied")
+		})
+	}
+}
+
+func TestOutlookClientReturnsGraphErrorFromNextPage(t *testing.T) {
+	requestCount := 0
+	client := &OutlookClient{
+		CalendarID: "calendar-id",
+		Client: &http.Client{Transport: roundTripFunc(func(*http.Request) (*http.Response, error) {
+			requestCount++
+			if requestCount == 1 {
+				return &http.Response{
+					StatusCode: http.StatusOK,
+					Body:       io.NopCloser(strings.NewReader(`{"@odata.nextLink":"https://graph.microsoft.com/next","value":[]}`)),
+					Header:     make(http.Header),
+				}, nil
+			}
+			return &http.Response{
+				StatusCode: http.StatusForbidden,
+				Body:       io.NopCloser(strings.NewReader(`{"error":{"code":"ErrorAccessDenied","message":"Access is denied."}}`)),
+				Header:     make(http.Header),
+			}, nil
+		})},
+	}
+
+	_, err := client.ListEvents(
+		context.Background(),
+		time.Date(2026, time.July, 20, 8, 0, 0, 0, time.UTC),
+		time.Date(2026, time.July, 20, 9, 0, 0, 0, time.UTC),
+	)
+
+	require.ErrorContains(t, err, "status code 403")
+	require.ErrorContains(t, err, "ErrorAccessDenied")
 }
