@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -19,12 +20,32 @@ import (
 const (
 	ExtensionOdataType = "microsoft.graph.openTypeExtension"
 	ExtensionName      = "inovex.calendarsync.meta"
+	// This identifier must remain stable so every CalendarSync build recognizes shared-mailbox metadata.
+	// Its UUID is UUIDv5(URL, "https://github.com/inovex/CalendarSync/outlook-metadata").
+	singleValueMetadataID     = "String {23f8dbef-16e9-5e2c-8cc7-e7f020136a50} Name " + ExtensionName
+	openExtensionExpand       = "extensions($filter=Id%20eq%20'inovex.calendarsync.meta')"
+	singleValueMetadataExpand = "singleValueExtendedProperties($filter=id%20eq%20'String%20%7B23f8dbef-16e9-5e2c-8cc7-e7f020136a50%7D%20Name%20inovex.calendarsync.meta')"
 )
 
 // OutlookClient implements the OutlookCalendarClient interface
 type OutlookClient struct {
 	Client     *http.Client
 	CalendarID string
+	User       string
+}
+
+func (o OutlookClient) calendarPath() string {
+	if o.User == "" {
+		return "/me/calendars/" + o.CalendarID
+	}
+	return "/users/" + url.PathEscape(o.User) + "/calendars/" + o.CalendarID
+}
+
+func (o OutlookClient) metadataExpand() string {
+	if o.User == "" {
+		return openExtensionExpand
+	}
+	return singleValueMetadataExpand
 }
 
 func (o *OutlookClient) ListEvents(ctx context.Context, start time.Time, end time.Time) ([]models.Event, error) {
@@ -33,9 +54,9 @@ func (o *OutlookClient) ListEvents(ctx context.Context, start time.Time, end tim
 
 	// Query can't simply be encoded with the url package for example, microsoft also uses its own encoding here.
 	// Otherwise this always ends in a 500 return code, see also https://stackoverflow.com/a/62770941
-	query := "?startDateTime=" + startDate + "&endDateTime=" + endDate + "&$expand=extensions($filter=Id%20eq%20'inovex.calendarsync.meta')"
+	query := "?startDateTime=" + startDate + "&endDateTime=" + endDate + "&$expand=" + o.metadataExpand()
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, baseUrl+"/me/calendars/"+o.CalendarID+"/CalendarView"+query, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, baseUrl+o.calendarPath()+"/CalendarView"+query, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -49,14 +70,12 @@ func (o *OutlookClient) ListEvents(ctx context.Context, start time.Time, end tim
 		return nil, err
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, err
-	}
-
-	body, _ := io.ReadAll(resp.Body)
-	err = resp.Body.Close()
+	body, err := readResponseBody(resp)
 	if err != nil {
 		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("status code at event listing was not 200, got status code %d, response: %s", resp.StatusCode, string(body))
 	}
 
 	var eventList EventList
@@ -72,10 +91,12 @@ func (o *OutlookClient) ListEvents(ctx context.Context, start time.Time, end tim
 			return nil, err
 		}
 
-		body, _ := io.ReadAll(resp.Body)
-		err = resp.Body.Close()
+		body, err := readResponseBody(resp)
 		if err != nil {
 			return nil, err
+		}
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("status code at paginated event listing was not 200, got status code %d, response: %s", resp.StatusCode, string(body))
 		}
 
 		var nextList EventList
@@ -110,7 +131,7 @@ func (o *OutlookClient) CreateEvent(ctx context.Context, event models.Event) err
 		return err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, baseUrl+"/me/calendars/"+o.CalendarID+"/events", bytes.NewBuffer(by))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, baseUrl+o.calendarPath()+"/events", bytes.NewBuffer(by))
 	if err != nil {
 		return err
 	}
@@ -151,7 +172,7 @@ func (o *OutlookClient) UpdateEvent(ctx context.Context, event models.Event) err
 		return err
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, baseUrl+"/me/calendars/"+o.CalendarID+"/events/"+event.ID, bytes.NewBuffer(by))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, baseUrl+o.calendarPath()+"/events/"+event.ID, bytes.NewBuffer(by))
 	if err != nil {
 		return err
 	}
@@ -180,21 +201,44 @@ func (o *OutlookClient) UpdateEvent(ctx context.Context, event models.Event) err
 
 func (o *OutlookClient) DeleteEvent(ctx context.Context, event models.Event) error {
 	// https://learn.microsoft.com/en-us/graph/api/event-delete?view=graph-rest-1.0&tabs=http
-	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, baseUrl+"/me/calendars/"+o.CalendarID+"/events/"+event.ID, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodDelete, baseUrl+o.calendarPath()+"/events/"+event.ID, nil)
 	if err != nil {
 		return err
 	}
-	_, err = o.Client.Do(req)
+	resp, err := o.Client.Do(req)
 	if err != nil {
 		return err
+	}
+	body, err := readResponseBody(resp)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != http.StatusNoContent {
+		return fmt.Errorf("status code at event deletion was not 204, got status code %d, response: %s", resp.StatusCode, string(body))
 	}
 
 	return nil
 }
 
+func readResponseBody(response *http.Response) ([]byte, error) {
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		_ = response.Body.Close()
+		return nil, err
+	}
+	if err := response.Body.Close(); err != nil {
+		return nil, err
+	}
+	return body, nil
+}
+
 func (o OutlookClient) GetCalendarHash() string {
 	var id []byte
-	sum := sha1.Sum([]byte(o.CalendarID))
+	identity := o.CalendarID
+	if o.User != "" {
+		identity = o.User + "\x00" + o.CalendarID
+	}
+	sum := sha1.Sum([]byte(identity))
 	id = append(id, sum[:]...)
 	return base64.URLEncoding.EncodeToString(id)
 }
@@ -219,17 +263,24 @@ func (o OutlookClient) eventToOutlookEvent(e models.Event) (oe Event) {
 		outlookEvent.Body.ContentType = "text"
 	}
 
-	calendarSyncExtension := &Extensions{
-		OdataType:     ExtensionOdataType,
-		ExtensionName: ExtensionName,
-
-		Metadata: models.Metadata{
-			SyncID:           e.Metadata.SyncID,
-			SourceID:         e.Metadata.SourceID,
-			OriginalEventUri: e.Metadata.OriginalEventUri,
-		},
+	calendarSyncMetadata := models.Metadata{
+		SyncID:           e.Metadata.SyncID,
+		SourceID:         e.Metadata.SourceID,
+		OriginalEventUri: e.Metadata.OriginalEventUri,
 	}
-	outlookEvent.Extensions = append(outlookEvent.Extensions, *calendarSyncExtension)
+	if o.User == "" {
+		outlookEvent.Extensions = append(outlookEvent.Extensions, Extensions{
+			OdataType:     ExtensionOdataType,
+			ExtensionName: ExtensionName,
+			Metadata:      calendarSyncMetadata,
+		})
+	} else {
+		metadataValue, _ := json.Marshal(calendarSyncMetadata)
+		outlookEvent.SingleValueExtendedProperties = append(outlookEvent.SingleValueExtendedProperties, SingleValueExtendedProperty{
+			ID:    singleValueMetadataID,
+			Value: string(metadataValue),
+		})
+	}
 
 	for _, att := range e.Attendees {
 		outlookEvent.Attendees = append(outlookEvent.Attendees, Attendee{
@@ -289,6 +340,10 @@ func (o OutlookClient) outlookEventToEvent(oe Event, adapterSourceID string) (e 
 	if oe.ResponseStatus.Response == "declined" {
 		hasEventAccepted = false
 	}
+	metadata, err := ensureMetadata(oe, adapterSourceID)
+	if err != nil {
+		return bufEvent, err
+	}
 
 	bufEvent = models.Event{
 		ICalUID:     oe.UID,
@@ -298,7 +353,7 @@ func (o OutlookClient) outlookEventToEvent(oe Event, adapterSourceID string) (e 
 		Location:    oe.Location.Name,
 		StartTime:   startTime,
 		EndTime:     endTime,
-		Metadata:    ensureMetadata(oe, adapterSourceID),
+		Metadata:    metadata,
 		Attendees:   attendees,
 		Reminders:   reminders,
 		MeetingLink: oe.OnlineMeetingUrl,
@@ -315,15 +370,28 @@ func (o OutlookClient) outlookEventToEvent(oe Event, adapterSourceID string) (e 
 // Adding metadata is a bit more complicated as in the google adapter
 // see also: https://learn.microsoft.com/en-us/graph/api/opentypeextension-post-opentypeextension?view=graph-rest-1.0&tabs=http
 // Retrieve metadata if possible otherwise regenerate it
-func ensureMetadata(event Event, adapterSourceID string) *models.Metadata {
+func ensureMetadata(event Event, adapterSourceID string) (*models.Metadata, error) {
 	for _, extension := range event.Extensions {
 		if extension.ExtensionName == ExtensionName && (len(extension.SyncID) != 0 && len(extension.SourceID) != 0) {
 			return &models.Metadata{
 				SyncID:           extension.SyncID,
 				OriginalEventUri: extension.OriginalEventUri,
 				SourceID:         extension.SourceID,
-			}
+			}, nil
 		}
 	}
-	return models.NewEventMetadata(event.ID, event.HtmlLink, adapterSourceID)
+	for _, property := range event.SingleValueExtendedProperties {
+		if property.ID != singleValueMetadataID {
+			continue
+		}
+		var metadata models.Metadata
+		if err := json.Unmarshal([]byte(property.Value), &metadata); err != nil {
+			return nil, fmt.Errorf("cannot decode Outlook event metadata: %w", err)
+		}
+		if metadata.SyncID == "" || metadata.SourceID == "" {
+			return nil, fmt.Errorf("cannot decode Outlook event metadata: SyncID and SourceID must not be empty")
+		}
+		return &metadata, nil
+	}
+	return models.NewEventMetadata(event.ID, event.HtmlLink, adapterSourceID), nil
 }

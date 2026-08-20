@@ -51,6 +51,12 @@ func NewSinkAdapterFromConfig(ctx context.Context, bindPort uint, openBrowser bo
 		}
 	}
 
+	if c, ok := client.(port.ConfigSetter); ok {
+		if err := c.SetConfig(config.Adapter().Config); err != nil {
+			return nil, err
+		}
+	}
+
 	if c, ok := client.(port.OAuth2Adapter); ok {
 		if err := c.SetupOauth2(ctx,
 			auth.Credentials{
