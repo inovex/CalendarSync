@@ -18,13 +18,14 @@ source:
 The ZEP adapter is only supported as a source.
 
 ## Outlook Adapter Setup
+
 The Outlook calendar is synchronized via Microsoft Graph API. You will need to
 [register an application on Azure](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app).
 The application needs the following permissions:
 
-* `Calendar.ReadWrite`
+* `Calendars.ReadWrite`
 
-The `User.read` permission should be assigned by default. To assign the `Calendar.ReadWrite` permission, click on "API Permissions" and add the permission to the "Microsoft Graph API".
+The `User.Read` permission should be assigned by default. To assign the `Calendars.ReadWrite` permission, click on "API Permissions" and add the delegated permission to the "Microsoft Graph API".
 
 You also need to setup a platform specific configuration. This can be done in the "Authentication" menu. Add a "mobile and desktop application" platform configuration and add `http://localhost/redirect` as a valid redirect uri.
 
@@ -40,12 +41,34 @@ source:
   adapter:
     type: "outlook_http"
     calendar: "[base64-format string here]"
-    config:
+    oAuth:
       tenantId: "[UUID-format string here]"
       clientId: "[UUID-format string here]"
 ```
 
 To get your calendar ID, use the [Microsoft Graph Explorer](https://developer.microsoft.com/en-us/graph/graph-explorer) and query `GET https://graph.microsoft.com/v1.0/me/calendar`.
+
+### Shared Mailboxes and delegated calendars
+
+By default, the adapter accesses `/me/calendars/{calendarID}`. To target a Microsoft 365 Shared Mailbox or another delegated user's calendar, set `config.user` to that mailbox's user principal name (UPN) or Entra object ID:
+
+```yaml
+source:
+  adapter:
+    type: "outlook_http"
+    calendar: "[shared-calendar-id]"
+    config:
+      user: "shared-mailbox@example.com"
+    oAuth:
+      tenantId: "[UUID-format string here]"
+      clientId: "[UUID-format string here]"
+```
+
+CalendarSync still authenticates an interactive user, not the Shared Mailbox itself. That user must have the appropriate Exchange Online mailbox or calendar delegation for the target mailbox. Microsoft Graph's delegated `Calendars.Read.Shared` permission is sufficient for read-only access. CalendarSync requests `Calendars.ReadWrite.Shared` in addition to `Calendars.ReadWrite` when `config.user` is set because the Outlook adapter can also be used as a sink. The Graph permission does not grant access unless the mailbox delegation is also configured. See Microsoft's documentation for [accessing shared or delegated Outlook calendars](https://learn.microsoft.com/en-us/graph/outlook-get-shared-events-calendars) and [creating events in shared or delegated calendars](https://learn.microsoft.com/en-us/graph/outlook-create-event-in-shared-delegated-calendar). The same `config.user` mechanism can target a delegated normal user mailbox.
+
+Microsoft Graph does not allow delegates to create events with open extensions in Shared Mailbox calendars. CalendarSync therefore stores its synchronization metadata in a single-value legacy extended property whenever `config.user` is set. Existing `/me` configurations continue to use open extensions without changing their stored metadata. See Microsoft's [open-extension limitations](https://learn.microsoft.com/en-us/graph/extensibility-overview#comparison-of-extension-types).
+
+If `config.user` is omitted or empty, the existing `/me` behavior and permissions remain unchanged. When enabling it for an existing configuration, remove the affected CalendarSync authentication entry using the normal auth-storage workflow and authenticate again so the new shared-calendar permission can be granted. Do not edit encrypted authentication storage manually.
 
 
 ## Google Adapter Setup

@@ -22,6 +22,9 @@ source:
   adapter:
     type: "outlook_http"
     calendar: "[base64-format string here]"
+    # Optional: target a shared/delegated mailbox instead of /me.
+    # config:
+    #   user: "shared-mailbox@example.com"
     oAuth:
       clientId: "[UUID-format string here]"
       tenantId: "[UUID-format string here]"

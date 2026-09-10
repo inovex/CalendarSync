@@ -18,6 +18,11 @@ type CalendarIDSetter interface {
 	SetCalendarID(calendarID string) error
 }
 
+// ConfigSetter validates and stores adapter configuration before external initialization.
+type ConfigSetter interface {
+	SetConfig(config map[string]interface{}) error
+}
+
 // Configurable is an interface which defines how arbitrary configuration data can be passed
 // to a struct which implements this interface. Clients should be configurable.
 type Configurable interface {

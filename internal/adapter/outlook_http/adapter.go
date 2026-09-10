@@ -30,6 +30,7 @@ type OutlookCalendarClient interface {
 type CalendarAPI struct {
 	outlookClient OutlookCalendarClient
 	calendarID    string
+	user          string
 
 	oAuthConfig   *oauth2.Config
 	authenticated bool
@@ -44,6 +45,7 @@ type CalendarAPI struct {
 
 // Assert that the expected interfaces are implemented
 var _ port.Configurable = &CalendarAPI{}
+var _ port.ConfigSetter = &CalendarAPI{}
 var _ port.LogSetter = &CalendarAPI{}
 var _ port.CalendarIDSetter = &CalendarAPI{}
 var _ port.OAuth2Adapter = &CalendarAPI{}
@@ -53,6 +55,21 @@ func (c *CalendarAPI) SetCalendarID(calendarID string) error {
 		return fmt.Errorf("%s adapter 'calendar' cannot be empty", c.Name())
 	}
 	c.calendarID = calendarID
+	return nil
+}
+
+func (c *CalendarAPI) SetConfig(config map[string]interface{}) error {
+	user, configured := config["user"]
+	if !configured {
+		c.user = ""
+		return nil
+	}
+
+	configuredUser, ok := user.(string)
+	if !ok {
+		return fmt.Errorf("%s adapter config 'user' must be a string", c.Name())
+	}
+	c.user = configuredUser
 	return nil
 }
 
@@ -71,10 +88,16 @@ func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credenti
 		AuthStyle: oauth2.AuthStyleInParams,
 	}
 
+	scopes := []string{"Calendars.ReadWrite"}
+	if c.user != "" {
+		scopes = append(scopes, "Calendars.ReadWrite.Shared")
+	}
+	scopes = append(scopes, "offline_access")
+
 	oAuthConfig := oauth2.Config{
 		ClientID: credentials.Client.Id,
 		Endpoint: endpoint,
-		Scopes:   []string{"Calendars.ReadWrite", "offline_access"}, // You need to request offline_access in order to retrieve a refresh token
+		Scopes:   scopes, // You need to request offline_access in order to retrieve a refresh token
 	}
 
 	oAuthListener, err := auth.NewOAuthHandler(oAuthConfig, bindPort)
@@ -84,7 +107,8 @@ func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credenti
 
 	c.oAuthHandler = oAuthListener
 	c.storage = storage
-	c.oAuthConfig = &oAuthConfig
+	c.oAuthConfig = c.oAuthHandler.Configuration()
+	c.oAuthUrl = c.oAuthConfig.AuthCodeURL("state", oauth2.AccessTypeOffline)
 
 	storedAuth, err := c.storage.ReadCalendarAuth(c.calendarID)
 	if err != nil {
@@ -166,10 +190,8 @@ func (c *CalendarAPI) SetupOauth2(ctx context.Context, credentials auth.Credenti
 	return nil
 }
 
-func (c *CalendarAPI) Initialize(ctx context.Context, openBrowser bool, config map[string]interface{}) error {
+func (c *CalendarAPI) Initialize(ctx context.Context, openBrowser bool, _ map[string]interface{}) error {
 	if !c.authenticated {
-		c.oAuthUrl = c.oAuthHandler.Configuration().AuthCodeURL("state", oauth2.AccessTypeOffline)
-
 		if openBrowser {
 			c.logger.Infof("opening browser window for authentication of %s\n", c.Name())
 			err := browser.OpenURL(c.oAuthUrl)
@@ -202,7 +224,7 @@ func (c *CalendarAPI) Initialize(ctx context.Context, openBrowser bool, config m
 
 	client := c.oAuthConfig.Client(ctx, c.oAuthToken)
 
-	c.outlookClient = &OutlookClient{Client: client, CalendarID: c.calendarID}
+	c.outlookClient = &OutlookClient{Client: client, CalendarID: c.calendarID, User: c.user}
 	return nil
 }
 
