@@ -1,6 +1,6 @@
 module github.com/inovex/CalendarSync
 
-go 1.25.8
+go 1.27.1
 
 require (
 	filippo.io/age v1.3.1
