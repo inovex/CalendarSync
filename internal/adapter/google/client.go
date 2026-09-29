@@ -141,6 +141,11 @@ func isNotFound(err error) bool {
 	return errors.As(err, &gerr) && gerr.Code == http.StatusNotFound
 }
 
+func isDeleted(err error) bool {
+	var gerr *googleapi.Error
+	return errors.As(err, &gerr) && gerr.Code == http.StatusGone && firstErrorReason(gerr) == "deleted"
+}
+
 func (g *GCalClient) UpdateEvent(ctx context.Context, event models.Event) error {
 	extProperties := &calendar.EventExtendedProperties{
 		Private: eventMetadataToEventProperties(event.Metadata),
@@ -193,7 +198,7 @@ func (g *GCalClient) DeleteEvent(ctx context.Context, event models.Event) error 
 		err := g.Client.Events.Delete(g.CalendarId, event.ID).Context(ctx).SendUpdates("none").Do()
 		return nil, err
 	})
-	if isNotFound(err) {
+	if isNotFound(err) || isDeleted(err) {
 		g.logger.Debug("Event is already deleted.", "method", "DeleteEvent", "title", event.ShortTitle(), "time", event.StartTime.String())
 		return nil
 	} else if err != nil {
