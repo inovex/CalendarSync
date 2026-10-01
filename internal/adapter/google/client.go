@@ -68,20 +68,18 @@ func (g *GCalClient) ListEvents(ctx context.Context, starttime time.Time, endtim
 		return nil, fmt.Errorf("failed to list eventList from calendar %s: %w", g.CalendarId, err)
 	}
 
-	var loadedEvents []models.Event
-	for _, event := range eventList.Items {
-		loadedEvents = append(loadedEvents, calendarEventToEvent(event, g.GetCalendarHash()))
-	}
-
 	// if the responses 'nextPageToken' is set, the result is paginated and more data to be loaded recursively
 	if eventList.NextPageToken != "" {
 		err := g.loadPages(listCall, &eventList.Items, eventList.NextPageToken)
 		if err != nil {
 			return nil, err
 		}
-		for _, pageEvent := range eventList.Items {
-			loadedEvents = append(loadedEvents, calendarEventToEvent(pageEvent, g.GetCalendarHash()))
-		}
+	}
+
+	// convert only once all pages are in eventList.Items, otherwise the first page is returned twice
+	var loadedEvents []models.Event
+	for _, event := range eventList.Items {
+		loadedEvents = append(loadedEvents, calendarEventToEvent(event, g.GetCalendarHash()))
 	}
 	return loadedEvents, nil
 }
