@@ -22,7 +22,7 @@ vet:
 # Lint job is responsible for calling 'golangci-lint'.
 lint:
   stage: prepare
-  image: golangci/golangci-lint:v1.51.2
+  image: golangci/golangci-lint:v2.14.0
   script:
     - golangci-lint --timeout 10m run --go "1.20"
 
