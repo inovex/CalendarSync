@@ -28,6 +28,7 @@ type Event struct {
 	IsAllDay                   bool           `json:"isAllDay"`
 	OnlineMeetingUrl           string         `json:"onlineMeetingUrl"`
 	ResponseStatus             ResponseStatus `json:"responseStatus,omitempty"`
+	Sensitivity                string         `json:"sensitivity,omitempty"`
 }
 
 type Extensions struct {

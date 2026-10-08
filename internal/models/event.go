@@ -28,6 +28,7 @@ type Event struct {
 	Reminders   Reminders
 	MeetingLink string
 	Accepted    bool
+	Visibility  string // Event visibility: "default", "public", "private", "confidential"
 }
 
 type Reminders []Reminder
@@ -113,6 +114,7 @@ func (e *Event) Overwrite(source Event) Event {
 	e.Location = source.Location
 	e.Reminders = source.Reminders
 	e.MeetingLink = source.MeetingLink
+	e.Visibility = source.Visibility
 
 	return *e
 }
@@ -207,6 +209,11 @@ func IsSameEvent(a, b Event) bool {
 			log.Debugf("Attendee in Source has DisplayName: %s, in Sink the DisplayName is: %s", a.Attendees[j].DisplayName, b.Attendees[j].DisplayName)
 			return false
 		}
+	}
+
+	if a.Visibility != b.Visibility {
+		log.Debugf("Visibility of Source Event %s at %s changed from %s to %s", a.Title, a.StartTime, b.Visibility, a.Visibility)
+		return false
 	}
 
 	return true

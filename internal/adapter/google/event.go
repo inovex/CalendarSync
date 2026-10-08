@@ -38,6 +38,12 @@ func calendarEventToEvent(e *calendar.Event, adapterSourceID string) models.Even
 		}
 	}
 
+	// Set visibility, default to "default" if not specified
+	visibility := e.Visibility
+	if visibility == "" {
+		visibility = "default"
+	}
+
 	return models.Event{
 		ICalUID:     e.ICalUID,
 		ID:          e.Id,
@@ -52,6 +58,7 @@ func calendarEventToEvent(e *calendar.Event, adapterSourceID string) models.Even
 		Reminders:   reminders,
 		MeetingLink: e.HangoutLink,
 		Accepted:    hasEventAccepted,
+		Visibility:  visibility,
 	}
 }
 
