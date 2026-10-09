@@ -52,6 +52,7 @@ transformations:
     config:
       NewTitle: "[Synchronisierter Termin]"
   - name: KeepMeetingLink
+  - name: AddOriginalLink
   # Do not use KeepAttendees when the Outlook Adapter is used as a sink. There is no way to suppress mail invitations
   - name: KeepAttendees
     config:

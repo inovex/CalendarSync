@@ -28,6 +28,7 @@ type Event struct {
 	Reminders   Reminders
 	MeetingLink string
 	Accepted    bool
+	HTMLLink    string
 }
 
 type Reminders []Reminder
