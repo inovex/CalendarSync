@@ -112,3 +112,19 @@ func Test_ensureMetadata(t *testing.T) {
 		})
 	}
 }
+
+// Private events read by a non-owner come back without a reminders field.
+func Test_calendarEventToEvent_withoutReminders(t *testing.T) {
+	event := calendar.Event{
+		Id:         "eventID",
+		HtmlLink:   "htmlLink",
+		Visibility: "private",
+		Start:      &calendar.EventDateTime{DateTime: "2026-10-29T10:00:00-04:00"},
+		End:        &calendar.EventDateTime{DateTime: "2026-10-29T10:30:00-04:00"},
+	}
+
+	result := calendarEventToEvent(&event, "testSourceId")
+
+	assert.Empty(t, result.Reminders)
+	assert.Equal(t, "eventID", result.ID)
+}
