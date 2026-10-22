@@ -27,14 +27,17 @@ func calendarEventToEvent(e *calendar.Event, adapterSourceID string) models.Even
 	}
 
 	var reminders []models.Reminder
-	for _, reminder := range e.Reminders.Overrides {
-		if reminder.Method == "popup" {
-			reminders = append(reminders, models.Reminder{
-				Actions: models.ReminderActionDisplay,
-				Trigger: models.ReminderTrigger{
-					PointInTime: eventDateTimeToTime(e.Start).Add(-(time.Minute * time.Duration(reminder.Minutes))),
-				},
-			})
+	// Private events read by a non-owner have no reminders field.
+	if e.Reminders != nil {
+		for _, reminder := range e.Reminders.Overrides {
+			if reminder.Method == "popup" {
+				reminders = append(reminders, models.Reminder{
+					Actions: models.ReminderActionDisplay,
+					Trigger: models.ReminderTrigger{
+						PointInTime: eventDateTimeToTime(e.Start).Add(-(time.Minute * time.Duration(reminder.Minutes))),
+					},
+				})
+			}
 		}
 	}
 
