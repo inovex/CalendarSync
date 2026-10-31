@@ -7,11 +7,14 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"html"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/charmbracelet/log"
+	"github.com/microcosm-cc/bluemonday"
 
 	"github.com/inovex/CalendarSync/internal/models"
 )
@@ -42,7 +45,7 @@ func (o *OutlookClient) ListEvents(ctx context.Context, start time.Time, end tim
 
 	// Get all the events in UTC timezone
 	// when we retrieve them from other adapters they will also be in UTC
-	req.Header.Add("Prefer", "outlook.timezone=\"UTC\"")
+	req.Header.Add("Prefer", preferHeader)
 
 	resp, err := o.Client.Do(req)
 	if err != nil {
@@ -67,7 +70,14 @@ func (o *OutlookClient) ListEvents(ctx context.Context, start time.Time, end tim
 
 	nextLink := eventList.NextLink
 	for nextLink != "" {
-		resp, err := o.Client.Get(nextLink)
+		// Graph only applies Prefer headers to the request that carries them:
+		// they must be sent again on every @odata.nextLink page.
+		nextReq, err := http.NewRequestWithContext(ctx, http.MethodGet, nextLink, nil)
+		if err != nil {
+			return nil, err
+		}
+		nextReq.Header.Add("Prefer", preferHeader)
+		resp, err := o.Client.Do(nextReq)
 		if err != nil {
 			return nil, err
 		}
@@ -294,7 +304,7 @@ func (o OutlookClient) outlookEventToEvent(oe Event, adapterSourceID string) (e 
 		ICalUID:     oe.UID,
 		ID:          oe.ID,
 		Title:       oe.Subject,
-		Description: oe.Body.Content,
+		Description: normalizeBody(oe.Body),
 		Location:    oe.Location.Name,
 		StartTime:   startTime,
 		EndTime:     endTime,
@@ -326,4 +336,24 @@ func ensureMetadata(event Event, adapterSourceID string) *models.Metadata {
 		}
 	}
 	return models.NewEventMetadata(event.ID, event.HtmlLink, adapterSourceID)
+}
+
+// preferHeader asks Graph for UTC times and for a plain-text body.
+// Exchange stores every body as HTML (a "text" body is converted on write); without
+// the text preference the HTML wrapper never equals the source description, so
+// IsSameEvent reports every event as changed on every run.
+const preferHeader = `outlook.timezone="UTC", outlook.body-content-type="text"`
+
+var stripAllHTML = bluemonday.StrictPolicy()
+
+// normalizeBody turns an Outlook body into the plain description CalendarSync compares.
+// It is a safety net if Graph still returns HTML (e.g. the Prefer header is ignored).
+func normalizeBody(b Body) string {
+	content := b.Content
+	if strings.EqualFold(b.ContentType, "html") {
+		content = html.UnescapeString(stripAllHTML.Sanitize(content))
+	}
+	content = strings.ReplaceAll(content, "\r\n", "\n")
+	// TrimSpace also removes U+00A0, which Exchange puts in an empty converted body.
+	return strings.TrimSpace(content)
 }
